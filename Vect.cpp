@@ -1,0 +1,151 @@
+/*
+ * File:   Vect.cpp
+ * Author: uyras
+ *
+ * Created on 20 Ноябрь 2012 г., 15:55
+ */
+
+#include "config.h"
+#include "Vect.h"
+#include "Part.h"
+#include <cmath>
+#include <locale.h>
+#include <iostream>
+
+using namespace std;
+
+Vect::Vect() {
+	this->x = 0;
+	this->y = 0;
+	this->z = 0;
+}
+
+Vect::Vect(double x, double y, double z) {
+	this->x = x;
+	this->y = y;
+	this->z = z;
+}
+
+void Vect::setUnit(){
+	double length = this->length();
+	this->x /= length;
+	this->y /= length;
+	if (!config::Instance()->U2D)
+		this->z /= length;
+}
+
+
+double Vect::scalar(Vect b) {
+	return (this->x * b.x) + (this->y * b.y) + (this->z * b.z);
+}
+
+/**
+ * Находит расстояние между двумя векторами
+ * @param a
+ * @param b
+ * @return
+ */
+double Vect::space(Vect b) {
+	if (config::Instance()->U2D)
+		return sqrt(
+					(this->x - b.x)*(this->x - b.x) +
+					(this->y - b.y)*(this->y - b.y)
+					);
+	else
+		return sqrt(
+					(this->x - b.x)*(this->x - b.x) +
+					(this->y - b.y)*(this->y - b.y) +
+					(this->z - b.z)*(this->z - b.z)
+					);
+}
+
+Vect Vect::radius(Vect b) {
+	return Vect(b.x - this->x, b.y - this->y, b.z - this->z);
+}
+
+double Vect::length() {
+	if (config::Instance()->U2D)
+		return sqrt(
+					this->x * this->x +
+					this->y * this->y
+					);
+	else
+		return sqrt(
+					this->x * this->x +
+					this->y * this->y +
+					this->z * this->z
+					);
+}
+
+void Vect::setXYZ(double x, double y, double z = 0) {
+	this->x = x;
+	this->y = y;
+	this->z = z;
+	//this->_length = NULL;
+}
+
+void Vect::rotate() {
+	this->x *= -1;
+	this->y *= -1;
+	this->z *= -1;
+}
+
+Vect& Vect::operator=(const Vect& a) {
+	this->x = a.x;
+	this->y = a.y;
+	this->z = a.z;
+	Vect res(this->x,this->y,this->z);
+	return res;
+}
+
+Vect& Vect::operator+=(const Vect& a) {
+	this->x += a.x;
+	this->y += a.y;
+	this->z += a.z;
+	return *this;
+}
+
+Vect& Vect::operator +(const Vect& a){
+	Vect res;
+	res.x = this->x+a.x;
+	res.y = this->y+a.y;
+	res.z = this->z+a.z;
+
+	return res;
+}
+
+void Vect::toAbs(){
+	this->x *= config::Instance()->vol;
+	this->y *= config::Instance()->vol;
+	this->z *= config::Instance()->vol;
+}
+
+void Vect::toRel(){
+	this->x /= config::Instance()->vol;
+	this->y /= config::Instance()->vol;
+	this->z /= config::Instance()->vol;
+}
+
+void Vect::draw(){
+	cout<<"x="<<this->x<<"; y="<<this->y<<"; z="<<this->z<<endl;
+}
+
+double Vect::angle(){
+    if(this->x>0&&this->y>=0)
+        return atan(this->y/this->x);
+    if (this->x>0&&this->y<0)
+        return atan(this->y/this->x)+M_PI*2;
+    if(this->x<0)
+        return atan(this->y/this->x)+M_PI;
+    if(this->x==0&&this->y>0)
+        return M_PI_2;
+    if (this->x==0&&this->y<0)
+        return M_PI_2*3;
+    if(this->x==0&&this->y==0)
+        return 0;
+
+}
+
+double Vect::grade(){
+    return this->angle()*180/M_PI;
+}
