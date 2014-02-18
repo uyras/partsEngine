@@ -22,8 +22,8 @@ PartArray::PartArray() {
 }
 
 PartArray::~PartArray(){
-    delete this->state;
     this->clear();
+    delete this->state;
 }
 
 PartArray::PartArray(double x, double y, double z) {
@@ -46,13 +46,15 @@ PartArray* PartArray::copy(){
     temp->E1 = this->E1;
     temp->E2 = this->E2;
     temp->eIncrementalTemp = this->eIncrementalTemp;
-    temp->parts = this->parts;
     temp->size = this->size;
     temp->absSize = this->absSize;
 
-    if (this->state){
-        temp->state = this->state->copy(temp);
+    vector<Part*>::iterator iter = this->parts.begin();
+    while(iter!=this->parts.end()){
+        temp->insert((*iter)->copy());
+        iter++;
     }
+
     return temp;
 }
 
@@ -93,7 +95,7 @@ void PartArray::dropRandom(double maxDestiny) {
     int partCount = this->parts.size(); //количество сброшеных частиц
     double destiny; //плотность заполнения образца
 
-    std::vector < Part >::iterator iterator1; // итератор для обхода массива частиц
+    std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
     bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
     int dropErrorCount=0; //количество ошибочных сбросов подряд
 
@@ -120,7 +122,7 @@ void PartArray::dropRandom(double maxDestiny) {
             //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
             iterator1 = this->parts.begin();
             while (iterator1 != this->parts.end()) {
-                if (temp->pos.radius(iterator1->pos).length()<=config::Instance()->partR*2){
+                if (temp->pos.radius((*iterator1)->pos).length()<=config::Instance()->partR*2){
                     regenerate=true;
 
                     //std::cout<<"Drop "<<partCount<<" particle error, repeat"<<endl;
@@ -146,13 +148,12 @@ void PartArray::dropRandom(double maxDestiny) {
         temp->m.z = config::Instance()->m * lattitude;
 
         //добавляем частицу на экземпляр
-        this->parts.push_back(*temp);
+        insert(temp);
         partCount++;
 
         //считаем плотность заполнения экземпляра
         destiny = (config::Instance()->vol * partCount) / surfVol;
     } while (destiny < maxDestiny);
-    this->state->resize();
 }
 
 void PartArray::dropRandom(int count) {
@@ -160,7 +161,7 @@ void PartArray::dropRandom(int count) {
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
 
-    std::vector < Part >::iterator iterator1; // итератор для обхода массива частиц
+    std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
     bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
     while (partCount < count) {
         //std::cout <<"Drop "<<partCount<<endl;
@@ -183,7 +184,7 @@ void PartArray::dropRandom(int count) {
             //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
             iterator1 = this->parts.begin();
             while (iterator1 != this->parts.end()) {
-                if (temp->pos.radius(iterator1->pos).length()<=config::Instance()->partR*2){
+                if (temp->pos.radius((*iterator1)->pos).length()<=config::Instance()->partR*2){
                     regenerate = true;
                     //std::cout<<"Drop "<<partCount<<" particle error, repeat"<<endl;
                     break;
@@ -202,10 +203,9 @@ void PartArray::dropRandom(int count) {
         temp->m.z = config::Instance()->m * lattitude;
 
         //добавляем частицу на экземпляр
-        this->parts.push_back(*temp);
+        this->insert(temp);
         partCount++;
     }
-    this->state->resize();
 }
 
 void PartArray::dropChain(double distance){
@@ -227,12 +227,11 @@ void PartArray::dropChain(double distance){
             temp->pos.z = 0;
 
             y+=distance;
-            this->parts.push_back(*temp);
+            this->insert(temp);
         }
         up *= -1;
         x+=distance;
     }
-    this->state->resize();
 }
 
 //перемешать магнитные моменты частиц M
@@ -245,8 +244,13 @@ void PartArray::shuffleM(){
     }
 }
 
+void PartArray::insert(Part * part){
+    this->parts.push_back(part);
+    this->state->_state.push_back(part);
+}
+
 void PartArray::dropLattice(double distance){
-    this->parts.clear();
+    this->clear();
     Part* temp; //временная частица
     for(double x=config::Instance()->partR; x<=this->size.x-config::Instance()->partR; x+=config::Instance()->partR*2+distance){
         for(double y=config::Instance()->partR; y<=this->size.y-config::Instance()->partR; y+=config::Instance()->partR*2+distance){
@@ -264,10 +268,9 @@ void PartArray::dropLattice(double distance){
             temp->pos.z = 0;
 
             //добавляем частицу на экземпляр
-            this->parts.push_back(*temp);
+            this->insert(temp);
         }
     }
-    this->state->resize();
 }
 
 double PartArray::destiny(bool simple){
@@ -277,9 +280,9 @@ double PartArray::destiny(bool simple){
         return (config::Instance()->vol * this->parts.size()) / surfVol;
     else{
         double destiny=0;
-        std::vector < Part >::iterator iterator1 = this->parts.begin();
+        std::vector < Part* >::iterator iterator1 = this->parts.begin();
         while (iterator1!=this->parts.end()){
-            destiny+=iterator1->volume/surfVol;
+            destiny+=(*iterator1)->volume/surfVol;
             iterator1++;
         }
         return destiny;
@@ -292,12 +295,12 @@ Vect PartArray::M(){
 
 Vect PartArray::calcM1(){
     Vect temp;
-    vector<Part>::iterator iter = this->parts.begin();
+    vector<Part*>::iterator iter = this->parts.begin();
     while (iter!=this->parts.end()){
-        temp.x += iter->m.x;
-        temp.y += iter->m.y;
+        temp.x += (*iter)->m.x;
+        temp.y += (*iter)->m.y;
         if (!config::Instance()->U2D)
-            temp.z += iter->m.z;
+            temp.z += (*iter)->m.z;
         iter++;
     }
     return temp;
@@ -305,12 +308,12 @@ Vect PartArray::calcM1(){
 
 Vect PartArray::calcM2(){
     Vect temp;
-    vector<Part>::iterator iter = this->parts.begin();
+    vector<Part*>::iterator iter = this->parts.begin();
     while (iter!=this->parts.end()){
-        temp.x += fabs(iter->m.x);
-        temp.y += fabs(iter->m.y);
+        temp.x += fabs((*iter)->m.x);
+        temp.y += fabs((*iter)->m.y);
         if (!config::Instance()->U2D)
-            temp.z += fabs(iter->m.z);
+            temp.z += fabs((*iter)->m.z);
         iter++;
     }
     return temp;
@@ -318,17 +321,17 @@ Vect PartArray::calcM2(){
 
 Vect PartArray::calcM12(){
     Vect temp1, temp2;
-    vector<Part>::iterator iter = this->parts.begin();
+    vector<Part*>::iterator iter = this->parts.begin();
     while (iter!=this->parts.end()){
-        temp1.x += iter->m.x;
-        temp2.x += fabs(iter->m.x);
+        temp1.x += (*iter)->m.x;
+        temp2.x += fabs((*iter)->m.x);
 
-        temp1.y += iter->m.y;
-        temp2.y += fabs(iter->m.y);
+        temp1.y += (*iter)->m.y;
+        temp2.y += fabs((*iter)->m.y);
 
         if (!config::Instance()->U2D) {
-            temp1.z += iter->m.z;
-            temp2.z += fabs(iter->m.z);
+            temp1.z += (*iter)->m.z;
+            temp2.z += fabs((*iter)->m.z);
         }
 
         iter++;
@@ -342,35 +345,35 @@ Vect PartArray::calcM12(){
 }
 
 void PartArray::calcInteraction(Part* elem) {
-    std::vector < Part >::iterator iterator1;
+    std::vector < Part* >::iterator iterator1;
     elem->interaction.x = 0;
     elem->interaction.y = 0;
     elem->interaction.z = 0;
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
-        if (elem->pos.x != (*iterator1).pos.x || elem->pos.y != (*iterator1).pos.y || elem->pos.z != (*iterator1).pos.z) { //не считать взаимодействие частицы на себя
-            elem->interaction += elem->interact(&(*iterator1));
+        if (elem->pos.x != (*iterator1)->pos.x || elem->pos.y != (*iterator1)->pos.y || elem->pos.z != (*iterator1)->pos.z) { //не считать взаимодействие частицы на себя
+            elem->interaction += elem->interact(*iterator1);
         }
         ++iterator1;
     }
 }
 
 void PartArray::calcInteraction() {
-    std::vector < Part >::iterator iterator2;
+    std::vector < Part* >::iterator iterator2;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
-        this->calcInteraction(&(*iterator2));
+        this->calcInteraction(*iterator2);
         iterator2++;
     }
 }
 
 
 double PartArray::calcEnergy1(Vect& H) {
-    std::vector < Part >::iterator iterator2;
+    std::vector < Part* >::iterator iterator2;
     this->E1 = 0;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
-        this->E1 += this->calcEnergy1(&*iterator2) + H.scalar(iterator2->m);
+        this->E1 += this->calcEnergy1(*iterator2) + H.scalar((*iterator2)->m);
         iterator2++;
     }
     this->E1 *= 0.5;
@@ -383,20 +386,20 @@ double PartArray::calcEnergy1(){
 }
 
 double PartArray::calcEnergy1(Part* elem) {
-    std::vector < Part >::iterator iterator1;
+    std::vector < Part* >::iterator iterator1;
     double r, r2, r5, E = 0;
     Vect rij;
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
-        if (elem->pos.x != (*iterator1).pos.x || elem->pos.y != (*iterator1).pos.y || elem->pos.z != (*iterator1).pos.z) { //не считать взаимодействие частицы на себя
-            rij = (*iterator1).pos.radius(elem->pos);
+        if (elem->pos.x != (*iterator1)->pos.x || elem->pos.y != (*iterator1)->pos.y || elem->pos.z != (*iterator1)->pos.z) { //не считать взаимодействие частицы на себя
+            rij = (*iterator1)->pos.radius(elem->pos);
             r = rij.length();
             r2 = r * r; //радиус в кубе
             r5 = r2 * r * r * r; //радиус в пятой
             E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                    (((*iterator1).m.scalar(elem->m) * r2)
+                    (((*iterator1)->m.scalar(elem->m) * r2)
                      -
-                     (3 * elem->m.scalar(rij) * (*iterator1).m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                     (3 * elem->m.scalar(rij) * (*iterator1)->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
         }
         ++iterator1;
     }
@@ -404,7 +407,7 @@ double PartArray::calcEnergy1(Part* elem) {
 }
 
 void PartArray::calcEnergy1Fast(){
-    std::vector < Part >::iterator iterator1, iterator2, beginIterator, endIterator;
+    std::vector < Part* >::iterator iterator1, iterator2, beginIterator, endIterator;
     double r, r2, r5, rijx, rijy;
 
     this->E1 = 0;
@@ -416,15 +419,15 @@ void PartArray::calcEnergy1Fast(){
         while (iterator1 != endIterator) {
 
             if (iterator2 != iterator1) { //не считать взаимодействие частицы на себя
-                rijx = iterator2->pos.x - iterator1->pos.x;
-                rijy = iterator2->pos.y - iterator1->pos.y;
+                rijx = (*iterator2)->pos.x - (*iterator1)->pos.x;
+                rijy = (*iterator2)->pos.y - (*iterator1)->pos.y;
                 r2 = rijx*rijx+rijy*rijy;
                 r = sqrt(r2); //трудное место, заменить бы
                 r5 = r2 * r2 * r; //радиус в пятой
                 this->E1 += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                        (( (iterator1->m.x*iterator2->m.x+iterator1->m.y*iterator2->m.y) * r2)
+                        (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y) * r2)
                          -
-                         (3 * (iterator2->m.x * rijx + iterator2->m.y * rijy) * (iterator1->m.x * rijx + iterator1->m.y * rijy)  )) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                         (3 * ((*iterator2)->m.x * rijx + (*iterator2)->m.y * rijy) * ((*iterator1)->m.x * rijx + (*iterator1)->m.y * rijy)  )) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
 
             }
 
@@ -438,12 +441,12 @@ void PartArray::calcEnergy1Fast(){
 
 
 double PartArray::calcEnergy1FastIncremental(double initEnergy, StateMachine* state){
-    vector<bool>::iterator iter; //итератор обхода состояния
-    vector<Part>::iterator part; //итератор частицы
+    vector<Part*>::iterator iter; //итератор обхода состояния
+    vector<Part*>::iterator part; //итератор частицы
 
     //если не передано состояние, оперируем системным состоянием
     if (!state){
-        state = this->state;
+        state = new StateMachine(this);//this->state;
     }
 
     std::vector<int> zeros; //хранит инфу на каких позициях нули
@@ -451,7 +454,7 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, StateMachine* st
     iter = state->begin();
     int i=0;
     while(iter != state->end()){
-        if ( *iter == 0){
+        if ( (*iter)->state == 0){
             zeros.push_back(i);
         }
         iter++; i++;
@@ -464,10 +467,10 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, StateMachine* st
     iter = state->begin();
     part = this->parts.begin();
     while(iter != state->end()){
-        if ( *iter == true){
+        if ( (*iter)->state == true){
             iter2 = zeros.begin();
             while (iter2!=zeros.end()){
-                E -=  ( 2. * part->eArray.at(*iter2));
+                E -=  ( 2. * (*part)->eArray.at(*iter2));
                 iter2++;
             }
         }
@@ -481,39 +484,39 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     this->state->reset();//при первом запуске состояние системы должно быть 0
     double eIncrementalTemp = 0;
 
-    std::vector < Part >::iterator iterator1, iterator2, beginIterator, endIterator;
+    std::vector < Part* >::iterator iterator1, iterator2, beginIterator, endIterator;
     double r, r2, r5, rijx, rijy, E;
 
     beginIterator = iterator2 = this->parts.begin();
     endIterator = this->parts.end();
 
     while (iterator2 != endIterator) {
-        iterator2->e = 0;
-        iterator2->eArray.clear();
+        (*iterator2)->e = 0;
+        (*iterator2)->eArray.clear();
         iterator1 = beginIterator;
         while (iterator1 != endIterator) {
 
             if (iterator2 != iterator1) { //не считать взаимодействие частицы на себя
-                rijx = iterator2->pos.x - iterator1->pos.x;
-                rijy = iterator2->pos.y - iterator1->pos.y;
+                rijx = (*iterator2)->pos.x - (*iterator1)->pos.x;
+                rijy = (*iterator2)->pos.y - (*iterator1)->pos.y;
                 r2 = rijx*rijx+rijy*rijy;
                 r = sqrt(r2); //трудное место, заменить бы
                 r5 = r2 * r2 * r; //радиус в пятой
                 E = //энергия считается векторным методом, так как она не нужна для каждой оси
-                        (( (iterator1->m.x*iterator2->m.x+iterator1->m.y*iterator2->m.y) * r2)
+                        (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y) * r2)
                          -
-                         (3 * (iterator2->m.x * rijx + iterator2->m.y * rijy) * (iterator1->m.x * rijx + iterator1->m.y * rijy)  )) / r5;
+                         (3 * ((*iterator2)->m.x * rijx + (*iterator2)->m.y * rijy) * ((*iterator1)->m.x * rijx + (*iterator1)->m.y * rijy)  )) / r5;
 
-                iterator2->e += E;//энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                iterator2->eArray.push_back(E);
+                (*iterator2)->e += E;//энергии отличаются от формулы потому что дроби внесены под общий знаменатель
+                (*iterator2)->eArray.push_back(E);
             } else {
-                iterator2->eArray.push_back(0);
+                (*iterator2)->eArray.push_back(0);
             }
 
             ++iterator1;
         }
 
-        eIncrementalTemp += iterator2->e;
+        eIncrementalTemp += (*iterator2)->e;
 
         iterator2++;
     }
@@ -522,32 +525,32 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
 }
 
 void PartArray::calcEnergy2() {
-    std::vector < Part >::iterator iterator2;
+    std::vector < Part* >::iterator iterator2;
     this->E2 = 0;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
-        (*iterator2).e = (*iterator2).interaction.scalar((*iterator2).m);
-        this->E2 -= (*iterator2).e;
+        (*iterator2)->e = (*iterator2)->interaction.scalar((*iterator2)->m);
+        this->E2 -= (*iterator2)->e;
         iterator2++;
     }
     this->E2 *= 0.5;
 }
 
 void PartArray::cout() {
-    std::vector < Part >::iterator iterator1;
+    std::vector < Part* >::iterator iterator1;
     std::cout << "X\tY\tZ\tMx\tMy\tMz\t\tHx\tHy\tHz\t|H|" << std::endl;
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
         std::cout
-                << (*iterator1).pos.x << "\t"
-                << (*iterator1).pos.y << "\t"
-                << (*iterator1).pos.z << "\t"
-                << (*iterator1).m.x << "\t"
-                << (*iterator1).m.y << "\t"
-                << (*iterator1).m.z << "\t\t"
-                << (*iterator1).interaction.x << "\t"
-                << (*iterator1).interaction.y << "\t"
-                << (*iterator1).interaction.z << "\t";
+                << (*iterator1)->pos.x << "\t"
+                << (*iterator1)->pos.y << "\t"
+                << (*iterator1)->pos.z << "\t"
+                << (*iterator1)->m.x << "\t"
+                << (*iterator1)->m.y << "\t"
+                << (*iterator1)->m.z << "\t\t"
+                << (*iterator1)->interaction.x << "\t"
+                << (*iterator1)->interaction.y << "\t"
+                << (*iterator1)->interaction.z << "\t";
         ++iterator1;
     }
     std::cout << "E1 : " << this->E1 << "; E2 : " << this->E2 << std::endl;
@@ -555,10 +558,10 @@ void PartArray::cout() {
 
 std::vector<double> PartArray::getEVector() {
     std::vector<double> e;
-    std::vector < Part >::iterator iterator1 = this->parts.begin();
+    std::vector < Part* >::iterator iterator1 = this->parts.begin();
 
     while (iterator1 != this->parts.end()) {
-        e.push_back((*iterator1).e);
+        e.push_back((*iterator1)->e);
         ++iterator1;
     }
     return e;
@@ -566,10 +569,10 @@ std::vector<double> PartArray::getEVector() {
 
 std::vector<double> PartArray::getHVector() {
     std::vector<double> h;
-    std::vector < Part >::iterator iterator1 = this->parts.begin();
+    std::vector < Part* >::iterator iterator1 = this->parts.begin();
 
     while (iterator1 != this->parts.end()) {
-        h.push_back((*iterator1).interaction.length());
+        h.push_back((*iterator1)->interaction.length());
         ++iterator1;
     }
     return h;
@@ -577,10 +580,10 @@ std::vector<double> PartArray::getHVector() {
 
 std::vector<double> PartArray::getHZVector() {
     std::vector<double> h;
-    std::vector < Part >::iterator iterator1 = this->parts.begin();
+    std::vector < Part* >::iterator iterator1 = this->parts.begin();
 
     while (iterator1 != this->parts.end()) {
-        h.push_back((*iterator1).interaction.z);
+        h.push_back((*iterator1)->interaction.z);
         ++iterator1;
     }
     return h;
@@ -623,39 +626,39 @@ std::vector<double> PartArray::getHZVector() {
 //}
 
 void PartArray::setMAllUp() {
-    std::vector < Part >::iterator iterator1;
+    std::vector < Part* >::iterator iterator1;
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
 
-        (*iterator1).m.x = 0.;
-        (*iterator1).m.y = 1.;
-        (*iterator1).m.z = 0.;
+        (*iterator1)->m.x = 0.;
+        (*iterator1)->m.y = 1.;
+        (*iterator1)->m.z = 0.;
         ++iterator1;
     }
 }
 
 void PartArray::setMRandom() {
-    std::vector < Part >::iterator iterator1;
+    std::vector < Part* >::iterator iterator1;
     srand((unsigned int)time(NULL));
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
-        if (config::Instance()->rand() % 2 == 1) (*iterator1).m.z = 1.;
-        else (*iterator1).m.z = -1.;
-        (*iterator1).m.y = 0.;
-        (*iterator1).m.x = 0.;
+        if (config::Instance()->rand() % 2 == 1) (*iterator1)->m.z = 1.;
+        else (*iterator1)->m.z = -1.;
+        (*iterator1)->m.y = 0.;
+        (*iterator1)->m.x = 0.;
         ++iterator1;
     }
 }
 
 std::vector<double> PartArray::processStep() {
-    std::vector<Part>::iterator iter;
+    std::vector<Part*>::iterator iter;
     std::vector<double> history;
     iter = this->parts.begin();
     while (iter != this->parts.end()) {
-        if ((*iter).interaction.length() > config::Instance()->hc && (*iter).interaction.scalar((*iter).m) < 0) {
+        if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
             history.push_back(this->E2);
             //std::cout << "rotate with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
-            (*iter).m.rotate();
+            (*iter)->m.rotate();
             this->calcInteraction();
             this->calcEnergy2();
             iter = this->parts.begin();
@@ -668,7 +671,7 @@ std::vector<double> PartArray::processStep() {
 }
 
 std::vector<double> PartArray::processRandom() {
-    std::vector<Part>::iterator iter; //итератор для перебора массива частиц
+    std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
     Part* rElem; //тут будет храниться случайная частица
     std::vector<Part*> unstable; //хранит нестабильные частицы
     std::vector<double> history; //история переворота
@@ -679,8 +682,8 @@ std::vector<double> PartArray::processRandom() {
         //собираем все неустойчивые элементы в один массив
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter).interaction.length() > config::Instance()->hc && (*iter).interaction.scalar((*iter).m) < 0)
-                unstable.push_back(&*iter);
+            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0)
+                unstable.push_back(*iter);
             iter++;
         }
         //если найдены частицы, выбираем одну из них рэндомно и переворачиваем
@@ -703,7 +706,7 @@ std::vector<double> PartArray::processRandom() {
 
 std::vector<double> PartArray::processMaxH() {
     std::vector<double> history; //история переворота
-    std::vector<Part>::iterator iter; //итератор для перебора массива частиц
+    std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
     Part* mElem = NULL; //тут будет храниться максимальная частица. по умолчанию максимальная - первая
     bool hasUnstable = true;
     while (hasUnstable) {
@@ -711,14 +714,14 @@ std::vector<double> PartArray::processMaxH() {
         mElem = NULL; //чистим максимум
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter).interaction.length() > config::Instance()->hc && (*iter).interaction.scalar((*iter).m) < 0) {
+            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
                 hasUnstable = true;
                 //на первом шаге цикла нужно просто присвоить максимуму значение, а на остальных уже сравнивать
                 if (mElem == NULL) {
-                    mElem = &*iter;
+                    mElem = *iter;
                 } else {
-                    if (mElem->interaction.length() < (*iter).interaction.length())
-                        mElem = &*iter;
+                    if (mElem->interaction.length() < (*iter)->interaction.length())
+                        mElem = *iter;
                 }
             }
             iter++;
@@ -740,7 +743,7 @@ std::vector<double> PartArray::processMaxH() {
 std::vector<double> PartArray::processGroupMaxH() {
     std::vector<double> history; //история переворота
     std::vector<Part*> unstable; //все нестабильные частицы здесь при просчете
-    std::vector<Part>::iterator iter; //итератор для перебора массива частиц
+    std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
     std::vector<Part*>::iterator iter2; //итератор для перебора нестабильных частиц
     int maxH = 0; //максимальный модуль поля взаимодействия
     bool hasUnstable = true; //есть нестабильные частицы или нет
@@ -754,11 +757,11 @@ std::vector<double> PartArray::processGroupMaxH() {
         //step 1 - сначала находим максимальный магнитный момент системы
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter).interaction.length() > config::Instance()->hc && (*iter).interaction.scalar((*iter).m) < 0) {
-                unstable.push_back(&*iter);
+            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+                unstable.push_back(*iter);
                 hasUnstable = true;
-                if ((int) (*iter).interaction.length() > maxH)
-                    maxH = (int) (*iter).interaction.length();
+                if ((int) (*iter)->interaction.length() > maxH)
+                    maxH = (int) (*iter)->interaction.length();
             }
             iter++;
         }
@@ -789,7 +792,7 @@ std::vector<double> PartArray::processGroupMaxH() {
 std::vector<double> PartArray::processGroupStep() {
     std::vector<double> history; //история переворота
     std::vector<Part*> unstable; //все нестабильные частицы здесь при просчете
-    std::vector<Part>::iterator iter; //итератор для перебора массива частиц
+    std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
     std::vector<Part*>::iterator iter2; //итератор для перебора нестабильных частиц
     bool hasUnstable = true; //есть нестабильные частицы или нет
     while (hasUnstable) {
@@ -807,8 +810,8 @@ std::vector<double> PartArray::processGroupStep() {
         //step 1 - сначала находим все неустойчивые элементы
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter).interaction.length() > config::Instance()->hc && (*iter).interaction.scalar((*iter).m) < 0) {
-                unstable.push_back(&*iter);
+            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+                unstable.push_back(*iter);
                 hasUnstable = true;
             }
             iter++;
@@ -829,7 +832,7 @@ std::vector<double> PartArray::processGroupStep() {
 std::vector<double> PartArray::processHEffective() {
     std::vector<double> history; //история переворота
     std::vector<Part*> unstable; //частицы, подлежащие перевороту при текущей итерации
-    std::vector<Part>::iterator iter; //итератор для перебора массива частиц
+    std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
     std::vector<Part*>::iterator iter2; //итератор для перебора нестабильных частиц
     double averH = 0.; //максимальный модуль поля взаимодействия
     int averCount = 0; //количество значений, положеных в среднее
@@ -845,10 +848,10 @@ std::vector<double> PartArray::processHEffective() {
         //step 1 - сначала находим средний магнитный момент всех частиц
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter).interaction.length() > config::Instance()->hc && (*iter).interaction.scalar((*iter).m) < 0) {
-                averH = (averH * averCount + (*iter).interaction.length()) / (double) (averCount + 1);
+            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+                averH = (averH * averCount + (*iter)->interaction.length()) / (double) (averCount + 1);
                 averCount++;
-                unstable.push_back(&*iter);
+                unstable.push_back(*iter);
                 hasUnstable = true;
             }
             iter++;
@@ -892,16 +895,16 @@ void PartArray::save(char* file, bool showNotifications) {
     f << "x\ty\tz\tMx\tMy\tMz\tr" << endl;
 
     //затем все магнитные моменты системы и положения точек
-    vector<Part>::iterator iter = this->parts.begin();
+    vector<Part*>::iterator iter = this->parts.begin();
     while (iter != this->parts.end()) {
-        f << (*iter).pos.x << "\t";// << endl;
-        f << (*iter).pos.y << "\t";// << endl;
-        f << (*iter).pos.z << "\t";// << endl;
-        f << (*iter).m.x << "\t";// << endl;
-        f << (*iter).m.y << "\t";// << endl;
-        f << (*iter).m.z << "\t";// << endl;
-        //f << (*iter).sector << "\t";// << endl;
-        f << (*iter).volume << endl;
+        f << (*iter)->pos.x << "\t";// << endl;
+        f << (*iter)->pos.y << "\t";// << endl;
+        f << (*iter)->pos.z << "\t";// << endl;
+        f << (*iter)->m.x << "\t";// << endl;
+        f << (*iter)->m.y << "\t";// << endl;
+        f << (*iter)->m.z << "\t";// << endl;
+        //f << (*iter)->sector << "\t";// << endl;
+        f << (*iter)->volume << endl;
         iter++;
     }
     f.close();
@@ -916,7 +919,7 @@ void PartArray::load(char* file,bool showNotifications) {
         std::cout<<"load "<<file<<" file start"<<endl;
     std::ifstream f(file);
 
-    this->parts.clear(); //удаляем все частицы
+    this->clear(); //удаляем все частицы
     this->E1 = this->E2 = 0; //обнуляем энергии системы
 
     //сначала сохраняем xyz
@@ -933,18 +936,19 @@ void PartArray::load(char* file,bool showNotifications) {
 
     //затем читаем все магнитные моменты системы и положения точек
     double radius = 0;
+    Part* temp;
     while (!f.eof()) {
-        Part temp;
-        if (!(f >> temp.pos.x).good()) break; //если не получилось считать - значит конец файла
-        f >> temp.pos.y;
-        f >> temp.pos.z;
-        f >> temp.m.x;
-        f >> temp.m.y;
-        f >> temp.m.z;
+        temp = new Part();
+        if (!(f >> temp->pos.x).good()) break; //если не получилось считать - значит конец файла
+        f >> temp->pos.y;
+        f >> temp->pos.z;
+        f >> temp->m.x;
+        f >> temp->m.y;
+        f >> temp->m.z;
         //f >> temp.sector; для MPI реализации, @todo потом перегрузить
-        f >> temp.volume;
-        this->parts.push_back(temp);
-        radius = temp.volume;
+        f >> temp->volume;
+        this->insert(temp);
+        radius = temp->volume;
         //if (i%1000==0) std::cout<<"load "<<i<<" particle"<<std::endl;
         i++;
     }
@@ -960,12 +964,16 @@ void PartArray::load(char* file,bool showNotifications) {
     else
         config::Instance()->set3D();
 
-    this->state->resize();
 }
 
 void PartArray::clear(){
+    vector<Part*>::iterator iter = this->parts.begin();
+    while (iter!=this->parts.end()){
+        delete (*iter); //удаляем все что по есть по ссылкам на частицы
+        iter++;
+    }
     this->parts.clear();
-    this->state->resize();
+    delete this->state;
 }
 
 
@@ -977,7 +985,7 @@ void PartArray::clear(){
 void PartArray::checkFM(char* file, double c){
     std::ofstream f(file, ios_base::app);
 
-    std::vector<Part>::iterator iter1;
+    std::vector<Part*>::iterator iter1;
     const int total = this->parts.size();
     double scalar; //Number of H greather Zero; Number of H less Zero
     int i=0;
@@ -987,13 +995,13 @@ void PartArray::checkFM(char* file, double c){
 
         Vect h;
         int Nhgz = 0, Nhlz = 0, Nhez = 0;
-        std::vector<Part>::iterator iter2 = this->parts.begin();
+        std::vector<Part*>::iterator iter2 = this->parts.begin();
         //считаем количество сонаправленных и обратнонаправленных частий
 
         while (iter2 != this->parts.end()){
             if (iter1!=iter2){
-                h = iter1->interact(&(*iter2)); //считаем поле взаимодействия двух частиц
-                scalar = h.scalar(iter1->m)/(h.length()*iter1->m.length());
+                h = (*iter1)->interact(*iter2); //считаем поле взаимодействия двух частиц
+                scalar = h.scalar((*iter1)->m)/(h.length()*(*iter1)->m.length());
 
                 if (scalar > 0.08) Nhgz++; else
                     if (scalar < -0.08) Nhlz++; else
@@ -1003,13 +1011,13 @@ void PartArray::checkFM(char* file, double c){
             iter2++;
         }
 
-        this->calcInteraction(&(*iter1));
+        this->calcInteraction(*iter1);
 
         f
                 << (double)Nhgz/(double)total << "\t"
                 << (double)Nhlz/(double)total << "\t"
                 << (double)Nhez/(double)total << "\t"
-                << iter1->interaction.length() << "\t"
+                << (*iter1)->interaction.length() << "\t"
                 << c <<endl;
         if (i%1000==0 || i<1000)
             std::cout<<i<<" particle"<<std::endl;
@@ -1023,21 +1031,21 @@ void PartArray::checkFM(char* file, double c){
 void PartArray::saveEachMagnetization(char* file) {
     std::ofstream f(file);
 
-    vector<Part>::iterator iter = this->parts.begin();
-    vector<Part>::iterator iter2 = this->parts.begin();
+    vector<Part*>::iterator iter = this->parts.begin();
+    vector<Part*>::iterator iter2 = this->parts.begin();
     Vect tempv;
     int i=1;
     while (iter != this->parts.end()) {
         f <<
-             (*iter).pos.x << "\t" <<
-             (*iter).pos.y << "\t" <<
-             iter->m.x << "\t" <<
-             iter->m.y << "\t";
+             (*iter)->pos.x << "\t" <<
+             (*iter)->pos.y << "\t" <<
+             (*iter)->m.x << "\t" <<
+             (*iter)->m.y << "\t";
 
         iter2 = this->parts.begin();
         while (iter2!=this->parts.end()){
             if (iter!=iter2){
-                tempv = iter->interact(&(*iter2));
+                tempv = (*iter)->interact(*iter2);
                 f << tempv.x << "\t" << tempv.y << "\t";
             } else
                 f << 0 << "\t" << 0 << "\t";
@@ -1056,39 +1064,39 @@ int PartArray::count(){
 }
 
 void PartArray::rotateAllUp(){
-    vector<Part>::iterator iter;
+    vector<Part*>::iterator iter;
     iter = this->parts.begin();
     while (iter!=this->parts.end())
     {
-        if (iter->m.y<0) iter->m.y *= -1.;
+        if ((*iter)->m.y<0) (*iter)->m.y *= -1.;
         iter++;
     }
 }
 
 void PartArray::rotateAllLines(double segmentSize){
-    vector<Part>::iterator iter;
+    vector<Part*>::iterator iter;
     iter = this->parts.begin();
     while (iter!=this->parts.end())
     {
-        if ((int)( iter->pos.x / segmentSize) % 2 == 0) { //если в четном сегменте
-            if (iter->m.y < 0) iter->m.y*= -1.; //поворачиваем вверх
+        if ((int)( (*iter)->pos.x / segmentSize) % 2 == 0) { //если в четном сегменте
+            if ((*iter)->m.y < 0) (*iter)->m.y*= -1.; //поворачиваем вверх
         } else {
-            if (iter->m.y > 0) iter->m.y*= -1.; //поворачиваем вниз
+            if ((*iter)->m.y > 0) (*iter)->m.y*= -1.; //поворачиваем вниз
         }
         iter++;
     }
 }
 
 void PartArray::setMBruteLines(double segmentSize){
-    vector<Part>::iterator iter;
+    vector<Part*>::iterator iter;
     iter = this->parts.begin();
     while (iter!=this->parts.end())
     {
-        iter->m.x = iter->m.z = 0;
-        if ((int)( iter->pos.x / segmentSize) % 2  == 0) { //если целая часть от деления делится на 2 без остатка, то в четном сегменте
-            iter->m.y = config::Instance()->m; //поворачиваем вверх
+        (*iter)->m.x = (*iter)->m.z = 0;
+        if ((int)( (*iter)->pos.x / segmentSize) % 2  == 0) { //если целая часть от деления делится на 2 без остатка, то в четном сегменте
+            (*iter)->m.y = config::Instance()->m; //поворачиваем вверх
         } else {
-            iter->m.y = -config::Instance()->m; //поворачиваем вниз
+            (*iter)->m.y = -config::Instance()->m; //поворачиваем вниз
         }
         iter++;
     }
@@ -1100,13 +1108,13 @@ void PartArray::scaleSystem(double coff){
     if (!config::Instance()->U2D)
         this->size.z *= coff;
 
-    vector<Part>::iterator iter;
+    vector<Part*>::iterator iter;
     iter = this->parts.begin();
     while (iter!=this->parts.end()){
-        iter->pos.x *= coff;
-        iter->pos.y *= coff;
+        (*iter)->pos.x *= coff;
+        (*iter)->pos.y *= coff;
         if (!config::Instance()->U2D)
-            iter->pos.z *= coff;
+            (*iter)->pos.z *= coff;
         iter++;
     }
 }
@@ -1117,7 +1125,7 @@ void PartArray::_construct(){
 
 
 double PartArray::calcJ(){
-    vector<Part>::iterator iter1,iter2;
+    vector<Part*>::iterator iter1,iter2;
     Vect r; //радиус-вектор
     double rL;
     double Jxx,Jxy,Jyx,Jyy,J=0;
@@ -1130,7 +1138,7 @@ double PartArray::calcJ(){
         iter2 = iter1;
         while (iter2!=this->parts.end()){
             if (iter2!=iter1){
-                r = iter1->pos.radius(iter2->pos);
+                r = (*iter1)->pos.radius((*iter2)->pos);
                 rL = r.length();
 
 
@@ -1170,7 +1178,7 @@ double PartArray::calcJ(){
 
 
 double PartArray::calcJ2(){
-    vector<Part>::iterator iter1,iter2;
+    vector<Part*>::iterator iter1,iter2;
     Vect r; //радиус-вектор
     double rL;
     double Jxx,Jxy,Jyx,Jyy,J=0;
@@ -1183,7 +1191,7 @@ double PartArray::calcJ2(){
         iter2 = iter1;
         while (iter2!=this->parts.end()){
             if (iter2!=iter1){
-                r = iter1->pos.radius(iter2->pos);
+                r = (*iter1)->pos.radius((*iter2)->pos);
                 rL = r.length();
 
 
@@ -1229,7 +1237,7 @@ double PartArray::calcJ2(){
 }
 
 double PartArray::calcJ12(){
-    vector<Part>::iterator iter1,iter2;
+    vector<Part*>::iterator iter1,iter2;
     Vect r; //радиус-вектор
     double rL;
     double Jxx,Jxy,Jyx,Jyy,J1=0,J2=0;
@@ -1242,7 +1250,7 @@ double PartArray::calcJ12(){
         iter2 = iter1;
         while (iter2!=this->parts.end()){
             if (iter2!=iter1){
-                r = iter1->pos.radius(iter2->pos);
+                r = (*iter1)->pos.radius((*iter2)->pos);
                 rL = r.length();
 
 
@@ -1292,11 +1300,11 @@ double PartArray::calcJ12(){
 
 
 bool PartArray::setToGroundState(){
-    StateMachine minstate, temp;
-    this->state->reset();
+    StateMachine minstate(this), temp(this);
+    //this->state->reset();
     double initE = this->calcEnergy1FastIncrementalFirst();
 
-    temp = *this->state;
+    //temp = *this->state;
 
     double eMin, eTemp;
 
@@ -1315,7 +1323,7 @@ bool PartArray::setToGroundState(){
             }
     } while (temp.next());
 
-    *(this->state) = minstate;
+    //*(this->state) = minstate;
 
     return true;
 }
@@ -1374,9 +1382,7 @@ bool PartArray::setToMonteCarloGroundState2(){
         rotatedCount = ( config::Instance()->rand()%(count-2) ) + 1; //решаем сколько частиц подворачивать
         for (int i=0;i<rotatedCount;i++){
             num = config::Instance()->rand()%count; //решаем какую частицу подворачивать
-            Part &temp = this->parts.at(num);
-            temp.m.rotate();
-            temp.rotated = !temp.rotated;
+            this->parts.at(num)->rotate();
             rot[i] = num; //запоминаем подвернутую частицу
         }
         Enew = this->calcEnergy1();
@@ -1384,9 +1390,7 @@ bool PartArray::setToMonteCarloGroundState2(){
         if (Eold<=Enew){
             for (int i=0;i<rotatedCount;i++){
                 num = rot[i]; //решаем какую частицу подворачивать
-                Part &temp = this->parts.at(num);
-                temp.m.rotate();
-                temp.rotated = !temp.rotated;
+                this->parts.at(num)->rotate();
             }
             tryingCount++;
         } else tryingCount=0;
@@ -1517,13 +1521,13 @@ double PartArray::calcEnergy1FastIncrementalTemp(unsigned long long int state){
     //рассчитываем энергию
     power = 1;
     double E=this->eIncrementalTemp;
-    vector<Part>::iterator iter;
+    vector<Part*>::iterator iter;
 
     iter = this->parts.begin();
     while(iter!= this->parts.end()){
         if ( (power & state) != 0){
             for (int i=0;i<this->count();i++){
-                E -=  ( 2. * iter->eArray.at(i));
+                E -=  ( 2. * (*iter)->eArray.at(i));
             }
         }
         power<<=1;
@@ -1538,7 +1542,7 @@ void PartArray::dropAdaptive(int count){
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
 
-    std::vector < Part >::iterator iterator1; // итератор для обхода массива частиц
+    std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
     bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
     while (partCount < count) {
         //std::cout <<"Drop "<<partCount<<endl;
@@ -1560,7 +1564,7 @@ void PartArray::dropAdaptive(int count){
             //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
             iterator1 = this->parts.begin();
             while (iterator1 != this->parts.end()) {
-                if (temp->pos.radius(iterator1->pos).length()<=config::Instance()->partR*2){
+                if (temp->pos.radius((*iterator1)->pos).length()<=config::Instance()->partR*2){
                     regenerate = true;
                     //std::cout<<"Drop "<<partCount<<" particle error, repeat"<<endl;
                     break;
@@ -1585,7 +1589,7 @@ void PartArray::dropAdaptive(int count){
         }
 
         //добавляем частицу на экземпляр
-        this->parts.push_back(*temp);
+        this->insert(temp);
         partCount++;
     }
 }
@@ -1598,12 +1602,12 @@ void PartArray::turnRight(){
 }
 
 void PartArray::turnToDirection(Vect *v){
-    vector<Part>::iterator temp = this->parts.begin();
-    temp = this->parts.begin();
-    while(temp!=this->parts.end()){
-        if (temp->m.scalar(*v)<0){
-            temp->m.rotate();
+    vector<Part*>::iterator iter = this->parts.begin();
+    iter = this->parts.begin();
+    while(iter!=this->parts.end()){
+        if ((*iter)->m.scalar(*v)<0){
+            (*iter)->m.rotate();
         }
-        temp++;
+        iter++;
     }
 }

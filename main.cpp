@@ -5,13 +5,38 @@
 #include <ctime>
 
 #include "StateMachine.h"
+#include "StateMachineFree.h"
 #include "PartArray.h"
+#include "Part.h"
 
 using namespace std;
 
 int main(){
 
 
+    PartArray *s = new PartArray(), *s1;
+    Part* p;
+
+    p = new Part();
+    p->m.x = p->m.y = 1;
+    s->insert(p);
+    p = new Part();
+    p->m.x = p->m.y = 2;
+    s->insert(p);
+    p = new Part();
+    p->m.x = p->m.y = 3;
+    s->insert(p);
+
+
+    s->state->draw();
+    s1 = s->copy();
+    for (;;){
+        s1 = s->copy();
+        delete s1;
+        //s1->clear();
+    }
+
+    /*
     config::Instance()->srand(time(NULL));
     PartArray *sys;
     int trueCount = 0;
@@ -29,6 +54,7 @@ int main(){
         delete sys;
     }
     cout<<"result accuracy: "<<(double)trueCount/100.*100.<<"%"<<endl;
+    */
 
     cout<<"finish";
     return 0;

@@ -1,6 +1,10 @@
 #ifndef STATEMACHINEFREE_H
 #define STATEMACHINEFREE_H
+#include <vector>
+#include <iostream>
+#include "StateMachine.h"
 
+class StateMachine;
 /**
  * @brief The StateMachineFree class представляет собой класс, не привязанный к какой-либо системе.
  * Поддерживает стандартное представление StateMachine и умеет копировать из него состояния
@@ -9,6 +13,8 @@ class StateMachineFree
 {
 public:
     StateMachineFree();
+
+    StateMachineFree & operator= (const StateMachine & one);
 
     /**
      * @brief isInitial Проверяет, находится ли система в начальном состоянии
@@ -23,6 +29,8 @@ public:
     bool next();
 
     std::vector<bool> _state;
+
+    void draw();
 };
 
 #endif // STATEMACHINEFREE_H

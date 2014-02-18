@@ -52,6 +52,11 @@ public:
     void resize(double x, double y, double z);
 
     /**
+     * @brief insert Добавляет частицу на образец
+     */
+    void insert(Part*part);
+
+    /**
     * Бросает частицы на случайное место в пространстве с заданной частотой
     */
     void dropRandom(double maxDestiny);
@@ -242,10 +247,10 @@ public:
      ***********************/
 
      //номер состояния, нужен для алгоритма полного обхода состояний
-    StateMachine* state;
+    StateMachine* state; //Указан как ссылка потому что в классах используется перекрестная инициализация
 
     //сам массив частиц, над которым проводятся исследования
-    std::vector < Part > parts;
+    std::vector < Part* > parts;
     Vect size; //размер плоскости в относительных единицах
 protected:
     Vect absSize;  //размер плоскости в абсолютных единицах

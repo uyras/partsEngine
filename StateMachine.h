@@ -6,12 +6,13 @@
 #include "PartArray.h"
 #include "Part.h"
 #include "config.h"
+#include "StateMachineFree.h"
 
 class PartArray; //фикс, так как используется перекрестное объявление с этим классом
+class StateMachineFree;
 class StateMachine
 {
 public:
-    StateMachine();
     StateMachine(PartArray*);
 
     /**
@@ -46,22 +47,20 @@ public:
      */
     bool next();
 
-    bool operator++(int);
     bool operator++();
 
     StateMachine & operator =(const StateMachine & two);
-    StateMachine* copy(PartArray* system = NULL);
 
-    void resize(int size = -1);
+    StateMachine & operator= (const StateMachineFree & one);
 
     void draw();
 
-    std::vector<bool>::iterator begin();
-    std::vector<bool>::iterator end();
+    std::vector<Part*>::iterator begin();
+    std::vector<Part*>::iterator end();
 
 public:
     PartArray* _system;
-    std::vector<bool> _state;
+    std::vector<Part*> _state;
 };
 
 #endif // STATEMACHINE_H

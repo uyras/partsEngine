@@ -10,13 +10,16 @@
 #include "config.h"
 
 Part::Part() :
-    rotated(false)
+    state(false)
 {
     //по умолчанию на частицу ничего не действует
     this->interaction.x = this->interaction.y = this->interaction.z = 0;
     sector = 0; //по умолчанию, все частицы из сектора 0
 	this->volume = config::Instance()->partR; //по умолчанию радиус задается в конфигах
     this->e = 0;
+}
+Part::~Part(){
+    this->eArray.clear();
 }
 
 Vect Part::interact(Part* elem){
@@ -37,4 +40,25 @@ Vect Part::interact(Part* elem){
     h.z = ((3 * part * dz) - elem->m.z * r2) / r5;
 
     return h;
+}
+
+void Part::rotate(float angle){
+    angle = angle;
+    this->m.rotate();
+    this->state = !this->state;
+}
+
+Part* Part::copy(){
+    Part* temp = new Part();
+
+    temp->pos = this->pos;
+    temp->m = this->m;
+    temp->interaction = this->interaction;
+    temp->e = this->e;
+    temp->eArray=this->eArray;
+    temp->volume = this->volume;
+    temp->sector = this->sector;
+    temp->state = this->state;
+
+    return temp;
 }
