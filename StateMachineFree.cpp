@@ -48,3 +48,11 @@ StateMachineFree & StateMachineFree::operator= (const StateMachine & one){
 
     return *this;
 }
+
+void StateMachineFree::reset(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while(iter!=this->_state.end()){
+        *iter = false;
+        iter++;
+    }
+}

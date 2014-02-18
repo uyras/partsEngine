@@ -54,10 +54,9 @@ bool StateMachine::next(){
 }
 
 void StateMachine::setSystem(PartArray* system){
-    this->_system = system;
-    std::vector<Part*>::iterator iter = _system->parts.begin();
+    std::vector<Part*>::iterator iter = system->parts.begin();
 
-    while (iter!=_system->parts.end()){
+    while (iter!=system->parts.end()){
         this->_state.push_back(*iter);
         iter++;
     }
@@ -77,18 +76,15 @@ void StateMachine::draw(){
     std::cout<<std::endl;
 }
 
-void StateMachine::reset(){/*
-    std::vector<bool>::iterator iter;
-    std::vector<Part>::iterator part;
+void StateMachine::reset(){
+    std::vector<Part*>::iterator iter;
     iter = this->_state.begin();
-    part = this->_system->parts.begin();
     while(iter!=this->_state.end()){
-        if (*iter==1){
-            part->m.rotate();
-            *iter=0;
+        if ((*iter)->state==1){
+            (*iter)->rotate();
         }
-        iter++; part++;
-    }*/
+        iter++;
+    }
 }
 
 void StateMachine::rotate(int num){/*

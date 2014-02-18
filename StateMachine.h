@@ -59,7 +59,6 @@ public:
     std::vector<Part*>::iterator end();
 
 public:
-    PartArray* _system;
     std::vector<Part*> _state;
 };
 

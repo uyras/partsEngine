@@ -31,6 +31,8 @@ public:
     std::vector<bool> _state;
 
     void draw();
+
+    void reset();
 };
 
 #endif // STATEMACHINEFREE_H
