@@ -14,7 +14,8 @@ SOURCES += Vect.cpp \
     ini.c \
     distributionLaw.cpp \
     config.cpp \
-    StateMachine.cpp
+    StateMachine.cpp \
+    StateMachineFree.cpp
 
 HEADERS += Vect.h \
     typizator.h \
@@ -24,7 +25,8 @@ HEADERS += Vect.h \
     ini.h \
     distributionLaw.h \
     config.h \
-    StateMachine.h
+    StateMachine.h \
+    StateMachineFree.h
 
 CONFIG(debug,debug|release) {
     SOURCES += main.cpp
@@ -36,7 +38,6 @@ CONFIG(release,debug|release){
     TEMPLATE = lib
     CONFIG += staticlib
     DESTDIR = $$PWD
-
 }
 
 OTHER_FILES += \

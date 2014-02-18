@@ -16,6 +16,7 @@ int main(){
     PartArray *sys;
     int trueCount = 0;
     for (int i=0;i<100;i++){
+        sys = new PartArray(10,10,1);
 
         sys->dropChain(2);
         sys->shuffleM();

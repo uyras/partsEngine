@@ -21,6 +21,11 @@ PartArray::PartArray() {
     this->_construct();
 }
 
+PartArray::~PartArray(){
+    delete this->state;
+    this->clear();
+}
+
 PartArray::PartArray(double x, double y, double z) {
     this->_construct();
     this->resize(x,y,z); //изменяем размер подложки
@@ -205,6 +210,8 @@ void PartArray::dropRandom(int count) {
 
 void PartArray::dropChain(double distance){
     double rad = config::Instance()->partR;
+    if (distance==-1)
+        distance = 2.*rad;
     double x = rad;
     short int up = 1;
     Part* temp;
@@ -1454,9 +1461,9 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
             double p = std::min(1.,exp(de/(0.75)));
 
             if (randNum<p){
-                temp = systems[i+1];
-                systems[i+1] = systems[i];
-                systems[i] = temp;
+                temp = (*iter);
+                (*iter) = (*iter2);
+                (*iter2) = temp;
 
                 eRepeatNum = 0;
             }
