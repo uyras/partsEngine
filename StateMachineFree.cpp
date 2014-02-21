@@ -56,3 +56,27 @@ void StateMachineFree::reset(){
         iter++;
     }
 }
+
+int StateMachineFree::randomize(int count){
+    int randnum, parts = this->_state.size();
+    vector<bool>::iterator iter;
+    for (int i=0;i<count;i++){
+        randnum = config::Instance()->rand()%parts;
+        iter = this->_state.begin()+randnum;
+        *iter = !*iter;
+    }
+    if (count==1)
+        return randnum;
+    else
+        return -1;
+}
+
+bool StateMachineFree::isInitial(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while (iter!=this->_state.end()){
+        if (*iter==true)
+            return false;
+        iter++;
+    }
+    return true;
+}

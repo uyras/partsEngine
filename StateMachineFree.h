@@ -33,6 +33,13 @@ public:
     void draw();
 
     void reset();
+
+    /**
+     * @brief randomize Переворачивает несколько случайных частиц
+     * @param count Количество частиц, которые должны быть перевернуты
+     * @return если перевернуть одну частицу, возвращает ее номер, иначе 0
+     */
+    int randomize(int count=1);
 };
 
 #endif // STATEMACHINEFREE_H

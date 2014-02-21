@@ -16,9 +16,10 @@ public:
     StateMachine(PartArray*);
 
     /**
-     * @brief reset сбросить состояние в начальное состояние, т.е. все состояния по нулям
+     * @brief reset сбросить состояние в начальное, т.е. все состояния по нулям
      */
     void reset();
+
     /**
      * @brief randomize Переворачивает несколько случайных частиц
      * @param count Количество частиц, которые должны быть перевернуты
@@ -26,14 +27,7 @@ public:
      */
     int randomize(int count=1);
 
-    /**
-     * @brief rotate Поворачивает частицу
-     * @param num Номер частицы, которую нужно повернуть
-     */
-    void rotate(int num);
-
     void setSystem(PartArray*);
-    PartArray* getSystem();
 
     /**
      * @brief isInitial Проверяет, находится ли система в начальном состоянии
@@ -48,8 +42,6 @@ public:
     bool next();
 
     bool operator++();
-
-    StateMachine & operator =(const StateMachine & two);
 
     StateMachine & operator= (const StateMachineFree & one);
 

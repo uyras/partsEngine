@@ -42,4 +42,5 @@ CONFIG(release,debug|release){
 
 OTHER_FILES += \
     README.md \
-    .gitignore
+    .gitignore \
+    makefile

@@ -8,32 +8,6 @@ bool StateMachine::operator++(){
     return this->next();
 }
 
-StateMachine & StateMachine::operator =(StateMachine const & two){
-
-    /*
-    if (this->_state.size()==two._state.size()){
-        //если состояние связано с системой, то попутно придется переворачивать частицы
-        if (this->_system){
-            std::vector<Part*>::iterator iter1;
-            std::vector<bool>::const_iterator iter2;
-            std::vector<Part>::iterator part;
-            iter1 = this->_state.begin();
-            iter2 = two._state.begin();
-
-            part = this->_system->parts.begin();
-            while (iter1!=this->_state.end()){
-                if ((*iter1)^(*iter2)){
-                    part->m.rotate();
-                }
-                iter1++; iter2++;
-                part++;
-            }
-        }
-        this->_state = two._state;
-    }*/
-    return *this;
-}
-
 bool StateMachine::next(){
 
     //версия для типа bool
@@ -87,12 +61,6 @@ void StateMachine::reset(){
     }
 }
 
-void StateMachine::rotate(int num){/*
-    this->_state.at(num)= !this->_state.at(num);
-    if (this->_system)
-        this->_system->parts.at(num).m.rotate();*/
-}
-
 std::vector<Part*>::iterator StateMachine::begin(){
     return this->_state.begin();
 }
@@ -127,3 +95,12 @@ StateMachine & StateMachine::operator= (const StateMachineFree & one){
     return *this;
 }
 
+bool StateMachine::isInitial(){
+    vector<Part*>::iterator iter = this->_state.begin();
+    while (iter!=this->_state.end()){
+        if ((*iter)->state==true)
+            return false;
+        iter++;
+    }
+    return true;
+}

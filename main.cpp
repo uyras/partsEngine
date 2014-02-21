@@ -14,7 +14,7 @@ using namespace std;
 int main(){
 
 
-    PartArray *s = new PartArray(), *s1;
+    PartArray *s = new PartArray();
     Part* p;
 
     p = new Part();
@@ -28,13 +28,11 @@ int main(){
     s->insert(p);
 
 
-    s->state->draw();
-    s1 = s->copy();
-    for (;;){
-        s1 = s->copy();
-        delete s1;
-        //s1->clear();
-    }
+    StateMachineFree *sf = new StateMachineFree();
+    //*sf = *s->state;
+    sf->_state.push_back(true);
+    sf->_state.push_back(true);
+    sf->_state.push_back(true);
 
     /*
     config::Instance()->srand(time(NULL));
