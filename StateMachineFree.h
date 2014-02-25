@@ -14,6 +14,8 @@ class StateMachineFree
 public:
     StateMachineFree();
 
+    StateMachineFree(StateMachine* state);
+
     StateMachineFree & operator= (const StateMachine & one);
 
     /**
@@ -40,6 +42,9 @@ public:
      * @return если перевернуть одну частицу, возвращает ее номер, иначе 0
      */
     int randomize(int count=1);
+
+    std::vector<bool>::iterator begin();
+    std::vector<bool>::iterator end();
 };
 
 #endif // STATEMACHINEFREE_H

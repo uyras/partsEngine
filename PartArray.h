@@ -106,12 +106,12 @@ public:
     * Рассчитать поле взаимодействия для указанной частицы и записывает её в параметр Interaction
     * @param elem ссылка на элемент, над которым производить взаимодействие
     */
-    void calcInteraction(Part* elem);
+    void calcH(Part* elem);
 
     /**
     * рассчитывает поле взаимодействия для всех частиц в системе (каждой в параметрах прописывает поле взаимодействия)
     */
-    void calcInteraction();
+    void calcH();
 
     /**
     * Считать поле взаимодействия только для соседних 8 элементов
@@ -130,7 +130,7 @@ public:
     void calcEnergy1Fast();
 
 
-    double calcEnergy1FastIncremental(double initEnergy, StateMachine *s = 0); //state - новое состояние системы
+    double calcEnergy1FastIncremental(double initEnergy); //state - новое состояние системы
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
     double eIncrementalTemp; //энергия, нужна для инкремента. Используется только в 2-х функциях выше
 
@@ -144,7 +144,7 @@ public:
     /**
     * рассчитывает внутреннюю энергию во всей системе частиц (метод скалярного произведения H и E)
     */
-    void calcEnergy2();
+    double calcEnergy2();
 
     /**
     * выдает все парамеры частиц на экран
@@ -208,7 +208,8 @@ public:
 	bool setToGroundState();
 
 	//находит состояние минимума энергии системы и переводит её в это состояние методом монте-карло
-	bool setToMonteCarloGroundState(const double t = 0);
+    //steps - количество попыток
+    bool setToMonteCarloGroundState(const double t = 0, int steps=1000);
 
 	//выполняет 1 шаг монте-карло при t температуре (относительная единица)
 	//возвращает true если система изменилась и false если нет

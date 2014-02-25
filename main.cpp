@@ -13,28 +13,6 @@ using namespace std;
 
 int main(){
 
-
-    PartArray *s = new PartArray();
-    Part* p;
-
-    p = new Part();
-    p->m.x = p->m.y = 1;
-    s->insert(p);
-    p = new Part();
-    p->m.x = p->m.y = 2;
-    s->insert(p);
-    p = new Part();
-    p->m.x = p->m.y = 3;
-    s->insert(p);
-
-
-    StateMachineFree *sf = new StateMachineFree();
-    //*sf = *s->state;
-    sf->_state.push_back(true);
-    sf->_state.push_back(true);
-    sf->_state.push_back(true);
-
-    /*
     config::Instance()->srand(time(NULL));
     PartArray *sys;
     int trueCount = 0;
@@ -52,7 +30,7 @@ int main(){
         delete sys;
     }
     cout<<"result accuracy: "<<(double)trueCount/100.*100.<<"%"<<endl;
-    */
+
 
     cout<<"finish";
     return 0;

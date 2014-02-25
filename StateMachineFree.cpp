@@ -4,6 +4,10 @@ StateMachineFree::StateMachineFree()
 {
 }
 
+StateMachineFree::StateMachineFree(StateMachine* state){
+    *this = *state;
+}
+
 void StateMachineFree::draw(){
     std::vector<bool>::iterator iter;
     iter = this->_state.end();
@@ -23,7 +27,7 @@ bool StateMachineFree::next(){
     std::vector<bool>::iterator iter;
     iter = this->_state.begin();
 
-    while (iter!=this->_state.end()){
+    while (iter!=(this->_state.end()-1)){
         if (*iter==0){
             *iter=1;
             return true;
@@ -80,3 +84,13 @@ bool StateMachineFree::isInitial(){
     }
     return true;
 }
+
+std::vector<bool>::iterator StateMachineFree::begin(){
+    return this->_state.begin();
+}
+
+std::vector<bool>::iterator StateMachineFree::end(){
+    return this->_state.end();
+}
+
+

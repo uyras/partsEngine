@@ -13,7 +13,7 @@ Part::Part() :
     state(false)
 {
     //по умолчанию на частицу ничего не действует
-    this->interaction.x = this->interaction.y = this->interaction.z = 0;
+    this->h.x = this->h.y = this->h.z = 0;
     sector = 0; //по умолчанию, все частицы из сектора 0
 	this->volume = config::Instance()->partR; //по умолчанию радиус задается в конфигах
     this->e = 0;
@@ -53,7 +53,7 @@ Part* Part::copy(){
 
     temp->pos = this->pos;
     temp->m = this->m;
-    temp->interaction = this->interaction;
+    temp->h = this->h;
     temp->e = this->e;
     temp->eArray=this->eArray;
     temp->volume = this->volume;

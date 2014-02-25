@@ -240,7 +240,7 @@ void PartArray::shuffleM(){
     for (int i=0;i<this->count();i++){
         rotate = (double)config::Instance()->rand()/(double)config::Instance()->rand_max > 0.5;
         if (rotate)
-            this->state->rotate(i);
+            this->parts[i]->rotate();
     }
 }
 
@@ -344,25 +344,25 @@ Vect PartArray::calcM12(){
     return temp1;
 }
 
-void PartArray::calcInteraction(Part* elem) {
+void PartArray::calcH(Part* elem) {
     std::vector < Part* >::iterator iterator1;
-    elem->interaction.x = 0;
-    elem->interaction.y = 0;
-    elem->interaction.z = 0;
+    elem->h.x = 0;
+    elem->h.y = 0;
+    elem->h.z = 0;
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
         if (elem->pos.x != (*iterator1)->pos.x || elem->pos.y != (*iterator1)->pos.y || elem->pos.z != (*iterator1)->pos.z) { //не считать взаимодействие частицы на себя
-            elem->interaction += elem->interact(*iterator1);
+            elem->h += elem->interact(*iterator1);
         }
         ++iterator1;
     }
 }
 
-void PartArray::calcInteraction() {
+void PartArray::calcH() {
     std::vector < Part* >::iterator iterator2;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
-        this->calcInteraction(*iterator2);
+        this->calcH(*iterator2);
         iterator2++;
     }
 }
@@ -440,14 +440,8 @@ void PartArray::calcEnergy1Fast(){
 }
 
 
-double PartArray::calcEnergy1FastIncremental(double initEnergy, StateMachine* state){
+double PartArray::calcEnergy1FastIncremental(double initEnergy){
     vector<Part*>::iterator iter; //итератор обхода состояния
-    vector<Part*>::iterator part; //итератор частицы
-
-    //если не передано состояние, оперируем системным состоянием
-    if (!state){
-        state = new StateMachine(this);//this->state;
-    }
 
     std::vector<int> zeros; //хранит инфу на каких позициях нули
     //ищем нули
@@ -465,16 +459,15 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, StateMachine* st
     double E=initEnergy;
     std::vector<int>::iterator iter2;
     iter = state->begin();
-    part = this->parts.begin();
     while(iter != state->end()){
         if ( (*iter)->state == true){
             iter2 = zeros.begin();
             while (iter2!=zeros.end()){
-                E -=  ( 2. * (*part)->eArray.at(*iter2));
+                E -=  ( 2. * (*iter)->eArray.at(*iter2));
                 iter2++;
             }
         }
-        iter++; part++;
+        iter++;
     }
 
     return E;
@@ -524,16 +517,17 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
 }
 
-void PartArray::calcEnergy2() {
+double PartArray::calcEnergy2() {
     std::vector < Part* >::iterator iterator2;
+    double eTemp = 0;
     this->E2 = 0;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
-        (*iterator2)->e = (*iterator2)->interaction.scalar((*iterator2)->m);
-        this->E2 -= (*iterator2)->e;
+        this->E2 -= (*iterator2)->h.scalar((*iterator2)->m);
         iterator2++;
     }
     this->E2 *= 0.5;
+    return this->E2;
 }
 
 void PartArray::cout() {
@@ -548,9 +542,9 @@ void PartArray::cout() {
                 << (*iterator1)->m.x << "\t"
                 << (*iterator1)->m.y << "\t"
                 << (*iterator1)->m.z << "\t\t"
-                << (*iterator1)->interaction.x << "\t"
-                << (*iterator1)->interaction.y << "\t"
-                << (*iterator1)->interaction.z << "\t";
+                << (*iterator1)->h.x << "\t"
+                << (*iterator1)->h.y << "\t"
+                << (*iterator1)->h.z << "\t";
         ++iterator1;
     }
     std::cout << "E1 : " << this->E1 << "; E2 : " << this->E2 << std::endl;
@@ -572,7 +566,7 @@ std::vector<double> PartArray::getHVector() {
     std::vector < Part* >::iterator iterator1 = this->parts.begin();
 
     while (iterator1 != this->parts.end()) {
-        h.push_back((*iterator1)->interaction.length());
+        h.push_back((*iterator1)->h.length());
         ++iterator1;
     }
     return h;
@@ -583,7 +577,7 @@ std::vector<double> PartArray::getHZVector() {
     std::vector < Part* >::iterator iterator1 = this->parts.begin();
 
     while (iterator1 != this->parts.end()) {
-        h.push_back((*iterator1)->interaction.z);
+        h.push_back((*iterator1)->h.z);
         ++iterator1;
     }
     return h;
@@ -655,11 +649,11 @@ std::vector<double> PartArray::processStep() {
     std::vector<double> history;
     iter = this->parts.begin();
     while (iter != this->parts.end()) {
-        if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+        if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
             history.push_back(this->E2);
             //std::cout << "rotate with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
             (*iter)->m.rotate();
-            this->calcInteraction();
+            this->calcH();
             this->calcEnergy2();
             iter = this->parts.begin();
         } else {
@@ -682,7 +676,7 @@ std::vector<double> PartArray::processRandom() {
         //собираем все неустойчивые элементы в один массив
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0)
+            if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0)
                 unstable.push_back(*iter);
             iter++;
         }
@@ -692,7 +686,7 @@ std::vector<double> PartArray::processRandom() {
             rNum = config::Instance()->rand() % unstable.size(); //получаем случайный номер переворачиваемой частицы
             rElem = unstable.at(rNum);
             rElem->m.rotate();
-            this->calcInteraction();
+            this->calcH();
             //сохраняем новую энергию системы в историю
             this->calcEnergy2();
             history.push_back(this->E2);
@@ -714,13 +708,13 @@ std::vector<double> PartArray::processMaxH() {
         mElem = NULL; //чистим максимум
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+            if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
                 hasUnstable = true;
                 //на первом шаге цикла нужно просто присвоить максимуму значение, а на остальных уже сравнивать
                 if (mElem == NULL) {
                     mElem = *iter;
                 } else {
-                    if (mElem->interaction.length() < (*iter)->interaction.length())
+                    if (mElem->h.length() < (*iter)->h.length())
                         mElem = *iter;
                 }
             }
@@ -730,7 +724,7 @@ std::vector<double> PartArray::processMaxH() {
         //если найдена нестабильная частица - вращаем её
         if (hasUnstable) {
             mElem->m.rotate();
-            this->calcInteraction();
+            this->calcH();
             //сохраняем новую энергию системы в историю
             this->calcEnergy2();
             history.push_back(this->E2);
@@ -757,11 +751,11 @@ std::vector<double> PartArray::processGroupMaxH() {
         //step 1 - сначала находим максимальный магнитный момент системы
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+            if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
                 unstable.push_back(*iter);
                 hasUnstable = true;
-                if ((int) (*iter)->interaction.length() > maxH)
-                    maxH = (int) (*iter)->interaction.length();
+                if ((int) (*iter)->h.length() > maxH)
+                    maxH = (int) (*iter)->h.length();
             }
             iter++;
         }
@@ -769,7 +763,7 @@ std::vector<double> PartArray::processGroupMaxH() {
         //step 2 - переворачиваем ТОЛЬКО частицы с максимальной нестабильностью
         iter2 = unstable.begin();
         while (iter2 != unstable.end()) {
-            if ((int) (*iter2)->interaction.length() == maxH) {
+            if ((int) (*iter2)->h.length() == maxH) {
                 (*iter2)->m.rotate();
                 rSize++;
             }
@@ -779,7 +773,7 @@ std::vector<double> PartArray::processGroupMaxH() {
         //step 3 - если чтото было перевернуто - обновляем поля взаимодействия
         if (hasUnstable) {
             std::cout << "rotate group from " << rSize << " elements" << std::endl;
-            this->calcInteraction();
+            this->calcH();
             //сохраняем новую энергию системы в историю
             this->calcEnergy2();
             history.push_back(this->E2);
@@ -797,7 +791,7 @@ std::vector<double> PartArray::processGroupStep() {
     bool hasUnstable = true; //есть нестабильные частицы или нет
     while (hasUnstable) {
 
-        this->calcInteraction();
+        this->calcH();
         //сохраняем новую энергию системы в историю
         this->calcEnergy2();
         history.push_back(this->E2);
@@ -810,7 +804,7 @@ std::vector<double> PartArray::processGroupStep() {
         //step 1 - сначала находим все неустойчивые элементы
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
+            if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
                 unstable.push_back(*iter);
                 hasUnstable = true;
             }
@@ -848,8 +842,8 @@ std::vector<double> PartArray::processHEffective() {
         //step 1 - сначала находим средний магнитный момент всех частиц
         iter = this->parts.begin();
         while (iter != this->parts.end()) {
-            if ((*iter)->interaction.length() > config::Instance()->hc && (*iter)->interaction.scalar((*iter)->m) < 0) {
-                averH = (averH * averCount + (*iter)->interaction.length()) / (double) (averCount + 1);
+            if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
+                averH = (averH * averCount + (*iter)->h.length()) / (double) (averCount + 1);
                 averCount++;
                 unstable.push_back(*iter);
                 hasUnstable = true;
@@ -860,7 +854,7 @@ std::vector<double> PartArray::processHEffective() {
         //step 2 - переворачиваем ТОЛЬКО частицы у которых энергия выше или равна среднему
         iter2 = unstable.begin();
         while (iter2 != unstable.end()) {
-            if ((int) (*iter2)->interaction.length() >= (int) averH) {
+            if ((int) (*iter2)->h.length() >= (int) averH) {
                 (*iter2)->m.rotate();
                 rSize++;
             }
@@ -870,7 +864,7 @@ std::vector<double> PartArray::processHEffective() {
         //step 3 - если чтото было перевернуто - обновляем поля взаимодействия
         if (hasUnstable) {
             std::cout << "rotate group from " << rSize << " elements" << std::endl;
-            this->calcInteraction();
+            this->calcH();
             //сохраняем новую энергию системы в историю
             this->calcEnergy2();
             history.push_back(this->E2);
@@ -972,8 +966,8 @@ void PartArray::clear(){
         delete (*iter); //удаляем все что по есть по ссылкам на частицы
         iter++;
     }
+    this->state->_state.clear();
     this->parts.clear();
-    delete this->state;
 }
 
 
@@ -1011,13 +1005,13 @@ void PartArray::checkFM(char* file, double c){
             iter2++;
         }
 
-        this->calcInteraction(*iter1);
+        this->calcH(*iter1);
 
         f
                 << (double)Nhgz/(double)total << "\t"
                 << (double)Nhlz/(double)total << "\t"
                 << (double)Nhez/(double)total << "\t"
-                << (*iter1)->interaction.length() << "\t"
+                << (*iter1)->h.length() << "\t"
                 << c <<endl;
         if (i%1000==0 || i<1000)
             std::cout<<i<<" particle"<<std::endl;
@@ -1300,30 +1294,29 @@ double PartArray::calcJ12(){
 
 
 bool PartArray::setToGroundState(){
-    StateMachine minstate(this), temp(this);
-    //this->state->reset();
-    double initE = this->calcEnergy1FastIncrementalFirst();
+    StateMachineFree minstate;
+    this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
 
-    //temp = *this->state;
+    double initE = this->calcEnergy1FastIncrementalFirst();
 
     double eMin, eTemp;
 
     bool first = true;
     do {
-        eTemp = this->calcEnergy1FastIncremental(initE,&temp);
+        eTemp = this->calcEnergy1FastIncremental(initE);
         if (first){
             eMin = eTemp;
-            minstate = temp;
+            minstate = *this->state;
             first = false;
         }
         else
             if (eTemp < eMin) {
                 eMin = eTemp;
-                minstate = temp;
+                minstate = *this->state;
             }
-    } while (temp.next());
+    } while (this->state->next());
 
-    //*(this->state) = minstate;
+    *(this->state) = minstate;
 
     return true;
 }
@@ -1362,7 +1355,7 @@ bool PartArray::processMonteCarloStep(const double t){
     if (de>0 || (t>0 && randNum <= p)){
         return true;
     } else {
-        this->state->rotate(num);
+        this->parts[num]->rotate();
         this->E1 = Eold;
         return false;
     }
@@ -1404,10 +1397,9 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
     //создали набор-шаблон частиц
     vector<PartArray*> systems;
 
-    //создали набор температур и энергий
+    //создали набор температур
     vector <double> t;
 
-    //итераторы
     PartArray *temp;
     double tempInterval = 0;
 
@@ -1424,29 +1416,27 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 
 
     //magic
-    bool mcResilt, solved=false;
-    int i, eRepeatNum=0, steps=0;
+    bool mcResult, //результат работы монте-карло шага (применены ли изменения или нет)
+            solved=false; //флаг, решено ли уравнение
+    int i,
+            eRepeatNum=0, //количество повторений энергии
+            steps=0; //количество шагов
 
     //данные о минимуме
-    PartArray* minSystem = NULL;
+    StateMachineFree minState;
     double eMin=9999;
 
 
-    vector<PartArray*>::iterator
-            begin = systems.begin(),
-            end = systems.end(),
-            iter, iter2;
+    vector<PartArray*>::iterator iter, iter2;
 
     do{
-
-
         //монтекарлим 1 раз все системы
-        iter=begin; i=0;
-        while (iter!=end){
+        iter=systems.begin(); i=0;
+        while (iter!=systems.end()){
             temp = *iter;
-            mcResilt = temp->processMonteCarloStep(t[i]);
+            mcResult = temp->processMonteCarloStep(t[i]);
             if (i==0){
-                if (!mcResilt)
+                if (!mcResult)
                     eRepeatNum++;
                 else
                     eRepeatNum = 0;
@@ -1457,9 +1447,9 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 
 
         //производим обмен системы, если выпал случай
-        iter=iter2=begin; i=0;
+        iter=iter2=systems.begin(); i=0;
         iter2++;
-        while (iter2!=end){
+        while (iter2!=systems.end()){
             double randNum = (double)config::Instance()->rand()/(double)config::Instance()->rand_max;
             double de = ((*iter)->E1) - ((*iter2)->E1);
             double p = std::min(1.,exp(de/(0.75)));
@@ -1476,10 +1466,8 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 
         //случай когда найден минимум
         if (systems[0]->E1<=eMin){
-            if (minSystem!=NULL)
-                delete minSystem;
-            minSystem = systems[0]->copy();
-            eMin = minSystem->E1;
+            minState = *(systems[0]->state);
+            eMin = systems[0]->E1;
             //std::cout << "E=" << minSystem->E1 <<endl;
         }
 
@@ -1494,8 +1482,8 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 
 
     //под конец чистим память
-    iter=begin;
-    while (iter!=end){
+    iter=systems.begin();
+    while (iter!=systems.end()){
         temp = *iter;
         delete temp;
         iter++;
@@ -1503,11 +1491,7 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
     systems.clear();
     t.clear();
 
-    this->parts = minSystem->parts;
-    this->state = minSystem->state;
-
-    if (minSystem!=NULL)
-        delete minSystem;
+    *this->state = minState;
 
     return true;
 }
@@ -1579,8 +1563,8 @@ void PartArray::dropAdaptive(int count){
         if (config::Instance()->U2D) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
 
         if (partCount>0){
-            this->calcInteraction(temp);
-            temp->m = temp->interaction;
+            this->calcH(temp);
+            temp->m = temp->h;
             temp->m.setUnit();
         } else {
             temp->m.x = config::Instance()->m * cos(longitude)*sqrt(1-lattitude*lattitude);

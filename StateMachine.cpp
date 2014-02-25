@@ -15,7 +15,7 @@ bool StateMachine::next(){
 
     iter = this->_state.begin();
 
-    while (iter!=this->_state.end()){
+    while (iter!=(this->_state.end()-1)){// -1 тут чтобы перебирать только половину состояний
         (*iter)->rotate();
         if ((*iter)->state==1){
             return true;
@@ -85,8 +85,9 @@ StateMachine & StateMachine::operator= (const StateMachineFree & one){
     if (one._state.size()>=this->_state.size()) {
         vector<bool>::const_iterator iter1 = one._state.begin();
         vector<Part*>::iterator iter2 = this->_state.begin();
-        while(iter1!=one._state.end()){
-            (*iter2)->state = *iter1;
+        while(iter2!=this->_state.end()){
+            if ((*iter2)->state != *iter1)
+                (*iter2)->rotate();
             iter1++; iter2++;
         }
     }
