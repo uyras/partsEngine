@@ -519,7 +519,6 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
 
 double PartArray::calcEnergy2() {
     std::vector < Part* >::iterator iterator2;
-    double eTemp = 0;
     this->E2 = 0;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
@@ -648,13 +647,14 @@ std::vector<double> PartArray::processStep() {
     std::vector<Part*>::iterator iter;
     std::vector<double> history;
     iter = this->parts.begin();
+    this->calcH();
+    history.push_back(this->calcEnergy2());
     while (iter != this->parts.end()) {
         if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
-            history.push_back(this->E2);
             //std::cout << "rotate with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
             (*iter)->m.rotate();
             this->calcH();
-            this->calcEnergy2();
+            history.push_back(this->calcEnergy2());
             iter = this->parts.begin();
         } else {
             //std::cout << "normal with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
@@ -664,44 +664,11 @@ std::vector<double> PartArray::processStep() {
     return history;
 }
 
-std::vector<double> PartArray::processRandom() {
-    std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
-    Part* rElem; //тут будет храниться случайная частица
-    std::vector<Part*> unstable; //хранит нестабильные частицы
-    std::vector<double> history; //история переворота
-    int rNum = 0;
-    bool hasUnstable = true;
-    while (hasUnstable) {
-        unstable.clear(); //чистим массив нестабильных частиц
-        //собираем все неустойчивые элементы в один массив
-        iter = this->parts.begin();
-        while (iter != this->parts.end()) {
-            if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0)
-                unstable.push_back(*iter);
-            iter++;
-        }
-        //если найдены частицы, выбираем одну из них рэндомно и переворачиваем
-        if (!unstable.empty()) {
-            hasUnstable = true;
-            rNum = config::Instance()->rand() % unstable.size(); //получаем случайный номер переворачиваемой частицы
-            rElem = unstable.at(rNum);
-            rElem->m.rotate();
-            this->calcH();
-            //сохраняем новую энергию системы в историю
-            this->calcEnergy2();
-            history.push_back(this->E2);
-            //std::cout << "rotate with x=" << rElem->pos.x << "; z=" << rElem->pos.z << std::endl;
-        } else {
-            hasUnstable = false;
-        }
-    }
-    return history;
-}
-
 std::vector<double> PartArray::processMaxH() {
     std::vector<double> history; //история переворота
     std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
     Part* mElem = NULL; //тут будет храниться максимальная частица. по умолчанию максимальная - первая
+    this->calcH();
     bool hasUnstable = true;
     while (hasUnstable) {
         hasUnstable = false;
@@ -735,6 +702,7 @@ std::vector<double> PartArray::processMaxH() {
 }
 
 std::vector<double> PartArray::processGroupMaxH() {
+    this->calcH();
     std::vector<double> history; //история переворота
     std::vector<Part*> unstable; //все нестабильные частицы здесь при просчете
     std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
@@ -772,18 +740,22 @@ std::vector<double> PartArray::processGroupMaxH() {
 
         //step 3 - если чтото было перевернуто - обновляем поля взаимодействия
         if (hasUnstable) {
-            std::cout << "rotate group from " << rSize << " elements" << std::endl;
+            //std::cout << "rotate group from " << rSize << " elements" << std::endl;
             this->calcH();
             //сохраняем новую энергию системы в историю
             this->calcEnergy2();
             history.push_back(this->E2);
         }
+
+        if (history.size()>10000)
+            break;
     }
 
     return history;
 }
 
 std::vector<double> PartArray::processGroupStep() {
+    this->calcH();
     std::vector<double> history; //история переворота
     std::vector<Part*> unstable; //все нестабильные частицы здесь при просчете
     std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
@@ -796,7 +768,7 @@ std::vector<double> PartArray::processGroupStep() {
         this->calcEnergy2();
         history.push_back(this->E2);
         //draw();
-        std::cout << this->E2 << endl;
+        //std::cout << this->E2 << endl;
 
         hasUnstable = false;
         unstable.clear(); //чистим набор нестабильных частиц
@@ -811,12 +783,15 @@ std::vector<double> PartArray::processGroupStep() {
             iter++;
         }
 
-        //step 2 - переворачиваем ТОЛЬКО частицы с максимальной нестабильностью
+        //step 2 - переворачиваем все настабильные частицы
         iter2 = unstable.begin();
         while (iter2 != unstable.end()) {
             (*iter2)->m.rotate();
             iter2++;
         }
+
+        if (history.size()>10000)
+            break;
     }
 
     return history;
@@ -824,6 +799,7 @@ std::vector<double> PartArray::processGroupStep() {
 
 
 std::vector<double> PartArray::processHEffective() {
+    this->calcH();
     std::vector<double> history; //история переворота
     std::vector<Part*> unstable; //частицы, подлежащие перевороту при текущей итерации
     std::vector<Part*>::iterator iter; //итератор для перебора массива частиц
@@ -863,12 +839,15 @@ std::vector<double> PartArray::processHEffective() {
 
         //step 3 - если чтото было перевернуто - обновляем поля взаимодействия
         if (hasUnstable) {
-            std::cout << "rotate group from " << rSize << " elements" << std::endl;
+            //std::cout << "rotate group from " << rSize << " elements" << std::endl;
             this->calcH();
             //сохраняем новую энергию системы в историю
             this->calcEnergy2();
             history.push_back(this->E2);
         }
+
+        if (history.size()>10000)
+            break;
     }
 
     return history;
@@ -1321,23 +1300,15 @@ bool PartArray::setToGroundState(){
     return true;
 }
 
-bool PartArray::setToMonteCarloGroundState(const double t){
-    //if (this->count() > 32)
-    //return false;
-    ofstream f("MC GS finding.txt");
-
-    int tryingCount=0;
+bool PartArray::setToMonteCarloGroundState(const double t, int steps){
+    int tryingCount=0; //количество попыток переворота
 
     do {
-        f << this->E1 << endl;
         if (this->processMonteCarloStep(t))
             tryingCount = 0;
         else
             tryingCount++;
-    } while (tryingCount<1000);
-
-
-    f.close();
+    } while (tryingCount<steps);
     return true;
 }
 
