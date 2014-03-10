@@ -157,7 +157,7 @@ void PartArray::dropRandom(double maxDestiny) {
 }
 
 void PartArray::dropRandom(int count) {
-    double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
+    //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
 
@@ -660,6 +660,8 @@ std::vector<double> PartArray::processStep() {
             //std::cout << "normal with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
             iter++;
         }
+        if (history.size()>10000)
+            break;
     }
     return history;
 }
@@ -697,6 +699,8 @@ std::vector<double> PartArray::processMaxH() {
             history.push_back(this->E2);
             //std::cout << "rotate with x=" << mElem->pos.x << "; z=" << mElem->pos.z << std::endl;
         }
+        if (history.size()>10000)
+            break;
     }
     return history;
 }
@@ -1271,7 +1275,6 @@ double PartArray::calcJ12(){
     return J1/J2;
 }
 
-
 bool PartArray::setToGroundState(){
     StateMachineFree minstate;
     this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
@@ -1299,6 +1302,35 @@ bool PartArray::setToGroundState(){
 
     return true;
 }
+
+bool PartArray::setToMaximalState(){
+    StateMachineFree maxstate;
+    this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
+
+    double initE = this->calcEnergy1FastIncrementalFirst();
+
+    double eMax, eTemp;
+
+    bool first = true;
+    do {
+        eTemp = this->calcEnergy1FastIncremental(initE);
+        if (first){
+            eMax = eTemp;
+            maxstate = *this->state;
+            first = false;
+        }
+        else
+            if (eMax < eTemp) {
+                eMax = eTemp;
+                maxstate = *this->state;
+            }
+    } while (this->state->next());
+
+    *(this->state) = maxstate;
+
+    return true;
+}
+
 
 bool PartArray::setToMonteCarloGroundState(const double t, int steps){
     int tryingCount=0; //количество попыток переворота
@@ -1493,7 +1525,7 @@ double PartArray::calcEnergy1FastIncrementalTemp(unsigned long long int state){
 }
 
 void PartArray::dropAdaptive(int count){
-    double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
+    //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
 
