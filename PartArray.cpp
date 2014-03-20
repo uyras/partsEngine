@@ -210,7 +210,7 @@ void PartArray::dropRandom(int count) {
 
 void PartArray::dropChain(double distance){
     double rad = config::Instance()->partR;
-    if (distance==-1)
+    if (distance < 2.*rad)
         distance = 2.*rad;
     double x = rad;
     short int up = 1;
