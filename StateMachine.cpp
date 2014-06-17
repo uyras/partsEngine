@@ -96,6 +96,36 @@ StateMachine & StateMachine::operator= (const StateMachineFree & one){
     return *this;
 }
 
+bool StateMachine::operator==(const StateMachineFree &one)
+{
+    if (one._state.size()!=this->_state.size()) return false;
+
+    vector<bool>::const_iterator iter1 = one._state.begin();
+    vector<Part*>::iterator iter2 = this->_state.begin();
+    while(iter2!=this->_state.end()){
+        if ((*iter2)->state != *iter1)
+            return false;
+        iter1++; iter2++;
+    }
+
+    return true;
+}
+
+bool StateMachine::operator==(const StateMachine &one)
+{
+    if (one._state.size()!=this->_state.size()) return false;
+
+    vector<Part*>::const_iterator iter1 = one._state.begin();
+    vector<Part*>::iterator iter2 = this->_state.begin();
+    while(iter2!=this->_state.end()){
+        if ((*iter2)->state != (*iter1)->state)
+            return false;
+        iter1++; iter2++;
+    }
+
+    return true;
+}
+
 bool StateMachine::isInitial(){
     vector<Part*>::iterator iter = this->_state.begin();
     while (iter!=this->_state.end()){

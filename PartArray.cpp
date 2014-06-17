@@ -215,9 +215,9 @@ void PartArray::dropChain(double distance){
     double x = rad;
     short int up = 1;
     Part* temp;
-    while (x < this->size.x-rad) {
+    while (x <= this->size.x-rad) {
         double y = rad;
-        while (y < this->size.y-rad){
+        while (y <= this->size.y-rad){
             temp = new Part();
             temp->m.y = config::Instance()->m * up;
             temp->m.x = temp->m.z = 0;

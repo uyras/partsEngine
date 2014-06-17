@@ -44,6 +44,8 @@ public:
     bool operator++();
 
     StateMachine & operator= (const StateMachineFree & one);
+    bool operator==(const StateMachineFree & one);
+    bool operator==(const StateMachine & one);
 
     void draw();
 

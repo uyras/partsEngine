@@ -53,6 +53,36 @@ StateMachineFree & StateMachineFree::operator= (const StateMachine & one){
     return *this;
 }
 
+bool StateMachineFree::operator==(const StateMachineFree &one)
+{
+    if (one._state.size()!=this->_state.size()) return false;
+
+    vector<bool>::const_iterator iter1 = one._state.begin();
+    vector<bool>::iterator iter2 = this->_state.begin();
+    while(iter2!=this->_state.end()){
+        if ((*iter2) != (*iter1))
+            return false;
+        iter1++; iter2++;
+    }
+
+    return true;
+}
+
+bool StateMachineFree::operator==(const StateMachine &one)
+{
+    if (one._state.size()!=this->_state.size()) return false;
+
+    vector<Part*>::const_iterator iter1 = one._state.begin();
+    vector<bool>::iterator iter2 = this->_state.begin();
+    while(iter2!=this->_state.end()){
+        if ((*iter1)->state != *iter2)
+            return false;
+        iter1++; iter2++;
+    }
+
+    return true;
+}
+
 void StateMachineFree::reset(){
     vector<bool>::iterator iter = this->_state.begin();
     while(iter!=this->_state.end()){

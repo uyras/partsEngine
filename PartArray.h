@@ -20,7 +20,7 @@ public:
     double E1, E2;
 
     PartArray();
-    ~PartArray();
+    virtual ~PartArray();
 
     /**
     * Создает пустой массив частиц с подложкой размером X,Y,Z (в нанометрах)
@@ -59,17 +59,17 @@ public:
     /**
     * Бросает частицы на случайное место в пространстве с заданной частотой
     */
-    void dropRandom(double maxDestiny);
+    virtual void dropRandom(double maxDestiny);
 
     //заполняет объет в виде квадратной решетки
     //distance - расстояние между двумя частицами
-    void dropLattice(double distance=0.);
+    virtual void dropLattice(double distance=0.);
 
     /**
      * @brief dropChain Бросаем частицы в виде цепочки. Это состояние и будет Ground State
      * @param distance Расстояние между частицами системы. По умолчанию частицы стоят плотно друг к другу
      */
-    void dropChain(double distance = -1.);
+    virtual void dropChain(double distance = -1.);
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
@@ -81,7 +81,7 @@ public:
     /**
     * Бросает частицы на случайное место в пространстве с заданной частотой
     */
-    void dropRandom(int count);
+    virtual void dropRandom(int count);
 
     /**
      * @brief calcM1 считает общий магнитный момент системы

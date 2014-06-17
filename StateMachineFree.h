@@ -18,6 +18,9 @@ public:
 
     StateMachineFree & operator= (const StateMachine & one);
 
+    bool operator==(const StateMachineFree & one);
+    bool operator==(const StateMachine & one);
+
     /**
      * @brief isInitial Проверяет, находится ли система в начальном состоянии
      * @return true если поворот всех спинов - 0.

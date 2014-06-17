@@ -14,22 +14,13 @@ using namespace std;
 int main(){
 
     config::Instance()->srand(time(NULL));
-    PartArray *sys;
-    int trueCount = 0;
-    for (int i=0;i<100;i++){
-        sys = new PartArray(10,10,1);
-
-        sys->dropChain(2);
-        sys->shuffleM();
-
-        sys->setToPTGroundState(5,1000);
-
-        cout<<sys->calcEnergy1()<<endl;
-        if (fabs(sys->calcEnergy1()+6.67773)<0.00001)
-            trueCount++;
-        delete sys;
-    }
-    cout<<"result accuracy: "<<(double)trueCount/100.*100.<<"%"<<endl;
+    PartArray *sys1,*sys2;
+    sys1 = new PartArray(10,10,1);
+    sys1->dropChain(2);
+    StateMachineFree *state2 = new StateMachineFree(sys1->state);
+    StateMachineFree *state3 = new StateMachineFree(sys1->state);
+    //state2->randomize();
+    cout<<(*state3==*state2);
 
 
     cout<<"finish";
