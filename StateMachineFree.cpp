@@ -10,14 +10,14 @@ StateMachineFree::StateMachineFree(StateMachine* state){
 
 void StateMachineFree::draw(){
     std::vector<bool>::iterator iter;
-    iter = this->_state.end();
-    while (iter!=this->_state.begin()){
-        iter--;
+    iter = this->_state.begin();
+    while (iter!=this->_state.end()){
         if (*iter==0){
             std::cout<<"0";
         } else {
             std::cout<<"1";
         }
+        iter++;
     }
     std::cout<<std::endl;
 }

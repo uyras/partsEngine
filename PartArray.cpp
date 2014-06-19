@@ -540,10 +540,11 @@ void PartArray::cout() {
                 << (*iterator1)->pos.z << "\t"
                 << (*iterator1)->m.x << "\t"
                 << (*iterator1)->m.y << "\t"
-                << (*iterator1)->m.z << "\t\t"
+                << (*iterator1)->m.z << "\t\t"/*
                 << (*iterator1)->h.x << "\t"
                 << (*iterator1)->h.y << "\t"
-                << (*iterator1)->h.z << "\t";
+                << (*iterator1)->h.z << "\t"*/
+                << std::endl;
         ++iterator1;
     }
     std::cout << "E1 : " << this->E1 << "; E2 : " << this->E2 << std::endl;

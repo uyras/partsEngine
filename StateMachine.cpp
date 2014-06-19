@@ -38,14 +38,14 @@ void StateMachine::setSystem(PartArray* system){
 
 void StateMachine::draw(){
     std::vector<Part*>::iterator iter;
-    iter = this->_state.end();
-    while (iter!=this->_state.begin()){
-        iter--;
+    iter = this->_state.begin();
+    while (iter!=this->_state.end()){
         if ((*iter)->state==0){
             std::cout<<"0";
         } else {
             std::cout<<"1";
         }
+        iter++;
     }
     std::cout<<std::endl;
 }

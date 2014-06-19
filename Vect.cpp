@@ -102,7 +102,7 @@ Vect& Vect::operator+=(const Vect& a) {
 	this->x += a.x;
 	this->y += a.y;
 	this->z += a.z;
-	return *this;
+    return *this;
 }
 
 Vect& Vect::operator +(const Vect& a){
