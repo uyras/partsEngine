@@ -12,16 +12,14 @@
 using namespace std;
 
 int main(){
+    config::Instance()->set3D();
 
     config::Instance()->srand(time(NULL));
     PartArray *sys1,*sys2;
-    sys1 = new PartArray(10,10,1);
-    sys1->dropChain(2);
-    StateMachineFree *state2 = new StateMachineFree(sys1->state);
-    StateMachineFree *state3 = new StateMachineFree(sys1->state);
-    //state2->randomize();
-    cout<<(*state3==*state2);
-
+    sys1 = new PartArray(10,10,10,.3);
+    sys1->savePVPython("2.py");
+    //sys1->setMAllUp();
+    //sys1->savePVPython("2.py");
 
     cout<<"finish";
     return 0;

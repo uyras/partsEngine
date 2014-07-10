@@ -153,6 +153,8 @@ public:
 
 	void save(char* file, bool showNotifications = false);
 
+    void savePVPython(char* file="data.py");
+
 	void load(char* file, bool showNotifications = false);
 
     //чистим массив частиц

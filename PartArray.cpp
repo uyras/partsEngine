@@ -178,8 +178,7 @@ void PartArray::dropRandom(int count) {
 
             temp->pos.x = temp->pos.x / 100 + config::Instance()->partR;
             temp->pos.y = temp->pos.y / 100 + config::Instance()->partR;
-            if (config::Instance()->U2D)
-                temp->pos.z = temp->pos.z / 100 + config::Instance()->partR;
+            temp->pos.z = temp->pos.z / 100 + config::Instance()->partR;
 
             //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
             iterator1 = this->parts.begin();
@@ -890,6 +889,46 @@ void PartArray::save(char* file, bool showNotifications) {
     if (showNotifications)
         std::cout<<"save "<<file<<" file complete"<<endl;
 
+}
+
+void PartArray::savePVPython(char *file)
+{
+    //Vect delta(size.x/2.,size.y/2.,size.z/2.);
+    Vect delta(0.,0.,0.);
+    std::ofstream f(file);
+    f<<"try: paraview.simple"<<endl<<
+       "except: from paraview.simple import *"<<endl<<
+       "paraview.simple._DisableFirstRenderCameraReset()"<<endl;
+    f<<"spheres = ["<<endl;
+
+    vector<Part*>::iterator iter = this->parts.begin();
+    while (iter != this->parts.end()) {
+        f << "\t";
+        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->volume<<", ";
+        f<<(*iter)->m.x-delta.x<<", "<<(*iter)->m.y-delta.y<<", "<<(*iter)->m.z-delta.z<<"],"<<endl;
+        iter++;
+    }
+    f<<"\t]"<<endl;
+    f<<"i=0"<<endl;
+    f<<"for [x,y,z,r,ax,ay,az] in spheres:"<<endl;
+    f<<"\tprint(str(i)+\" of \"+str(len(spheres)))"<<endl;
+    f<<"\tSphere( Radius=r, Center=[x, y, z], ThetaResolution=8, PhiResolution=8 )"<<endl;
+    f<<"\tShow()"<<endl;
+    f<<"\tLine( Point1=[x, y, z], Point2=[x+ax, y+ay, z+az], Resolution=1 )"<<endl;
+    f<<"\tShow()"<<endl;
+    f<<"\ti+=1"<<endl;
+    f<<endl;
+    f<<"SetActiveSource(Box( guiName=\"Box1\", XLength="<<size.x<<", YLength="<<size.y<<", ZLength="<<size.z<<
+       ", Center=["<<size.x/2.-delta.x<<", "<<size.y/2.-delta.y<<", "<<size.z/2.-delta.z<<"],  ))"<<endl;
+    f<<"DataRepresentation12 = Show()"<<endl;
+    f<<"DataRepresentation12.EdgeColor = [0.0, 0.0, 0.5]"<<endl;
+    f<<"DataRepresentation12.SelectionPointFieldDataArrayName = 'Normals'"<<endl;
+    f<<"DataRepresentation12.Representation = 'Wireframe'"<<endl;
+    f<<"DataRepresentation12.ScaleFactor = 0.1"<<endl;
+    f<<"DataRepresentation12.CubeAxesVisibility = 1"<<endl;
+    f<<"Render()"<<endl;
+
+    f.close();
 }
 
 void PartArray::load(char* file,bool showNotifications) {
