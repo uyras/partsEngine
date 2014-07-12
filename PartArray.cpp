@@ -211,25 +211,52 @@ void PartArray::dropChain(double distance){
     double rad = config::Instance()->partR;
     if (distance < 2.*rad)
         distance = 2.*rad;
-    double x = rad;
-    short int up = 1;
-    Part* temp;
-    while (x <= this->size.x-rad) {
-        double y = rad;
-        while (y <= this->size.y-rad){
-            temp = new Part();
-            temp->m.y = config::Instance()->m * up;
-            temp->m.x = temp->m.z = 0;
+    if (config::Instance()->U2D){
+        short int up = 1;
+        Part* temp;
+        double x = rad;
+        while (x <= this->size.x-rad) {
+            double y = rad;
+            while (y <= this->size.y-rad){
+                temp = new Part();
+                temp->m.y = config::Instance()->m * up;
+                temp->m.x = temp->m.z = 0;
 
-            temp->pos.x = x;
-            temp->pos.y = y;
-            temp->pos.z = 0;
+                temp->pos.x = x;
+                temp->pos.y = y;
+                temp->pos.z = 0;
 
-            y+=distance;
-            this->insert(temp);
+                y+=distance;
+                this->insert(temp);
+            }
+            up *= -1;
+            x+=distance;
         }
-        up *= -1;
-        x+=distance;
+    } else {
+        short int up = 1;
+        Part* temp;
+        double x = rad;
+        while (x <= this->size.x-rad) {
+            double y = rad;
+            while (y <= this->size.y-rad){
+                double z = rad;
+                while (z <= this->size.z-rad){
+                    temp = new Part();
+                    temp->m.y = config::Instance()->m * up;
+                    temp->m.x = temp->m.z = 0;
+
+                    temp->pos.x = x;
+                    temp->pos.y = y;
+                    temp->pos.z = z;
+
+                    z+=distance;
+                    this->insert(temp);
+                }
+                y+=distance;
+            }
+            up *= -1;
+            x+=distance;
+        }
     }
 }
 
@@ -891,7 +918,7 @@ void PartArray::save(char* file, bool showNotifications) {
 
 }
 
-void PartArray::savePVPython(char *file)
+void PartArray::savePVPython(char *file,int thteta, int phi)
 {
     //Vect delta(size.x/2.,size.y/2.,size.z/2.);
     Vect delta(0.,0.,0.);
@@ -912,7 +939,7 @@ void PartArray::savePVPython(char *file)
     f<<"i=0"<<endl;
     f<<"for [x,y,z,r,ax,ay,az] in spheres:"<<endl;
     f<<"\tprint(str(i)+\" of \"+str(len(spheres)))"<<endl;
-    f<<"\tSphere( Radius=r, Center=[x, y, z], ThetaResolution=8, PhiResolution=8 )"<<endl;
+    f<<"\tSphere( Radius=r, Center=[x, y, z], ThetaResolution="<<thteta<<", PhiResolution="<<phi<<" )"<<endl;
     f<<"\tShow()"<<endl;
     f<<"\tLine( Point1=[x, y, z], Point2=[x+ax, y+ay, z+az], Resolution=1 )"<<endl;
     f<<"\tShow()"<<endl;

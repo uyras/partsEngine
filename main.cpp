@@ -15,8 +15,9 @@ int main(){
     config::Instance()->set3D();
 
     config::Instance()->srand(time(NULL));
-    PartArray *sys1,*sys2;
-    sys1 = new PartArray(10,10,10,.3);
+    PartArray *sys1;
+    sys1 = new PartArray(3,3,3);
+    sys1->dropChain(2);
     sys1->savePVPython("2.py");
     //sys1->setMAllUp();
     //sys1->savePVPython("2.py");

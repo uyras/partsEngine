@@ -67,7 +67,7 @@ public:
 
     /**
      * @brief dropChain Бросаем частицы в виде цепочки. Это состояние и будет Ground State
-     * @param distance Расстояние между частицами системы. По умолчанию частицы стоят плотно друг к другу
+     * @param distance Расстояние между центрами частиц системы. По умолчанию частицы стоят плотно друг к другу
      */
     virtual void dropChain(double distance = -1.);
 
@@ -153,7 +153,13 @@ public:
 
 	void save(char* file, bool showNotifications = false);
 
-    void savePVPython(char* file="data.py");
+    /**
+     * @brief savePVPython Сохраняет систему в скрипте ParaView
+     * @param file Имя скрипта
+     * @param thteta Количество полигонов по горизонтали
+     * @param phi Количество полигонов по вертикали
+     */
+    void savePVPython(char* file="data.py", int thteta=8, int phi=8);
 
 	void load(char* file, bool showNotifications = false);
 
