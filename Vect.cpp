@@ -31,7 +31,13 @@ void Vect::setUnit(){
 	this->x /= length;
 	this->y /= length;
 	if (!config::Instance()->U2D)
-		this->z /= length;
+        this->z /= length;
+}
+
+Vect Vect::normalize()
+{
+    double length = this->length();
+    return Vect(this->x / length, this->y / length, this->z / length);
 }
 
 
@@ -90,28 +96,76 @@ void Vect::rotate() {
 	this->z *= -1;
 }
 
-Vect& Vect::operator=(const Vect& a) {
+Vect Vect::operator=(const Vect& a) {
 	this->x = a.x;
 	this->y = a.y;
 	this->z = a.z;
 	Vect res(this->x,this->y,this->z);
-	return res;
+    return Vect(this->x,this->y,this->z);;
 }
 
-Vect& Vect::operator+=(const Vect& a) {
+Vect Vect::operator+=(const Vect& a) {
 	this->x += a.x;
 	this->y += a.y;
 	this->z += a.z;
     return *this;
 }
 
-Vect& Vect::operator +(const Vect& a){
+Vect Vect::operator +(const Vect& a){
 	Vect res;
 	res.x = this->x+a.x;
 	res.y = this->y+a.y;
 	res.z = this->z+a.z;
 
-	return res;
+    return res;
+}
+
+Vect Vect::operator*(const double num)
+{
+    return Vect(
+                this->x*num,
+                this->y*num,
+                this->z*num
+                );
+}
+
+Vect Vect::operator*=(const double num)
+{
+    this->x*=num;
+    this->y*=num;
+    this->z*=num;
+    return *this;
+}
+
+Vect Vect::operator/(const double num)
+{
+    return Vect(
+                this->x/num,
+                this->y/num,
+                this->z/num
+                );
+}
+
+Vect Vect::operator/=(const double num)
+{
+    this->x/=num;
+    this->y/=num;
+    this->z/=num;
+    return *this;
+}
+
+Vect Vect::crossProduct(const Vect &vect1, const Vect &vect2)
+{
+    return Vect(
+                vect1.y*vect2.z-vect1.z*vect2.y,
+                vect1.z*vect2.x-vect1.x*vect2.z,
+                vect1.x*vect2.y-vect1.y*vect2.x
+                );
+}
+
+Vect Vect::normal(const Vect &vect1, const Vect &vect2)
+{
+    return Vect::crossProduct(vect1,vect2).normalize();
 }
 
 void Vect::toAbs(){

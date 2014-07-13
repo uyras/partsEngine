@@ -24,14 +24,21 @@ public:
     void draw(); //выводит вектор на экран
 
 	void setUnit(); //делает вектор едииничной длины
+    Vect normalize(); //возвращает нормализованный вектор
 
     double angle(); //возвращает угол наклона полярной системы координат в радианах, работает только в 2D
     double grade(); //возвращает угол наклона полярной системы координат в градусвх
 
     Vect(); //конструктор нулевого вектора
     Vect(double x, double y, double z); //конструктор направленного вектора
-    Vect& operator=(const Vect&); //присваивание вектора
-    Vect& operator+=(const Vect&); //оператор сложения
-	Vect& operator+(const Vect&);
+    Vect operator=(const Vect&); //присваивание вектора
+    Vect operator+=(const Vect&); //оператор сложения
+    Vect operator+(const Vect&);
+    Vect operator*(const double num);
+    Vect operator*=(const double num);
+    Vect operator/(const double num);
+    Vect operator/=(const double num);
+    static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
+    static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
 };
 
