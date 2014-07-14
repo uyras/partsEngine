@@ -160,6 +160,7 @@ void PartArray::dropRandom(int count) {
     //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
+    count+=partCount;
 
     std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
     bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
