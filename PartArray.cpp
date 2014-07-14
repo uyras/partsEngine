@@ -504,7 +504,7 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     double eIncrementalTemp = 0;
 
     std::vector < Part* >::iterator iterator1, iterator2, beginIterator, endIterator;
-    double r, r2, r5, rijx, rijy, E;
+    double r, r2, r5, rijx, rijy, rijz, E;
 
     beginIterator = iterator2 = this->parts.begin();
     endIterator = this->parts.end();
@@ -518,13 +518,23 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
             if (iterator2 != iterator1) { //не считать взаимодействие частицы на себя
                 rijx = (*iterator2)->pos.x - (*iterator1)->pos.x;
                 rijy = (*iterator2)->pos.y - (*iterator1)->pos.y;
-                r2 = rijx*rijx+rijy*rijy;
+                rijz = (*iterator2)->pos.z - (*iterator1)->pos.z;
+                if (config::Instance()->U2D)
+                    r2 = rijx*rijx+rijy*rijy;
+                else
+                    r2 = rijx*rijx+rijy*rijy+rijz*rijz;
                 r = sqrt(r2); //трудное место, заменить бы
                 r5 = r2 * r2 * r; //радиус в пятой
-                E = //энергия считается векторным методом, так как она не нужна для каждой оси
-                        (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y) * r2)
-                         -
-                         (3 * ((*iterator2)->m.x * rijx + (*iterator2)->m.y * rijy) * ((*iterator1)->m.x * rijx + (*iterator1)->m.y * rijy)  )) / r5;
+                if (config::Instance()->U2D)
+                    E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                            (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y) * r2)
+                             -
+                             (3 * ((*iterator2)->m.x * rijx + (*iterator2)->m.y * rijy) * ((*iterator1)->m.x * rijx + (*iterator1)->m.y * rijy)  )) / r5;
+                else
+                    E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                            (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y+(*iterator1)->m.z*(*iterator2)->m.z) * r2)
+                             -
+                             (3 * ((*iterator2)->m.x * rijx + (*iterator2)->m.y * rijy + (*iterator2)->m.z * rijz) * ((*iterator1)->m.x * rijx + (*iterator1)->m.y * rijy + (*iterator1)->m.z * rijz)  )) / r5;
 
                 (*iterator2)->e += E;//энергии отличаются от формулы потому что дроби внесены под общий знаменатель
                 (*iterator2)->eArray.push_back(E);
