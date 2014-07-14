@@ -9,6 +9,7 @@
 #define PARTARRAY_H
 
 #include <vector>
+#include <string>
 #include "Part.h"
 #include "StateMachine.h"
 
@@ -40,7 +41,7 @@ public:
     */
     PartArray(double x, double y, double z, int count);
 
-    PartArray(char* file);
+    PartArray(string file);
 
 	void operator=(const PartArray& a);
 
@@ -54,7 +55,7 @@ public:
     /**
      * @brief insert Добавляет частицу на образец
      */
-    void insert(Part*part);
+    void insert(Part* part);
 
     /**
     * Бросает частицы на случайное место в пространстве с заданной частотой
@@ -151,7 +152,7 @@ public:
     */
     void cout();
 
-	void save(char* file, bool showNotifications = false);
+    void save(string file, bool showNotifications = false);
 
     /**
      * @brief savePVPython Сохраняет систему в скрипте ParaView
@@ -159,9 +160,9 @@ public:
      * @param thteta Количество полигонов по горизонтали
      * @param phi Количество полигонов по вертикали
      */
-    void savePVPython(char* file="data.py", int thteta=8, int phi=8);
+    void savePVPython(string file="data.py", int thteta=8, int phi=8);
 
-	void load(char* file, bool showNotifications = false);
+    void load(string file, bool showNotifications = false);
 
     //чистим массив частиц
     void clear();
@@ -234,10 +235,10 @@ public:
 	bool setToPTGroundState(int replicas, int totalSteps=1000, double tMin=0, double tMax=3);
 
     //проверяем сколько частиц стоят по полю, а сколько против поля
-    void checkFM(char* file, double c);
+    void checkFM(string file, double c);
 
     //сохраняет намагниченность каждой частицы
-    void saveEachMagnetization(char* file);
+    void saveEachMagnetization(string file);
 
 	//рассчитываем обменный интеграл системы
     double calcJ();

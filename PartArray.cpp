@@ -74,7 +74,7 @@ PartArray::PartArray(double x, double y, double z, int count) {
     this->dropRandom(count); //набрасываем в массив частицы
 }
 
-PartArray::PartArray(char* file) {
+PartArray::PartArray(string file) {
     this->_construct();
     this->load(file);
 }
@@ -884,11 +884,11 @@ std::vector<double> PartArray::processHEffective() {
     return history;
 }
 
-void PartArray::save(char* file, bool showNotifications) {
+void PartArray::save(string file, bool showNotifications) {
 
     if (showNotifications)
         std::cout<<"save "<<file<<" file start"<<endl;
-    std::ofstream f(file);
+    std::ofstream f(file.c_str());
 
     //сначала сохраняем xyz
     f << this->size.x << endl;
@@ -918,11 +918,11 @@ void PartArray::save(char* file, bool showNotifications) {
 
 }
 
-void PartArray::savePVPython(char *file,int thteta, int phi)
+void PartArray::savePVPython(string file, int thteta, int phi)
 {
     //Vect delta(size.x/2.,size.y/2.,size.z/2.);
     Vect delta(0.,0.,0.);
-    std::ofstream f(file);
+    std::ofstream f(file.c_str());
     f<<"try: paraview.simple"<<endl<<
        "except: from paraview.simple import *"<<endl<<
        "paraview.simple._DisableFirstRenderCameraReset()"<<endl;
@@ -958,10 +958,10 @@ void PartArray::savePVPython(char *file,int thteta, int phi)
     f.close();
 }
 
-void PartArray::load(char* file,bool showNotifications) {
+void PartArray::load(string file,bool showNotifications) {
     if (showNotifications)
         std::cout<<"load "<<file<<" file start"<<endl;
-    std::ifstream f(file);
+    std::ifstream f(file.c_str());
 
     this->clear(); //удаляем все частицы
     this->E1 = this->E2 = 0; //обнуляем энергии системы
@@ -1026,8 +1026,8 @@ void PartArray::clear(){
 //временные функции, in process, deprecated and trash
 
 //проверяем сколько частиц стоят по полю, а сколько против поля
-void PartArray::checkFM(char* file, double c){
-    std::ofstream f(file, ios_base::app);
+void PartArray::checkFM(string file, double c){
+    std::ofstream f(file.c_str(), ios_base::app);
 
     std::vector<Part*>::iterator iter1;
     const int total = this->parts.size();
@@ -1072,8 +1072,8 @@ void PartArray::checkFM(char* file, double c){
 }
 
 
-void PartArray::saveEachMagnetization(char* file) {
-    std::ofstream f(file);
+void PartArray::saveEachMagnetization(string file) {
+    std::ofstream f(file.c_str());
 
     vector<Part*>::iterator iter = this->parts.begin();
     vector<Part*>::iterator iter2 = this->parts.begin();
