@@ -196,8 +196,8 @@ double Vect::angle(){
     if (this->x==0&&this->y<0)
         return M_PI_2*3;
     if(this->x==0&&this->y==0)
-        return 0;
-
+        return 0.;
+    return 0.;
 }
 
 double Vect::grade(){
