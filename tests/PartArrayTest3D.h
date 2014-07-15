@@ -1,5 +1,5 @@
-#ifndef PARTARRAYTEST2D_H
-#define PARTARRAYTEST2D_H
+#ifndef PARTARRAYTEST3D_H
+#define PARTARRAYTEST3D_H
 
 #include <QObject>
 #include <QTest>
@@ -8,20 +8,20 @@
 #include "config.h"
 #include "ctime"
 
-class PartArrayTest2D : public QObject
+class PartArrayTest3D : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase(){
-        config::Instance()->set2D();
+        config::Instance()->set3D();
         config::Instance()->srand(time(NULL));
         config::Instance()->partR = 0.5;
         config::Instance()->m = 1;
     }
     void dropRandomI()
     {
-        PartArray *a = new PartArray(10,10,1);
+        PartArray *a = new PartArray(10,10,10);
         a->dropRandom(10);
         QCOMPARE(a->count(),10);
         a->dropRandom(1);
@@ -29,13 +29,13 @@ private slots:
         delete a;
     }
     void dropRandomD(){
-        PartArray *a = new PartArray(10,10,1);
-        a->dropRandom(0.3);
-        QVERIFY(a->destiny(true)>0.25&&a->destiny(true)<0.35);
-        a->dropRandom(0.4);
-        QVERIFY(a->destiny(true)>0.35&&a->destiny(true)<0.45);
+        PartArray *a = new PartArray(10,10,10);
+        a->dropRandom(0.1);
+        QVERIFY(a->destiny(true)>0.09&&a->destiny(true)<0.11);
+        a->dropRandom(0.2);
+        QVERIFY(a->destiny(true)>0.19&&a->destiny(true)<0.21);
         delete a;
     }
 };
 
-#endif // PARTARRAYTEST2D_H
+#endif // PARTARRAYTEST3D_H

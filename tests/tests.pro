@@ -15,11 +15,12 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp \
-    partarraytest2D.cpp
+SOURCES += main.cpp
 
 HEADERS += \
-    partarraytest2D.h
+    PartArrayTest3D.h \
+    PartArrayTest2D.h \
+    VectTest2D.h
 
 INCLUDEPATH += ../
 LIBS += -L$$PWD/../ -lPartsEngine

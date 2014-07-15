@@ -7,6 +7,8 @@
 TARGET = PartsEngine
 CONFIG -= qt
 
+SUBDIRS += tests
+
 SOURCES += Vect.cpp \
     PartArray.cpp \
     Part.cpp \
@@ -44,3 +46,4 @@ OTHER_FILES += \
     README.md \
     .gitignore \
     makefile
+
