@@ -154,6 +154,15 @@ Vect Vect::operator/=(const double num)
     return *this;
 }
 
+bool Vect::operator==(const Vect & a)
+{
+    if (config::Instance()->U2D){
+        return (this->x==a.x && this->y==a.y);
+    } else {
+        return (this->x==a.x && this->y==a.y && this->z==a.z);
+    }
+}
+
 Vect Vect::crossProduct(const Vect &vect1, const Vect &vect2)
 {
     return Vect(

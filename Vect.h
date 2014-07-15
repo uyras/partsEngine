@@ -10,6 +10,9 @@ class Vect {
 public:
     double x, y, z; //основные параметры векторов
 
+    Vect(); //конструктор нулевого вектора
+    Vect(double x, double y, double z); //конструктор направленного вектора
+
     double scalar(Vect); //Скалярное произведение двух векторов
 
     double space(Vect b); //расстояние между векторами
@@ -29,8 +32,6 @@ public:
     double angle(); //возвращает угол наклона полярной системы координат в радианах, работает только в 2D
     double grade(); //возвращает угол наклона полярной системы координат в градусвх
 
-    Vect(); //конструктор нулевого вектора
-    Vect(double x, double y, double z); //конструктор направленного вектора
     Vect operator=(const Vect&); //присваивание вектора
     Vect operator+=(const Vect&); //оператор сложения
     Vect operator+(const Vect&);
@@ -38,6 +39,7 @@ public:
     Vect operator*=(const double num);
     Vect operator/(const double num);
     Vect operator/=(const double num);
+    bool operator==(const Vect&);
     static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
 };
