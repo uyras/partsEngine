@@ -99,11 +99,18 @@ StateMachine & StateMachine::operator= (const StateMachineFree & one){
 bool StateMachine::operator==(const StateMachineFree &one)
 {
     if (one._state.size()!=this->_state.size()) return false;
+    if (one._state.size()==this->_state.size() && (one._state.size()==0 || one._state.size()==1)) return true;
 
     vector<bool>::const_iterator iter1 = one._state.begin();
     vector<Part*>::iterator iter2 = this->_state.begin();
+
+    //вычисляем, прямое или обратное совпадение считать
+    bool compEquals=true;
+    if ((*iter2)->state != (*iter1))
+        compEquals = false;
+
     while(iter2!=this->_state.end()){
-        if ((*iter2)->state != *iter1)
+        if ( ((*iter2)->state == *iter1) != compEquals)
             return false;
         iter1++; iter2++;
     }
@@ -114,11 +121,18 @@ bool StateMachine::operator==(const StateMachineFree &one)
 bool StateMachine::operator==(const StateMachine &one)
 {
     if (one._state.size()!=this->_state.size()) return false;
+    if (one._state.size()==this->_state.size() && (one._state.size()==0 || one._state.size()==1)) return true;
 
     vector<Part*>::const_iterator iter1 = one._state.begin();
     vector<Part*>::iterator iter2 = this->_state.begin();
+
+    //вычисляем, прямое или обратное совпадение считать
+    bool compEquals=true;
+    if ((*iter2)->state != (*iter1)->state)
+        compEquals = false;
+
     while(iter2!=this->_state.end()){
-        if ((*iter2)->state != (*iter1)->state)
+        if ( ((*iter2)->state == (*iter1)->state) != compEquals)
             return false;
         iter1++; iter2++;
     }

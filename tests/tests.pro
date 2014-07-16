@@ -20,7 +20,8 @@ SOURCES += main.cpp
 HEADERS += \
     PartArrayTest3D.h \
     PartArrayTest2D.h \
-    VectTest2D.h
+    VectTest2D.h \
+    StateMachineTest.h
 
 INCLUDEPATH += ../
 LIBS += -L$$PWD/../ -lPartsEngine
