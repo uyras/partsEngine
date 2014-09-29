@@ -234,28 +234,30 @@ void PartArray::dropChain(double distance){
             x+=distance;
         }
     } else {
-        short int up = 1;
+        short int up1=1, up2 = 1;
         Part* temp;
         double x = rad;
         while (x <= this->size.x-rad) {
-            double y = rad;
-            while (y <= this->size.y-rad){
-                double z = rad;
-                while (z <= this->size.z-rad){
+            up2 = up1;
+            double z = rad;
+            while (z <= this->size.z-rad){
+                double y = rad;
+                while (y <= this->size.y-rad){
                     temp = new Part();
-                    temp->m.y = config::Instance()->m * up;
+                    temp->m.y = config::Instance()->m * up2;
                     temp->m.x = temp->m.z = 0;
 
                     temp->pos.x = x;
                     temp->pos.y = y;
                     temp->pos.z = z;
 
-                    z+=distance;
+                    y+=distance;
                     this->insert(temp);
                 }
-                y+=distance;
+                up2 *= -1;
+                z+=distance;
             }
-            up *= -1;
+            up1 *= -1;
             x+=distance;
         }
     }

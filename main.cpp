@@ -60,21 +60,26 @@ int main(){
 
     config::Instance()->srand(time(NULL));
     PartArray *sys1, *sys2, *ex;
-    ex = new PartArray(3,3,2);
+    ex = new PartArray(3,3,3);
     ex->dropChain();
+    ex->savePVPython("2.py");
     StateMachineFree init(ex->state);
-    for (int i=0;i<1000;i++){
+    //for (int i=0;i<10;i++){
         sys1 = ex->copy();
-        moveSystemMRandomly(sys1,50.*(M_PI/180.));
+        moveSystemMRandomly(sys1,10.*(M_PI/180.));
         sys2 = sys1->copy();
-        sys1->setToGroundState();
+        sys1->setToPTGroundState(20,2000);
+        sys1->state->draw();
+        sys2->state->draw();
+        sys1->savePVPython("1.py");
+        sys2->savePVPython("2.py");
         if (!(*sys1->state == init)){
-            sys2->setToPTGroundState(20,3000);
-            sys1->state->draw();
-            sys2->state->draw();
-        }
+            cout<<"ERR"<<endl<<endl;
+        } else
+            cout<<"fine"<<endl<<endl;
+
         delete sys1, sys2;
-    }
+    //}
     //sys1->setMAllUp();
     //sys1->savePVPython("2.py");
 
