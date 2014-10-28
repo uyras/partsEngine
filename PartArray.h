@@ -162,6 +162,16 @@ public:
      */
     void savePVPython(string file="data.py", int thteta=8, int phi=8);
 
+    /**
+     * @brief savePVPythonAnimation Сохраняет скрипт в виде анимации
+     * @param secondSystem
+     * @param file
+     * @param thteta
+     * @param phi
+     * @param frames
+     */
+    void savePVPythonAnimation(PartArray *secondSystem, string file, int thteta=8, int phi=8, int frames=100);
+
     void load(string file, bool showNotifications = false);
 
     //чистим массив частиц

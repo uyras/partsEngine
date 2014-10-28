@@ -971,6 +971,93 @@ void PartArray::savePVPython(string file, int thteta, int phi)
     f.close();
 }
 
+void PartArray::savePVPythonAnimation(PartArray* secondSystem, string file, int thteta, int phi, int frames)
+{
+    if (this->count()!=secondSystem->count())
+        return;
+    //Vect delta(size.x/2.,size.y/2.,size.z/2.);
+    Vect delta(0.,0.,0.);
+    std::ofstream f(file.c_str());
+    f<<"try: paraview.simple"<<endl<<
+       "except: from paraview.simple import *"<<endl<<
+       "paraview.simple._DisableFirstRenderCameraReset()"<<endl<<endl;
+
+    f<<"def getCue(el,param,num,oldVal,newVal):"<<endl<<
+        "\tcue = GetAnimationTrack(el.GetProperty(param),num)"<<endl<<
+        "\tkeyf0 = servermanager.animation.CompositeKeyFrame()"<<endl<<
+        "\tkeyf0.KeyTime = 0"<<endl<<
+        "\tkeyf0.KeyValues= [oldVal]"<<endl<<
+        "\tkeyf1 = servermanager.animation.CompositeKeyFrame()"<<endl<<
+        "\tkeyf1.KeyTime = 1.0"<<endl<<
+        "\tkeyf1.KeyValues= [newVal]"<<endl<<
+        "\tcue.KeyFrames = [keyf0, keyf1]"<<endl<<
+        "\treturn cue"<<endl<<endl;
+
+    vector<Part*>::iterator iter;
+    f<<"scene = GetAnimationScene()"<<endl;
+    f<<"scene.EndTime = 100.0"<<endl;
+    f<<"scene.NumberOfFrames = "<<frames<<endl;
+
+    f<<"spheres = ["<<endl;
+    iter = this->parts.begin();
+    while (iter != this->parts.end()) {
+        f << "\t";
+        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->volume<<", ";
+        f<<(*iter)->m.x-delta.x<<", "<<(*iter)->m.y-delta.y<<", "<<(*iter)->m.z-delta.z<<"],"<<endl;
+        iter++;
+    }
+    f<<"\t]"<<endl;
+
+    f<<"newSpheres = ["<<endl;
+    iter = secondSystem->parts.begin();
+    while (iter != secondSystem->parts.end()) {
+        f << "\t";
+        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->volume<<", ";
+        f<<(*iter)->m.x-delta.x<<", "<<(*iter)->m.y-delta.y<<", "<<(*iter)->m.z-delta.z<<"],"<<endl;
+        iter++;
+    }
+    f<<"\t]"<<endl;
+
+    f<<"i=0"<<endl;
+    f<<"for [x,y,z,r,ax,ay,az] in spheres:"<<endl;
+    f<<"\t[nx,ny,nz,nr,nax,nay,naz] = newSpheres[i]"<<endl;
+    f<<"\tprint(str(i)+\" of \"+str(len(spheres)))"<<endl;
+    f<<"\ts = Sphere( Radius=r, Center=[x, y, z], ThetaResolution="<<thteta<<", PhiResolution="<<phi<<" )"<<endl;
+    f<<"\tShow()"<<endl;
+    f<<"\tl = Line( Point1=[x, y, z], Point2=[x+ax, y+ay, z+az], Resolution=1 )"<<endl;
+
+
+
+    f<<"\tp = GetDisplayProperties( l )"<<endl;
+    f<<"\tp.DiffuseColor = [0.6, 0.0, 0.0]"<<endl;
+    f<<"\tp.LineWidth = 10.0"<<endl;
+    f<<"\tShow()"<<endl;
+    f<<"\tscene.Cues.append(getCue(l,\"Point1\",0,x,nx))"<<endl;
+    f<<"\tscene.Cues.append(getCue(l,\"Point1\",1,y,ny))"<<endl;
+    f<<"\tscene.Cues.append(getCue(l,\"Point1\",2,z,nz))"<<endl;
+    f<<"\tscene.Cues.append(getCue(l,\"Point2\",0,x+ax,nx+nax))"<<endl;
+    f<<"\tscene.Cues.append(getCue(l,\"Point2\",1,y+ay,ny+nay))"<<endl;
+    f<<"\tscene.Cues.append(getCue(l,\"Point2\",2,z+az,nz+naz))"<<endl;
+    f<<"\tscene.Cues.append(getCue(s,\"Center\",0,x,nx))"<<endl;
+    f<<"\tscene.Cues.append(getCue(s,\"Center\",1,y,ny))"<<endl;
+    f<<"\tscene.Cues.append(getCue(s,\"Center\",2,z,nz))"<<endl;
+    f<<"\tscene.Cues.append(getCue(s,\"Radius\",0,r,nr))"<<endl;
+    f<<"\ti+=1"<<endl;
+    f<<endl;
+
+    f<<"SetActiveSource(Box( guiName=\"Box1\", XLength="<<size.x<<", YLength="<<size.y<<", ZLength="<<size.z<<
+       ", Center=["<<size.x/2.-delta.x<<", "<<size.y/2.-delta.y<<", "<<size.z/2.-delta.z<<"],  ))"<<endl;
+    f<<"DataRepresentation12 = Show()"<<endl;
+    f<<"DataRepresentation12.EdgeColor = [0.0, 0.0, 0.5]"<<endl;
+    f<<"DataRepresentation12.SelectionPointFieldDataArrayName = 'Normals'"<<endl;
+    f<<"DataRepresentation12.Representation = 'Wireframe'"<<endl;
+    f<<"DataRepresentation12.ScaleFactor = 0.1"<<endl;
+    f<<"DataRepresentation12.CubeAxesVisibility = 1"<<endl;
+    f<<"Render()"<<endl;
+
+    f.close();
+}
+
 void PartArray::load(string file,bool showNotifications) {
     if (showNotifications)
         std::cout<<"load "<<file<<" file start"<<endl;
