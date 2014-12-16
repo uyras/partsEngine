@@ -21,6 +21,12 @@ public:
     void reset();
 
     /**
+     * @brief hardReset Жестко обнуляет состояния частиц, не трогая их намагниченности.
+     * Функция делает вид, что система только что сгенерировалась в таком состоянии.
+     */
+    void hardReset();
+
+    /**
      * @brief randomize Переворачивает несколько случайных частиц
      * @param count Количество частиц, которые должны быть перевернуты
      * @return если перевернуть одну частицу, возвращает ее номер, иначе 0
@@ -52,7 +58,6 @@ public:
     std::vector<Part*>::iterator begin();
     std::vector<Part*>::iterator end();
 
-public:
     std::vector<Part*> _state;
 };
 

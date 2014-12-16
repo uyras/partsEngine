@@ -61,6 +61,15 @@ void StateMachine::reset(){
     }
 }
 
+void StateMachine::hardReset(){
+    std::vector<Part*>::iterator iter;
+    iter = this->_state.begin();
+    while(iter!=this->_state.end()){
+        (*iter)->state=0;
+        iter++;
+    }
+}
+
 std::vector<Part*>::iterator StateMachine::begin(){
     return this->_state.begin();
 }
