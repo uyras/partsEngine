@@ -62,3 +62,12 @@ Part* Part::copy(){
 
     return temp;
 }
+
+double Part::volume()
+{
+    if (config::Instance()->dimensions()==2){
+        return M_PI * this->r * this->r;
+    } else {
+        return (4.0/3.0) * M_PI * this->r * this->r * this->r;
+    }
+}

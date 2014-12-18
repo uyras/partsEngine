@@ -30,7 +30,7 @@ void Vect::setUnit(){
 	double length = this->length();
 	this->x /= length;
 	this->y /= length;
-	if (!config::Instance()->U2D)
+    if (config::Instance()->dimensions()==3)
         this->z /= length;
 }
 
@@ -52,7 +52,7 @@ double Vect::scalar(Vect b) {
  * @return
  */
 double Vect::space(Vect b) {
-	if (config::Instance()->U2D)
+    if (config::Instance()->dimensions()==2)
 		return sqrt(
 					(this->x - b.x)*(this->x - b.x) +
 					(this->y - b.y)*(this->y - b.y)
@@ -70,7 +70,7 @@ Vect Vect::radius(Vect b) {
 }
 
 double Vect::length() {
-	if (config::Instance()->U2D)
+    if (config::Instance()->dimensions()==2)
 		return sqrt(
 					this->x * this->x +
 					this->y * this->y
@@ -156,7 +156,7 @@ Vect Vect::operator/=(const double num)
 
 bool Vect::operator==(const Vect & a)
 {
-    if (config::Instance()->U2D){
+    if (config::Instance()->dimensions()==2){
         return (this->x==a.x && this->y==a.y);
     } else {
         return (this->x==a.x && this->y==a.y && this->z==a.z);

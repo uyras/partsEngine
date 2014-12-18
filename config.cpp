@@ -3,12 +3,22 @@
 config*  config::_self;
 
 config::config(){
+    //относительные параметры магнитной системы
     partR = 0.5;
-    I0s = 500;
+    m = 1.;
     hc = 0;
+
+    //меры перевода в абсолютные величины (на одну единицу относительной величины)
+    santiMeter = 1E-7; //расстояние
+    ergGauss =  1; //Магнитный момент
+    ersted = 1; //Напряженность магнитного поля
+
+    //Depticated
+    I0s = 500;
     dstep = 0.0001;
     kv = 1E-9;
-    m = 1.;
+
+
     set2D();
 
     rank = 0;
@@ -33,6 +43,14 @@ void config::set2D(){
 void config::set3D(){
     U2D = false;
     vol = (4.0/3.0) * M_PI * partR * partR * partR;
+}
+
+unsigned short config::dimensions()
+{
+    if (this->U2D)
+        return 2;
+    else
+        return 3;
 }
 
 int config::rand(){
