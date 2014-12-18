@@ -17,13 +17,13 @@ using namespace std;
 Vect::Vect() {
 	this->x = 0;
 	this->y = 0;
-	this->z = 0;
+    this->z = 0;
 }
 
 Vect::Vect(double x, double y, double z) {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+    this->x = x;
+    this->y = y;
+    this->z = z;
 }
 
 void Vect::setUnit(){
@@ -190,7 +190,7 @@ void Vect::toRel(){
 }
 
 void Vect::draw(){
-	cout<<"x="<<this->x<<"; y="<<this->y<<"; z="<<this->z<<endl;
+    cout<<"x="<<this->x<<"; y="<<this->y<<"; z="<<this->z<<"; l="<<this->length()<<endl;
 }
 
 double Vect::angle(){

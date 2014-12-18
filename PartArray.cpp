@@ -311,7 +311,7 @@ double PartArray::destiny(bool simple){
         double destiny=0;
         std::vector < Part* >::iterator iterator1 = this->parts.begin();
         while (iterator1!=this->parts.end()){
-            destiny+=(*iterator1)->volume/surfVol;
+            destiny+=(*iterator1)->volume()/surfVol;
             iterator1++;
         }
         return destiny;
@@ -921,7 +921,7 @@ void PartArray::save(string file, bool showNotifications) {
         f << (*iter)->m.y << "\t";// << endl;
         f << (*iter)->m.z << "\t";// << endl;
         //f << (*iter)->sector << "\t";// << endl;
-        f << (*iter)->volume << endl;
+        f << (*iter)->r << endl;
         iter++;
     }
     f.close();
@@ -944,7 +944,7 @@ void PartArray::savePVPython(string file, int thteta, int phi)
     vector<Part*>::iterator iter = this->parts.begin();
     while (iter != this->parts.end()) {
         f << "\t";
-        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->volume<<", ";
+        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->r<<", ";
         f<<(*iter)->m.x-delta.x<<", "<<(*iter)->m.y-delta.y<<", "<<(*iter)->m.z-delta.z<<"],"<<endl;
         iter++;
     }
@@ -1002,7 +1002,7 @@ void PartArray::savePVPythonAnimation(PartArray* secondSystem, string file, int 
     iter = this->parts.begin();
     while (iter != this->parts.end()) {
         f << "\t";
-        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->volume<<", ";
+        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->r<<", ";
         f<<(*iter)->m.x-delta.x<<", "<<(*iter)->m.y-delta.y<<", "<<(*iter)->m.z-delta.z<<"],"<<endl;
         iter++;
     }
@@ -1012,7 +1012,7 @@ void PartArray::savePVPythonAnimation(PartArray* secondSystem, string file, int 
     iter = secondSystem->parts.begin();
     while (iter != secondSystem->parts.end()) {
         f << "\t";
-        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->volume<<", ";
+        f<<"["<<(*iter)->pos.x-delta.x<<", "<<(*iter)->pos.y-delta.y<<", "<<(*iter)->pos.z-delta.z<<", "<<(*iter)->r<<", ";
         f<<(*iter)->m.x-delta.x<<", "<<(*iter)->m.y-delta.y<<", "<<(*iter)->m.z-delta.z<<"],"<<endl;
         iter++;
     }
@@ -1090,9 +1090,9 @@ void PartArray::load(string file,bool showNotifications) {
         f >> temp->m.y;
         f >> temp->m.z;
         //f >> temp.sector; для MPI реализации, @todo потом перегрузить
-        f >> temp->volume;
+        f >> temp->r;
         this->insert(temp);
-        radius = temp->volume;
+        radius = temp->r;
         //if (i%1000==0) std::cout<<"load "<<i<<" particle"<<std::endl;
         i++;
     }
