@@ -75,39 +75,74 @@ void moveSystemMRandomly(PartArray* sys, double fi){
     }
 }
 
-void dropSpinIce(double partW, double partH, double lattice){
+void dropSpinIce(double partW, double partH, double lattice, PartArray *pa){
     if (config::Instance()->dimensions()!=2)
         return;
+
+    if (partW+partH>lattice) //если параметр решетки слишком маленький, увеличиваем до нужного
+        lattice=partH+partW;
 
     double a = fmin(partW, partH); //которкая сторона овала
     double b = fmax(partW, partH); //длиная сторона овала
 
     double firstSpace = lattice/2.+a/2.;
+    Vect center = Vect(firstSpace,firstSpace,0);
 
     Part *temp;
-    double x1=firstSpace, y1=a/2., x2=a/2., y2=firstSpace;
 
-    while(){
-        temp = new Part();
-        //добавляем горизонтальные
-        temp->pos = Vect(x1,y1);
+    while (center.y < pa->size.y) {
+        while(center.x < pa->size.x){
+            temp = new Part();
+            //добавляем горизонтальные
+            temp->pos = Vect(center.x, center.y-lattice/2.,0);
+            temp->m = Vect(config::Instance()->m,0,0);
+            pa->insert(temp);
 
-        //добавляем вертикальные
-        temp = new Part();
-        temp->pos = Vect(x2,y2);
+            //добавляем вертикальные
+            temp = new Part();
+            temp->pos = Vect(center.x-lattice/2.,center.y,0);
+            temp->m = Vect(0,config::Instance()->m,0);
+            pa->insert(temp);
+            center.x+=lattice;
+        }
+        //обрабатываем крайние частицы (возможно запихнуть еще один ряд вертикальных)
+        if (center.x - lattice/2. + a/2. <= pa->size.x){
+            temp = new Part();
+            temp->pos = Vect(center.x-lattice/2.,center.y,0);
+            temp->m = Vect(0,config::Instance()->m,0);
+            pa->insert(temp);
+        }
+        center.y+=lattice;
     }
+    //обрабатываем крайние частицы (возможно запихнуть еще один ряд горизонтальных)
+    if (center.y - lattice/2. + a/2. <= pa->size.y){
+        temp = new Part();
+        temp->pos = Vect(center.x-lattice/2.,center.y,0);
+        temp->m = Vect(0,config::Instance()->m,0);
+        pa->insert(temp);
+    }
+
 }
 
 int main(){
 
     config::Instance()->set2D();
     config::Instance()->srand(time(NULL));
+    config::Instance()->ergGauss = 3e7 * 9274e-24; //3*10^-7 - намагниченность одной частицы (магн. Бора), 9274e-24 - эрг/Гс в обном Боре
 
-    PartArray sys1 (10,10,1);
-    Part *temp;
-    temp= new Part();
-    temp->m = Vect()
-    sys1.insert();
+    PartArray sys1 (1000,1000,1);
+
+    ofstream f("spinIceField.dat");
+    cout<<config::Instance()->ergGauss/pow(config::Instance()->santiMeter,3.)<<endl;
+    for (int i=320;i<881;i++){
+        sys1.clear();
+        dropSpinIce(80,220,i,&sys1);
+        Vect field = sys1.parts[0]->interact(sys1.parts[1]);
+        //cout<<i<<": ";field.draw();
+        field*=config::Instance()->ergGauss/pow(config::Instance()->santiMeter,3.);
+        cout<<i<<": ";field.draw();
+        f<<i<<"\t"<<field.length()<<endl;
+    }
 
     cout<<"finish";
     return 0;

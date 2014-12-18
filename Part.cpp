@@ -15,7 +15,7 @@ Part::Part() :
     //по умолчанию на частицу ничего не действует
     this->h.x = this->h.y = this->h.z = 0;
     sector = 0; //по умолчанию, все частицы из сектора 0
-	this->volume = config::Instance()->partR; //по умолчанию радиус задается в конфигах
+    this->r = config::Instance()->partR; //по умолчанию радиус задается в конфигах
     this->e = 0;
 }
 Part::~Part(){
@@ -28,7 +28,7 @@ Vect Part::interact(Part* elem){
 
     Vect rvect = elem->pos.radius(this->pos);
     r = rvect.length();
-    r2 = r * r; //радиус в кубе
+    r2 = r * r; //радиус в квадрате
     r5 = r2 * r * r * r; //радиус в пятой
     dx = this->pos.x - elem->pos.x;
     dy = this->pos.y - elem->pos.y;
@@ -38,6 +38,8 @@ Vect Part::interact(Part* elem){
     h.x = ((3 * part * dx) - elem->m.x * r2) / r5;
     h.y = ((3 * part * dy) - elem->m.y * r2) / r5;
     h.z = ((3 * part * dz) - elem->m.z * r2) / r5;
+
+    //h.absK = config::Instance()->ergGauss/pow(config::Instance()->santiMeter,3.);
 
     return h;
 }
@@ -56,7 +58,7 @@ Part* Part::copy(){
     temp->h = this->h;
     temp->e = this->e;
     temp->eArray=this->eArray;
-    temp->volume = this->volume;
+    temp->_vol = this->_vol;
     temp->sector = this->sector;
     temp->state = this->state;
 
