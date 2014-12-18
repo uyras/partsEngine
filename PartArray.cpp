@@ -90,7 +90,7 @@ void PartArray::resize(double x, double y, double z){
 void PartArray::dropRandom(double maxDestiny) {
 
     double surfVol = this->size.x * this->size.y;
-    if (!config::Instance()->U2D) surfVol *= this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
+    if (config::Instance()->dimensions()==3) surfVol *= this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
     double destiny; //плотность заполнения образца
@@ -110,7 +110,7 @@ void PartArray::dropRandom(double maxDestiny) {
             //генерим координаты
             temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
             temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->U2D) //если работаем в плоскости, то генерить третью координату не надо
+            if (config::Instance()->dimensions()==3) //если работаем в плоскости, то генерить третью координату не надо
                 temp->pos.z = 0;
             else
                 temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
@@ -138,7 +138,7 @@ void PartArray::dropRandom(double maxDestiny) {
         //генерируем вектор частицы
         double longitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2*M_PI;
         double lattitude;
-        if (config::Instance()->U2D)
+        if (config::Instance()->dimensions()==2)
             lattitude=0; // если частица 2-х мерная то угол отклонения должен быть 0
         else
             lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2-1;
@@ -172,7 +172,7 @@ void PartArray::dropRandom(int count) {
             //генерим координаты
             temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
             temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->U2D) //если работаем в плоскости, то генерить третью координату не надо
+            if (config::Instance()->dimensions()==2) //если работаем в плоскости, то генерить третью координату не надо
                 temp->pos.z = 0;
             else
                 temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
@@ -196,7 +196,7 @@ void PartArray::dropRandom(int count) {
         //генерируем вектор частицы
         double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
         double lattitude;
-        if (config::Instance()->U2D) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
+        if (config::Instance()->dimensions()==2) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
 
         temp->m.x = config::Instance()->m * cos(longitude) * sqrt(1-lattitude*lattitude);
         temp->m.y = config::Instance()->m * sin(longitude) * sqrt(1-lattitude*lattitude);
@@ -212,7 +212,7 @@ void PartArray::dropChain(double distance){
     double rad = config::Instance()->partR;
     if (distance < 2.*rad)
         distance = 2.*rad;
-    if (config::Instance()->U2D){
+    if (config::Instance()->dimensions()==2){
         short int up = 1;
         Part* temp;
         double x = rad;
@@ -287,7 +287,7 @@ void PartArray::dropLattice(double distance){
             //генерируем вектор частицы
             double longitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2*M_PI;
             double lattitude;
-            if (config::Instance()->U2D) lattitude=0; else lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2-1; // если частица 2-х мерная то угол отклонения должен быть 0
+            if (config::Instance()->dimensions()==2) lattitude=0; else lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2-1; // если частица 2-х мерная то угол отклонения должен быть 0
 
             temp->m.x = config::Instance()->m * cos(longitude)*sqrt(1-lattitude*lattitude);
             temp->m.y = config::Instance()->m * sin(longitude)*sqrt(1-lattitude*lattitude);
@@ -304,7 +304,7 @@ void PartArray::dropLattice(double distance){
 
 double PartArray::destiny(bool simple){
     double surfVol = this->size.x * this->size.y;
-    if (!config::Instance()->U2D) surfVol *= this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
+    if (config::Instance()->dimensions()==3) surfVol *= this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     if (simple)
         return (config::Instance()->vol * this->parts.size()) / surfVol;
     else{
@@ -328,7 +328,7 @@ Vect PartArray::calcM1(){
     while (iter!=this->parts.end()){
         temp.x += (*iter)->m.x;
         temp.y += (*iter)->m.y;
-        if (!config::Instance()->U2D)
+        if (config::Instance()->dimensions()==3)
             temp.z += (*iter)->m.z;
         iter++;
     }
@@ -341,7 +341,7 @@ Vect PartArray::calcM2(){
     while (iter!=this->parts.end()){
         temp.x += fabs((*iter)->m.x);
         temp.y += fabs((*iter)->m.y);
-        if (!config::Instance()->U2D)
+        if (config::Instance()->dimensions()==3)
             temp.z += fabs((*iter)->m.z);
         iter++;
     }
@@ -358,7 +358,7 @@ Vect PartArray::calcM12(){
         temp1.y += (*iter)->m.y;
         temp2.y += fabs((*iter)->m.y);
 
-        if (!config::Instance()->U2D) {
+        if (config::Instance()->dimensions()==3) {
             temp1.z += (*iter)->m.z;
             temp2.z += fabs((*iter)->m.z);
         }
@@ -367,7 +367,7 @@ Vect PartArray::calcM12(){
     }
     temp1.x /= temp2.x;
     temp1.y /= temp2.y;
-    if (!config::Instance()->U2D)
+    if (config::Instance()->dimensions()==3)
         temp1.z /= temp2.z;
 
     return temp1;
@@ -522,13 +522,13 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
                 rijx = (*iterator2)->pos.x - (*iterator1)->pos.x;
                 rijy = (*iterator2)->pos.y - (*iterator1)->pos.y;
                 rijz = (*iterator2)->pos.z - (*iterator1)->pos.z;
-                if (config::Instance()->U2D)
+                if (config::Instance()->dimensions()==2)
                     r2 = rijx*rijx+rijy*rijy;
                 else
                     r2 = rijx*rijx+rijy*rijy+rijz*rijz;
                 r = sqrt(r2); //трудное место, заменить бы
                 r5 = r2 * r2 * r; //радиус в пятой
-                if (config::Instance()->U2D)
+                if (config::Instance()->dimensions()==2)
                     E = //энергия считается векторным методом, так как она не нужна для каждой оси
                             (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y) * r2)
                              -
@@ -1249,7 +1249,7 @@ void PartArray::setMBruteLines(double segmentSize){
 void PartArray::scaleSystem(double coff){
     this->size.x *= coff;
     this->size.y *= coff;
-    if (!config::Instance()->U2D)
+    if (!config::Instance()->dimensions()==2)
         this->size.z *= coff;
 
     vector<Part*>::iterator iter;
@@ -1257,7 +1257,7 @@ void PartArray::scaleSystem(double coff){
     while (iter!=this->parts.end()){
         (*iter)->pos.x *= coff;
         (*iter)->pos.y *= coff;
-        if (!config::Instance()->U2D)
+        if (!config::Instance()->dimensions()==2)
             (*iter)->pos.z *= coff;
         iter++;
     }
@@ -1286,7 +1286,7 @@ double PartArray::calcJ(){
                 rL = r.length();
 
 
-                if (config::Instance()->U2D){
+                if (config::Instance()->dimensions()==2){
                     Jxx = ( 1.0 / (rL*rL*rL) ) *  ( (3*r.x*r.x) /  (rL * rL) - 1.0 );
                     Jyy = ( 1.0 / (rL*rL*rL) ) *  ( (3*r.y*r.y) / (rL * rL) - 1.0 );
                     Jxy = ( 3 * r.x * r.y) / ( rL * rL * rL * rL * rL );
@@ -1339,7 +1339,7 @@ double PartArray::calcJ2(){
                 rL = r.length();
 
 
-                if (config::Instance()->U2D){
+                if (config::Instance()->dimensions()==2){
                     Jxx = ( 1.0 / (rL*rL*rL) ) *  ( (3*r.x*r.x) /  (rL * rL) - 1.0 );
                     Jyy = ( 1.0 / (rL*rL*rL) ) *  ( (3*r.y*r.y) / (rL * rL) - 1.0 );
                     Jxy = ( 3 * r.x * r.y) / ( rL * rL * rL * rL * rL );
@@ -1398,7 +1398,7 @@ double PartArray::calcJ12(){
                 rL = r.length();
 
 
-                if (config::Instance()->U2D){
+                if (config::Instance()->dimensions()==2){
                     Jxx = ( 1.0 / (rL*rL*rL) ) *  ( (3*r.x*r.x) / (rL * rL) - 1.0 );
                     Jyy = ( 1.0 / (rL*rL*rL) ) *  ( (3*r.y*r.y) / (rL * rL) - 1.0 );
                     Jxy = ( 3 * r.x * r.y) / ( rL * rL * rL * rL * rL );
@@ -1706,7 +1706,7 @@ void PartArray::dropAdaptive(int count){
             //генерим координаты
             temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
             temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->U2D) //если работаем в плоскости, то генерить третью координату не надо
+            if (config::Instance()->dimensions()==2) //если работаем в плоскости, то генерить третью координату не надо
                 temp->pos.z = 0;
             else
                 temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
@@ -1730,7 +1730,7 @@ void PartArray::dropAdaptive(int count){
         //генерируем вектор частицы
         double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
         double lattitude;
-        if (config::Instance()->U2D) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
+        if (config::Instance()->dimensions()==2) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
 
         if (partCount>0){
             this->calcH(temp);

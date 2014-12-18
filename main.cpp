@@ -16,10 +16,14 @@ void moveSystemPosRandomly(PartArray* sys, double d){
     for(int i=0;i<sys->count();i++){
         double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
         double lattitude;
-        if (config::Instance()->U2D)
+        switch (config::Instance()->dimensions()==2) {
+        case 2:
             lattitude=0; // если частица 2-х мерная то угол отклонения должен быть 0
-        else
+            break;
+        case 3:
             lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2.-1.;
+            break;
+        }
         dir.x = d * cos(longitude) * sqrt(1-lattitude*lattitude);
         dir.y = d * sin(longitude) * sqrt(1-lattitude*lattitude);
         dir.z = 0 * lattitude;
@@ -28,7 +32,7 @@ void moveSystemPosRandomly(PartArray* sys, double d){
 }
 
 void moveSystemMRandomly(PartArray* sys, double fi){
-    if (config::Instance()->U2D){
+    if (config::Instance()->dimensions()==2){
         double side = 1.;
         double oldFi;
 
@@ -71,72 +75,39 @@ void moveSystemMRandomly(PartArray* sys, double fi){
     }
 }
 
+void dropSpinIce(double partW, double partH, double lattice){
+    if (config::Instance()->dimensions()!=2)
+        return;
+
+    double a = fmin(partW, partH); //которкая сторона овала
+    double b = fmax(partW, partH); //длиная сторона овала
+
+    double firstSpace = lattice/2.+a/2.;
+
+    Part *temp;
+    double x1=firstSpace, y1=a/2., x2=a/2., y2=firstSpace;
+
+    while(){
+        temp = new Part();
+        //добавляем горизонтальные
+        temp->pos = Vect(x1,y1);
+
+        //добавляем вертикальные
+        temp = new Part();
+        temp->pos = Vect(x2,y2);
+    }
+}
+
 int main(){
-    /*3D
-    config::Instance()->set3D();
-
-    config::Instance()->srand(time(NULL));
-
-    int x=3, y=3, z=3; //количество частиц в линейке
-    double space = config::Instance()->partR*4.;//расстояние между центрами частиц
-    double dMax = space/2.-config::Instance()->partR;
-
-    PartArray *sys1, *sys2,*sys3, *example;
-    example = new PartArray((double)x*space,(double)y*space,(double)z*space);//размер образца 4 радиуса, или 2 диаметра
-
-    //бросаем частицы в шахматном порядке на линию и запоминаем состояние
-    example->dropChain(space);
-    StateMachineFree oldState(example->state);
-
-    sys1 = example->copy();
-    moveSystemMRandomly(sys1,85.*(M_PI_2/90.));
-    example->savePVPythonAnimation(sys1,"3_180_grades.py",50,50);
-
-    sys2 = sys1->copy();
-    sys2->setToPTGroundState(20,3000);
-    sys1->savePVPythonAnimation(sys2,"3_180_grades_gs.py",50,50);
-
-    sys1 = example->copy();
-    moveSystemPosRandomly(sys1,dMax);
-    example->savePVPythonAnimation(sys1,"3_180_pos.py",50,50);
-
-    sys2 = sys1->copy();
-    sys2->setToPTGroundState(20,3000);
-    sys1->savePVPythonAnimation(sys2,"3_180_pos_gs.py",50,50);
-*/
 
     config::Instance()->set2D();
     config::Instance()->srand(time(NULL));
-    int n=3, m=7, //количество частиц в линейке
-            experimentCount=1000;
-    double intervalCount = 100.;
-    double space = config::Instance()->partR*4.;//расстояние между центрами частиц
-    double dMax = space/2.-config::Instance()->partR;
 
-    PartArray *sys1, *sys2,*sys3, *example;
-    example = new PartArray((double)n*space,(double)m*space,1);//размер образца 4 радиуса, или 2 диаметра
-
-    //бросаем частицы в шахматном порядке на линию и запоминаем состояние
-    example->dropChain(space);
-
-    sys1 = example->copy();
-    moveSystemMRandomly(sys1,85.*(M_PI_2/90.));
-    example->savePVPythonAnimation(sys1,"2_180_grades.py",50,50);
-
-    sys2 = sys1->copy();
-    sys2->setToGroundState();
-    sys1->savePVPythonAnimation(sys2,"2_180_grades_gs.py",50,50);
-
-    sys1 = example->copy();
-    moveSystemPosRandomly(sys1,dMax);
-    example->savePVPythonAnimation(sys1,"2_180_pos.py",50,50);
-
-    sys2 = sys1->copy();
-    sys2->setToGroundState();
-    sys1->savePVPythonAnimation(sys2,"2_180_pos_gs.py",50,50);
-
-
-
+    PartArray sys1 (10,10,1);
+    Part *temp;
+    temp= new Part();
+    temp->m = Vect()
+    sys1.insert();
 
     cout<<"finish";
     return 0;
