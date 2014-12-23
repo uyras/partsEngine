@@ -89,27 +89,32 @@ void dropSpinIce(double partW, double partH, double lattice, PartArray *pa){
     Vect center = Vect(firstSpace,firstSpace,0);
 
     Part *temp;
-
     while (center.y < pa->size.y) {
         while(center.x < pa->size.x){
             temp = new Part();
+            temp->shape = Part::ELLIPSE;
             //добавляем горизонтальные
             temp->pos = Vect(center.x, center.y-lattice/2.,0);
             temp->m = Vect(config::Instance()->m,0,0);
+            temp->w1 = b; temp->h1 = a;
             pa->insert(temp);
 
             //добавляем вертикальные
             temp = new Part();
+            temp->shape = Part::ELLIPSE;
             temp->pos = Vect(center.x-lattice/2.,center.y,0);
             temp->m = Vect(0,config::Instance()->m,0);
+            temp->w1 = a; temp->h1 = b;
             pa->insert(temp);
             center.x+=lattice;
         }
         //обрабатываем крайние частицы (возможно запихнуть еще один ряд вертикальных)
         if (center.x - lattice/2. + a/2. <= pa->size.x){
             temp = new Part();
+            temp->shape = Part::ELLIPSE;
             temp->pos = Vect(center.x-lattice/2.,center.y,0);
             temp->m = Vect(0,config::Instance()->m,0);
+            temp->w1 = a; temp->h1 = b;
             pa->insert(temp);
         }
         center.y+=lattice;
@@ -117,12 +122,15 @@ void dropSpinIce(double partW, double partH, double lattice, PartArray *pa){
     //обрабатываем крайние частицы (возможно запихнуть еще один ряд горизонтальных)
     if (center.y - lattice/2. + a/2. <= pa->size.y){
         temp = new Part();
+        temp->shape = Part::ELLIPSE;
         temp->pos = Vect(center.x-lattice/2.,center.y,0);
         temp->m = Vect(0,config::Instance()->m,0);
+        temp->w1 = b; temp->h1=a;
         pa->insert(temp);
     }
 
 }
+
 
 int main(){
 
@@ -130,8 +138,12 @@ int main(){
     config::Instance()->srand(time(NULL));
     config::Instance()->ergGauss = 3e7 * 9274e-24; //3*10^-7 - намагниченность одной частицы (магн. Бора), 9274e-24 - эрг/Гс в обном Боре
 
-    PartArray sys1 (1000,1000,1);
-
+    PartArray sys1 (1000,1000,1), sys2;
+dropSpinIce(80,220,320,&sys1);
+sys1.save("1.dat");
+sys2.load("1.dat");
+sys2.save("2.dat");
+    /*
     ofstream f("spinIceField.dat");
     cout<<config::Instance()->ergGauss/pow(config::Instance()->santiMeter,3.)<<endl;
     for (int i=320;i<881;i++){
@@ -142,8 +154,8 @@ int main(){
         field*=config::Instance()->ergGauss/pow(config::Instance()->santiMeter,3.);
         cout<<i<<": ";field.draw();
         f<<i<<"\t"<<field.length()<<endl;
-    }
+    }*/
 
-    cout<<"finish";
+    cout<<"finish"<<endl;
     return 0;
 }

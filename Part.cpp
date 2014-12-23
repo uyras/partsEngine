@@ -17,6 +17,7 @@ Part::Part() :
     sector = 0; //по умолчанию, все частицы из сектора 0
     this->r = config::Instance()->partR; //по умолчанию радиус задается в конфигах
     this->e = 0;
+    this->w1 = this->h1 = 0;
 }
 Part::~Part(){
     this->eArray.clear();

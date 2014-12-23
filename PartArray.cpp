@@ -913,6 +913,16 @@ void PartArray::save(string file, bool showNotifications) {
 
     //затем все магнитные моменты системы и положения точек
     vector<Part*>::iterator iter = this->parts.begin();
+
+    string shape;
+    switch (((Part*)*iter)->shape) {
+    case Part::CIRCLE:
+        shape="CIRCLE";
+        break;
+    case Part::ELLIPSE:
+        shape="ELLIPSE";
+    };
+
     while (iter != this->parts.end()) {
         f << (*iter)->pos.x << "\t";// << endl;
         f << (*iter)->pos.y << "\t";// << endl;
@@ -920,8 +930,11 @@ void PartArray::save(string file, bool showNotifications) {
         f << (*iter)->m.x << "\t";// << endl;
         f << (*iter)->m.y << "\t";// << endl;
         f << (*iter)->m.z << "\t";// << endl;
+        f << (*iter)->w1 << "\t";// << endl;
+        f << (*iter)->h1 << "\t";// << endl;
         //f << (*iter)->sector << "\t";// << endl;
-        f << (*iter)->r << endl;
+        f << (*iter)->r << "\t";
+        f << shape << endl;
         iter++;
     }
     f.close();
@@ -1081,6 +1094,7 @@ void PartArray::load(string file,bool showNotifications) {
     //затем читаем все магнитные моменты системы и положения точек
     double radius = 0;
     Part* temp;
+    string shape;
     while (!f.eof()) {
         temp = new Part();
         if (!(f >> temp->pos.x).good()) break; //если не получилось считать - значит конец файла
@@ -1089,8 +1103,18 @@ void PartArray::load(string file,bool showNotifications) {
         f >> temp->m.x;
         f >> temp->m.y;
         f >> temp->m.z;
+        f >> temp->w1;
+        f >> temp->h1;
         //f >> temp.sector; для MPI реализации, @todo потом перегрузить
         f >> temp->r;
+
+        f >> shape;
+        if (shape.compare("CIRCLE")==0)
+            temp->shape = Part::CIRCLE;
+        if (shape.compare("ELLIPSE")==0)
+            temp->shape = Part::ELLIPSE;
+
+
         this->insert(temp);
         radius = temp->r;
         //if (i%1000==0) std::cout<<"load "<<i<<" particle"<<std::endl;
