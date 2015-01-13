@@ -27,7 +27,7 @@ public:
     void toRel(); //переводит вектор в относительные величины из абсолютных (не точно, что работает)
     void draw(); //выводит вектор на экран
 
-	void setUnit(); //делает вектор едииничной длины
+    void setUnitary(); //делает вектор едииничной длины
     Vect normalize(); //возвращает нормализованный вектор
 
     double angle(); //возвращает угол наклона полярной системы координат в радианах, работает только в 2D
@@ -43,5 +43,7 @@ public:
     bool operator==(const Vect&);
     static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
+
+    double unit; //Единицы измерения для перевода в абсолютную величину
 };
 

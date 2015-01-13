@@ -79,15 +79,30 @@ std::vector<Part*>::iterator StateMachine::end(){
 }
 
 int StateMachine::randomize(int count){
-    int randnum, parts = this->_state.size();
-    for (int i=0;i<count;i++){
-        randnum = config::Instance()->rand()%parts;
-        (*(this->_state[randnum])).rotate();
+    int randnum,
+            rm = config::Instance()->rand_max,
+            parts = this->_state.size(),
+            rotated = 0;
+
+    if (count>parts)
+        return -1;
+
+    Part* temp;
+    while (rotated<count){
+        randnum = config::Instance()->rand();
+        randnum = floor(double(randnum)/double(rm)*double(parts-1));
+        temp = (this->_state.at(randnum));
+
+        if (!temp->state){
+            temp->rotate();
+            rotated++;
+        }
     }
+
     if (count==1)
         return randnum;
     else
-        return -1;
+        return count;
 }
 
 StateMachine & StateMachine::operator= (const StateMachineFree & one){

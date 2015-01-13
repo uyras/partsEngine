@@ -72,6 +72,14 @@ public:
      */
     virtual void dropChain(double distance = -1.);
 
+    /**
+     * @brief dropSpinIce Создает структуру типа "спиновый лед"
+     * @param partW Высота частицы
+     * @param partH Ширина частицы
+     * @param lattice Расстояние между центрами соседних частиц (параметр решетки)
+     */
+    virtual void dropSpinIce(double partW, double partH, double lattice);
+
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
     /*рассчитывает плотность массива
@@ -205,6 +213,11 @@ public:
     void turnUp(); //повернуть M частиц так, чтобы их угол с осью X был меньше 0.
     void turnRight(); //повернуть M частиц так, чтобы их угол с осью Y был меньше 0.
     void turnToDirection(Vect*); //повернуть все частицы вдоль определенного вектора (сделать так чтобы угол был не более 90гр.)
+    void movePosRandomly(double d); //Сдвинуть каждую частицу в случайном направлении на расстояние d;
+    void moveMRandomly(double fi); //Сдвинуть вектор магнитного момента каждой частицы на угол fi в случайном направлении
+
+
+
     //просчет массива, возвращает набор энергий на каждом шаге
     //	std::vector<double> processStepXYZ(); //перебор в порядке объявления (сначала Z потом Y потом X)
     std::vector<double> processStep(); //перебор решетки и переворот всех по очереди

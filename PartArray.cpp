@@ -110,7 +110,7 @@ void PartArray::dropRandom(double maxDestiny) {
             //генерим координаты
             temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
             temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->dimensions()==3) //если работаем в плоскости, то генерить третью координату не надо
+            if (config::Instance()->dimensions()!=3) //если работаем в плоскости, то генерить третью координату не надо
                 temp->pos.z = 0;
             else
                 temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
@@ -260,6 +260,62 @@ void PartArray::dropChain(double distance){
             up1 *= -1;
             x+=distance;
         }
+    }
+}
+
+void PartArray::dropSpinIce(double partW, double partH, double lattice)
+{
+    if (config::Instance()->dimensions()!=2)
+        return;
+
+    if (partW+partH>lattice) //если параметр решетки слишком маленький, увеличиваем до нужного
+        lattice=partH+partW;
+
+    double a = fmin(partW, partH); //которкая сторона овала
+    double b = fmax(partW, partH); //длиная сторона овала
+
+    double firstSpace = lattice/2.+a/2.;
+    Vect center = Vect(firstSpace,firstSpace,0);
+
+    Part *temp;
+    while (center.y < this->size.y) {
+        while(center.x < this->size.x){
+            temp = new Part();
+            temp->shape = Part::ELLIPSE;
+            //добавляем горизонтальные
+            temp->pos = Vect(center.x, center.y-lattice/2.,0);
+            temp->m = Vect(config::Instance()->m,0,0);
+            temp->w1 = b; temp->h1 = a;
+            this->insert(temp);
+
+            //добавляем вертикальные
+            temp = new Part();
+            temp->shape = Part::ELLIPSE;
+            temp->pos = Vect(center.x-lattice/2.,center.y,0);
+            temp->m = Vect(0,config::Instance()->m,0);
+            temp->w1 = a; temp->h1 = b;
+            this->insert(temp);
+            center.x+=lattice;
+        }
+        //обрабатываем крайние частицы (возможно запихнуть еще один ряд вертикальных)
+        if (center.x - lattice/2. + a/2. <= this->size.x){
+            temp = new Part();
+            temp->shape = Part::ELLIPSE;
+            temp->pos = Vect(center.x-lattice/2.,center.y,0);
+            temp->m = Vect(0,config::Instance()->m,0);
+            temp->w1 = a; temp->h1 = b;
+            this->insert(temp);
+        }
+        center.y+=lattice;
+    }
+    //обрабатываем крайние частицы (возможно запихнуть еще один ряд горизонтальных)
+    if (center.y - lattice/2. + a/2. <= this->size.y){
+        temp = new Part();
+        temp->shape = Part::ELLIPSE;
+        temp->pos = Vect(center.x-lattice/2.,center.y,0);
+        temp->m = Vect(0,config::Instance()->m,0);
+        temp->w1 = b; temp->h1=a;
+        this->insert(temp);
     }
 }
 
@@ -921,6 +977,8 @@ void PartArray::save(string file, bool showNotifications) {
         break;
     case Part::ELLIPSE:
         shape="ELLIPSE";
+    case Part::SQUARE:
+        shape="SQUARE";
     };
 
     while (iter != this->parts.end()) {
@@ -1759,7 +1817,7 @@ void PartArray::dropAdaptive(int count){
         if (partCount>0){
             this->calcH(temp);
             temp->m = temp->h;
-            temp->m.setUnit();
+            temp->m.setUnitary();
         } else {
             temp->m.x = config::Instance()->m * cos(longitude)*sqrt(1-lattitude*lattitude);
             temp->m.y = config::Instance()->m * sin(longitude)*sqrt(1-lattitude*lattitude);
@@ -1787,5 +1845,69 @@ void PartArray::turnToDirection(Vect *v){
             (*iter)->m.rotate();
         }
         iter++;
+    }
+}
+
+void PartArray::movePosRandomly(double d){
+    Vect dir; //направление, в которое двигать частицу.
+    for(int i=0;i<this->count();i++){
+        double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
+        double lattitude=0;
+        switch (config::Instance()->dimensions()) {
+        case 2:
+            lattitude=0; // если частица 2-х мерная то угол отклонения должен быть 0
+            break;
+        case 3:
+            lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2.-1.;
+            break;
+        }
+        dir.x = d * cos(longitude) * sqrt(1-lattitude*lattitude);
+        dir.y = d * sin(longitude) * sqrt(1-lattitude*lattitude);
+        dir.z = 0 * lattitude;
+        this->parts[i]->pos += dir;
+    }
+}
+
+void PartArray::moveMRandomly(double fi){
+    if (config::Instance()->dimensions()==2){
+        double side = 1.;
+        double oldFi;
+
+        for(int i=0;i<this->count();i++){
+            double oldLen = this->parts[i]->m.length();
+            if ((double)config::Instance()->rand()/(double)config::Instance()->rand_max>0.5)
+                side = -1.;
+            else
+                side = 1.;
+            oldFi = this->parts[i]->m.angle();
+            double longitude = oldFi+(fi*side);
+            this->parts[i]->m.x = oldLen * cos(longitude);
+            this->parts[i]->m.y = oldLen * sin(longitude);
+            this->parts[i]->m.z = 0;
+        }
+    } else {
+        for(int i=0;i<this->count();i++){
+            Part* temp = this->parts[i];
+            Vect ox,oy,oz,newV;
+            //1. нормализуем вектор частицы, считаем его длину
+            oz = temp->m.normalize();
+
+            //2. генерируем ортонормированный базис, где oz-магнитный момент частицы
+            oy = Vect::crossProduct(oz,Vect(0.5,0,0));
+            ox = Vect::normal(oy,oz);
+            oy = Vect::normal(ox,oz);
+
+            //3. генерируем направление сдвига вектора
+            double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI; //[0;2pi]
+
+            //4. получаем положение вдоль оси z
+            //double lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*(1-cos(fi))+cos(fi); //[cos(fi);1]
+            double lattitude=cos(fi); //задано параметром функции, cos(fi)
+
+            //5. получаем сдвинутый вектор
+            newV = oz*lattitude + (ox*cos(longitude) + oy*sin(longitude)) * sqrt(1-lattitude*lattitude);
+            newV *= temp->m.length();
+            temp->m = newV;
+        }
     }
 }

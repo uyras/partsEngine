@@ -76,6 +76,25 @@ private slots:
         QVERIFY(!(s1==*sys2.state));
         QVERIFY(!(s1==s2));
     }
+
+
+    void randomize(){
+        config::Instance()->set3D();
+        PartArray *a = new PartArray(10,10,10);
+        a->dropRandom(10);
+        QVERIFY(a->state->randomize()>=0);
+        a->state->reset();
+        QCOMPARE(a->state->randomize(11),-1);
+        a->state->reset();
+        QCOMPARE(a->state->randomize(5),5);
+
+        int num=0;
+        for (int i=0;i<10;i++){
+            if (a->parts.at(i)->state)
+                num++;
+        }
+        QCOMPARE(num,5);
+    }
 };
 
 #endif // STATEMACHINETEST_H
