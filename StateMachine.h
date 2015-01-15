@@ -46,6 +46,11 @@ public:
      * @return false если система возвращается в начальное состояние
      */
     bool next();
+    /**
+     * @brief halfNext аналог next, но перебирается только половина состояний
+     * @return false если система прошла половину состояний
+     */
+    bool halfNext();
 
     bool operator++();
 

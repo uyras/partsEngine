@@ -15,6 +15,25 @@ bool StateMachine::next(){
 
     iter = this->_state.begin();
 
+    while (iter!=(this->_state.end())){
+        (*iter)->rotate();
+        if ((*iter)->state==1){
+            return true;
+            break;
+        }
+        iter++;
+    }
+
+    return false;
+}
+
+bool StateMachine::halfNext(){
+
+    //версия для типа bool
+    std::vector<Part*>::iterator iter;
+
+    iter = this->_state.begin();
+
     while (iter!=(this->_state.end()-1)){// -1 тут чтобы перебирать только половину состояний
         (*iter)->rotate();
         if ((*iter)->state==1){
