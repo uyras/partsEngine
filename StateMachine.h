@@ -53,6 +53,7 @@ public:
     bool halfNext();
 
     bool operator++();
+    StateMachine &  operator+=(int val);
 
     StateMachine & operator= (const StateMachineFree & one);
     bool operator==(const StateMachineFree & one);

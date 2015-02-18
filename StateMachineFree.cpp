@@ -97,6 +97,19 @@ bool StateMachineFree::operator==(const StateMachine &one)
     return true;
 }
 
+bool StateMachineFree::operator++()
+{
+    return this->next();
+}
+
+StateMachineFree &StateMachineFree::operator+=(int val)
+{
+    for (int i=0;i<val;i++){
+        this->next();
+    }
+    return *this;
+}
+
 void StateMachineFree::reset(){
     vector<bool>::iterator iter = this->_state.begin();
     while(iter!=this->_state.end()){

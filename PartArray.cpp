@@ -278,44 +278,37 @@ void PartArray::dropSpinIce(double partW, double partH, double lattice)
     Vect center = Vect(firstSpace,firstSpace,0);
 
     Part *temp;
-    while (center.y < this->size.y) {
-        while(center.x < this->size.x){
-            temp = new Part();
-            temp->shape = Part::ELLIPSE;
+    while (center.y < this->size.y + lattice) {
+        center.x = firstSpace;
+        while(center.x < this->size.x + lattice){
             //добавляем горизонтальные
-            temp->pos = Vect(center.x, center.y-lattice/2.,0);
-            temp->m = Vect(config::Instance()->m,0,0);
-            temp->w1 = b; temp->h1 = a;
-            this->insert(temp);
+            if (
+                    center.x + b/2. < this->size.x &&
+                    center.y - lattice/2. + a/2. < this->size.y
+                    ){
+                temp = new Part();
+                temp->shape = Part::ELLIPSE;
+                temp->pos = Vect(center.x, center.y-lattice/2.,0);
+                temp->m = Vect(config::Instance()->m,0,0);
+                temp->w1 = b; temp->h1 = a;
+                this->insert(temp);
+            }
 
             //добавляем вертикальные
-            temp = new Part();
-            temp->shape = Part::ELLIPSE;
-            temp->pos = Vect(center.x-lattice/2.,center.y,0);
-            temp->m = Vect(0,config::Instance()->m,0);
-            temp->w1 = a; temp->h1 = b;
-            this->insert(temp);
+            if (
+                    center.x - lattice/2. + a/2. < this->size.x &&
+                    center.y + b/2. < this->size.y
+                    ){
+                temp = new Part();
+                temp->shape = Part::ELLIPSE;
+                temp->pos = Vect(center.x-lattice/2.,center.y,0);
+                temp->m = Vect(0,config::Instance()->m,0);
+                temp->w1 = a; temp->h1 = b;
+                this->insert(temp);
+            }
             center.x+=lattice;
         }
-        //обрабатываем крайние частицы (возможно запихнуть еще один ряд вертикальных)
-        if (center.x - lattice/2. + a/2. <= this->size.x){
-            temp = new Part();
-            temp->shape = Part::ELLIPSE;
-            temp->pos = Vect(center.x-lattice/2.,center.y,0);
-            temp->m = Vect(0,config::Instance()->m,0);
-            temp->w1 = a; temp->h1 = b;
-            this->insert(temp);
-        }
         center.y+=lattice;
-    }
-    //обрабатываем крайние частицы (возможно запихнуть еще один ряд горизонтальных)
-    if (center.y - lattice/2. + a/2. <= this->size.y){
-        temp = new Part();
-        temp->shape = Part::ELLIPSE;
-        temp->pos = Vect(center.x-lattice/2.,center.y,0);
-        temp->m = Vect(0,config::Instance()->m,0);
-        temp->w1 = b; temp->h1=a;
-        this->insert(temp);
     }
 }
 
@@ -636,9 +629,9 @@ void PartArray::cout() {
                 << (*iterator1)->m.x << "\t"
                 << (*iterator1)->m.y << "\t"
                 << (*iterator1)->m.z << "\t\t"/*
-                << (*iterator1)->h.x << "\t"
-                << (*iterator1)->h.y << "\t"
-                << (*iterator1)->h.z << "\t"*/
+                           << (*iterator1)->h.x << "\t"
+                           << (*iterator1)->h.y << "\t"
+                           << (*iterator1)->h.z << "\t"*/
                 << std::endl;
         ++iterator1;
     }
@@ -971,15 +964,16 @@ void PartArray::save(string file, bool showNotifications) {
     vector<Part*>::iterator iter = this->parts.begin();
 
     string shape;
-    switch (((Part*)*iter)->shape) {
-    case Part::CIRCLE:
-        shape="CIRCLE";
-        break;
-    case Part::ELLIPSE:
-        shape="ELLIPSE";
-    case Part::SQUARE:
-        shape="SQUARE";
-    };
+    if (iter!=this->parts.end())
+        switch (((Part*)*iter)->shape) {
+        case Part::CIRCLE:
+            shape="CIRCLE";
+            break;
+        case Part::ELLIPSE:
+            shape="ELLIPSE";
+        case Part::SQUARE:
+            shape="SQUARE";
+        };
 
     while (iter != this->parts.end()) {
         f << (*iter)->pos.x << "\t";// << endl;
@@ -1054,15 +1048,15 @@ void PartArray::savePVPythonAnimation(PartArray* secondSystem, string file, int 
        "paraview.simple._DisableFirstRenderCameraReset()"<<endl<<endl;
 
     f<<"def getCue(el,param,num,oldVal,newVal):"<<endl<<
-        "\tcue = GetAnimationTrack(el.GetProperty(param),num)"<<endl<<
-        "\tkeyf0 = servermanager.animation.CompositeKeyFrame()"<<endl<<
-        "\tkeyf0.KeyTime = 0"<<endl<<
-        "\tkeyf0.KeyValues= [oldVal]"<<endl<<
-        "\tkeyf1 = servermanager.animation.CompositeKeyFrame()"<<endl<<
-        "\tkeyf1.KeyTime = 1.0"<<endl<<
-        "\tkeyf1.KeyValues= [newVal]"<<endl<<
-        "\tcue.KeyFrames = [keyf0, keyf1]"<<endl<<
-        "\treturn cue"<<endl<<endl;
+       "\tcue = GetAnimationTrack(el.GetProperty(param),num)"<<endl<<
+       "\tkeyf0 = servermanager.animation.CompositeKeyFrame()"<<endl<<
+       "\tkeyf0.KeyTime = 0"<<endl<<
+       "\tkeyf0.KeyValues= [oldVal]"<<endl<<
+       "\tkeyf1 = servermanager.animation.CompositeKeyFrame()"<<endl<<
+       "\tkeyf1.KeyTime = 1.0"<<endl<<
+       "\tkeyf1.KeyValues= [newVal]"<<endl<<
+       "\tcue.KeyFrames = [keyf0, keyf1]"<<endl<<
+       "\treturn cue"<<endl<<endl;
 
     vector<Part*>::iterator iter;
     f<<"scene = GetAnimationScene()"<<endl;
@@ -1260,26 +1254,18 @@ void PartArray::saveEachMagnetization(string file) {
     vector<Part*>::iterator iter = this->parts.begin();
     vector<Part*>::iterator iter2 = this->parts.begin();
     Vect tempv;
-    int i=1;
+    this->calcH();
     while (iter != this->parts.end()) {
         f <<
              (*iter)->pos.x << "\t" <<
              (*iter)->pos.y << "\t" <<
              (*iter)->m.x << "\t" <<
-             (*iter)->m.y << "\t";
+             (*iter)->m.y << "\t" <<
+             (*iter)->h.x << "\t" <<
+             (*iter)->h.y << "\t" << endl;
 
         iter2 = this->parts.begin();
-        while (iter2!=this->parts.end()){
-            if (iter!=iter2){
-                tempv = (*iter)->interact(*iter2);
-                f << tempv.x << "\t" << tempv.y << "\t";
-            } else
-                f << 0 << "\t" << 0 << "\t";
-            iter2++;
-        }
-        f<<i << endl;
         iter++;
-        i++;
     }
 
     f.close();

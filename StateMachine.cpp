@@ -8,6 +8,14 @@ bool StateMachine::operator++(){
     return this->next();
 }
 
+StateMachine &StateMachine::operator+=(int val)
+{
+    for (int i=0;i<val;i++){
+        this->next();
+    }
+    return *this;
+}
+
 bool StateMachine::next(){
 
     //версия для типа bool
@@ -112,10 +120,10 @@ int StateMachine::randomize(int count){
         randnum = floor(double(randnum)/double(rm)*double(parts-1));
         temp = (this->_state.at(randnum));
 
-        if (!temp->state){
+        //if (!temp->state){
             temp->rotate();
             rotated++;
-        }
+        //}
     }
 
     if (count==1)

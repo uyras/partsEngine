@@ -20,6 +20,8 @@ public:
 
     bool operator==(const StateMachineFree & one);
     bool operator==(const StateMachine & one);
+    bool  operator++();
+    StateMachineFree &  operator+=(int val);
 
     /**
      * @brief isInitial Проверяет, находится ли система в начальном состоянии
