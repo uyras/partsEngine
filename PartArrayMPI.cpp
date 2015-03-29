@@ -1,5 +1,6 @@
 #include "PartArrayMPI.h"
 #include "typizator.h"
+#include <vector>
 
 
 PartArrayMPI::PartArrayMPI() : PartArray()
@@ -33,7 +34,14 @@ void PartArrayMPI::load(char* file){
         PartArray::load(file);
     }
     if (config::Instance()->size>1)
-        this->sendParticlesBcast(0);
+        this->sendBcast(0);
+}
+
+void PartArrayMPI::save(string file, bool showNotifications)
+{
+    //    if (config::Instance()->rank==0){
+    PartArray::save(file);
+    //    }
 }
 
 void PartArrayMPI::save(char* file) {
@@ -254,7 +262,7 @@ void PartArrayMPI::dropRandomMPI(double maxDestiny, int x, int y){
 
 
             //передаем массив в главный поток и чистим память для следующего прохода
-            this->sendParticlesTo(0);
+            this->send(0);
             this->parts.clear();
             partCount=0;
             squareNum++;
@@ -263,7 +271,7 @@ void PartArrayMPI::dropRandomMPI(double maxDestiny, int x, int y){
     else {
         squareNum=0;
         while(squareNum<squareCount){
-            this->recieveParticlesFrom(MPI_ANY_SOURCE);
+            this->recieve(MPI_ANY_SOURCE);
             squareNum++;
             //std::cout<<"recieve parts from "<<squareNum<<" of "<<squareCount<<" sector with destiny="<<maxDestiny<<endl;
         }
@@ -359,49 +367,51 @@ void PartArrayMPI::filterInterMPI(){
     std::cout << "complete filtering particles" << endl;
 }
 
-void PartArrayMPI::sendParticlesTo(int thread){
-    MPI_Send(&this->parts[0],this->parts.size(),MPI_types.part(),thread,98,MPI_COMM_WORLD);
+void PartArrayMPI::send(int fromThread){
+    MPI_Send(&this->parts[0],this->parts.size(),MPI_types.part(),fromThread,98,MPI_COMM_WORLD);
 }
 
-void PartArrayMPI::sendParticlesBcast(int thread){
+void PartArrayMPI::sendBcast(int fromThread){
     //if (config::Instance()->rank==0)
     //std::cout<<"syncing particles with "<<thread<<" thread start"<<endl;
     //синхронизируем размеры системы
-    MPI_Bcast(&this->size,1,MPI_types.vect(),thread,MPI_COMM_WORLD);
+    MPI_Bcast(&this->size,1,MPI_types.vect(),fromThread,MPI_COMM_WORLD);
 
     int size=this->parts.size();
-    MPI_Bcast(&size,1,MPI_INT,thread,MPI_COMM_WORLD);
-    if (config::Instance()->rank!=thread){
+    MPI_Bcast(&size,1,MPI_INT,fromThread,MPI_COMM_WORLD);
+    if (config::Instance()->rank!=fromThread){
         //чистим старые массивы
         this->parts.clear();
         //и перераспределяем место
         this->parts.resize(size);
     }
     //получаем новые частицы
-    MPI_Bcast(&this->parts[0],size,MPI_types.part(),thread,MPI_COMM_WORLD);
+    vector<Part> temp = this->transformToParts();
+    MPI_Bcast(&temp[0],size,MPI_types.part(),fromThread,MPI_COMM_WORLD);
 
     //синхронизируем номер состояни системы
-    MPI_Bcast(&this->state,1,MPI_INT,thread,MPI_COMM_WORLD);
+    MPI_Bcast(&this->state,1,MPI_INT,fromThread,MPI_COMM_WORLD);
 
     //if (config::Instance()->rank==0)
     //std::cout<<"syncing particles with "<<thread<<" thread complete"<<endl;
 }
 
-void PartArrayMPI::recieveParticlesFrom(int thread){
+void PartArrayMPI::recieve(int toThread){
     MPI_Status status;
 
     //получаем количество элементов
-    MPI_Probe( thread, 98, MPI_COMM_WORLD, &status );
+    MPI_Probe( toThread, 98, MPI_COMM_WORLD, &status );
 
     //увеличиваем размер массива частиц, запоминая старый размер
     int oldsize = this->parts.size(), newsize;
     MPI_Get_count( &status, MPI_types.part(), &newsize );
-    this->parts.resize(oldsize+newsize);
-    MPI_Recv( &this->parts[oldsize], newsize, MPI_types.part(), thread, 98, MPI_COMM_WORLD, &status);
+    vector<Part> temp;
+    temp.resize(newsize);
+    MPI_Recv( &temp[0], newsize, MPI_types.part(), toThread, 98, MPI_COMM_WORLD, &status);
 }
 
 bool PartArrayMPI::setToGroundState(int thread){
-    this->sendParticlesBcast(thread); //передали набросанную систему всем для работы
+    this->sendBcast(thread); //передали набросанную систему всем для работы
 
     double eInit = this->calcEnergy1FastIncrementalFirst(); //предподготовка к просчёту, считаем начальную энергию
 
@@ -427,7 +437,7 @@ bool PartArrayMPI::setToGroundState(int thread){
     unsigned long long int *stateBuf = new unsigned long long int[config::Instance()->size];
     double *eBuf = new double[config::Instance()->size];
 
-   /* MPI_Gather(&minstate,1,MPI_UNSIGNED_LONG_LONG,stateBuf,1,MPI_UNSIGNED_LONG_LONG,thread,MPI_COMM_WORLD);
+    /* MPI_Gather(&minstate,1,MPI_UNSIGNED_LONG_LONG,stateBuf,1,MPI_UNSIGNED_LONG_LONG,thread,MPI_COMM_WORLD);
     MPI_Gather(&minE,1,MPI_DOUBLE,eBuf,1,MPI_DOUBLE,thread,MPI_COMM_WORLD);
 
     if (config::Instance()->rank==0){
@@ -439,5 +449,27 @@ bool PartArrayMPI::setToGroundState(int thread){
         }
         (&this->state) = (&minstate);
     }*/
-    this->sendParticlesBcast(thread);
+    this->sendBcast(thread);
+}
+
+vector<Part>& PartArrayMPI::transformToParts()
+{
+    vector<Part> temp;
+    vector<Part*>::iterator iter = this->parts.begin();
+    while (iter!=this->parts.end()){
+        temp.push_back(**iter);
+        iter++;
+    }
+    return temp;
+}
+
+void PartArrayMPI::transformFromParts(vector<Part>& temp)
+{
+    this->parts.clear();
+    this->parts.resize(temp.size());
+    vector<Part>::iterator iter = temp.begin();
+    while (iter!=temp.end()){
+        this->parts.push_back(&(*iter));
+        iter++;
+    }
 }

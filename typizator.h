@@ -37,16 +37,23 @@ public:
     MPI_Datatype& part(){
         if (!this->_part){
             //описываем тип "частица"
-            int len[5]={1,1,1,1,1}; //описываем где сколько элементов
-            MPI_Aint pos[5] = {
+            int len[6]={1,1,1,1,1,1}; //описываем где сколько элементов
+            MPI_Aint pos[6] = {
                 0,
-                offsetof(Part,m),
                 offsetof(Part,pos),
+                offsetof(Part,m),
+                offsetof(Part,h),
                 offsetof(Part,sector),
                 sizeof(Part)
             };
-            MPI_Datatype typ[5] = { MPI_LB, this->vect(), this->vect(), MPI_UNSIGNED_SHORT, MPI_UB };
-            MPI_Type_create_struct( 5, len, pos, typ, &this->_part );
+            MPI_Datatype typ[6] = {
+                MPI_LB,
+                this->vect(),
+                this->vect(),
+                this->vect(),
+                MPI_UNSIGNED_SHORT,
+                MPI_UB };
+            MPI_Type_create_struct( 6, len, pos, typ, &this->_part );
             MPI_Type_commit( &this->_part );
         }
         return this->_part;

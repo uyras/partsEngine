@@ -18,14 +18,12 @@ Vect::Vect() {
 	this->x = 0;
 	this->y = 0;
     this->z = 0;
-    this->unit = 1;
 }
 
 Vect::Vect(double x, double y, double z) {
     this->x = x;
     this->y = y;
     this->z = z;
-    this->unit= 1;
 }
 
 void Vect::setUnitary(){

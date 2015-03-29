@@ -31,24 +31,44 @@ HEADERS += Vect.h \
     distributionLaw.h \
     config.h \
     StateMachine.h \
-    StateMachineFree.h \
+    StateMachineFree.h
 
 contains(MODES,mpi) {
-    TARGET = PartsEngineMpi
-    message(Build with MPI)
+    CONFIG(release,debug|release){
+        TARGET = PartsEngineMpi
+    }
+
+    message(Build with MPI library)
     HEADERS += PartArrayMPI.h
     SOURCES += PartArrayMPI.cpp
     INCLUDEPATH += /usr/include/mpi
     DEPENDPATH += /usr/include/mpi
 
     QMAKE_CXX = mpicxx
+    QMAKE_CXXFLAGS_DEBUG = -O1 -fno-omit-frame-pointer -g
+    QMAKE_CXX_RELEASE = $$QMAKE_CXX
+    QMAKE_CXX_DEBUG = $$QMAKE_CXX
+    QMAKE_LINK = $$QMAKE_CXX
+    QMAKE_CC = mpicc
+    DEFINES += WITH_MPI=true
+}
+
+contains(MODES,boost) {
+    CONFIG(release,debug|release){
+        TARGET = PartsEngineBoost
+    }
+
+    message(Build with Boost.mpi library);
+    QMAKE_CXX = mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX
     QMAKE_LINK = $$QMAKE_CXX
     QMAKE_CC = mpicc
 
-} else {
-    message(Build without an MPI)
+    HEADERS += partarrayboost.h
+    SOURCES += partarrayboost.cpp
+    LIBS+= -lboost_mpi -lboost_serialization
+    DEFINES += WITH_BOOST=true
 }
 
 CONFIG(debug,debug|release) {

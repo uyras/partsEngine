@@ -9,7 +9,6 @@
 class Vect {
 public:
     double x, y, z; //основные параметры векторов
-    double absK; //коэфф. для перевода в абсолютное значение вектора
 
     Vect(); //конструктор нулевого вектора
     Vect(double x, double y, double z); //конструктор направленного вектора
@@ -43,7 +42,5 @@ public:
     bool operator==(const Vect&);
     static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
-
-    double unit; //Единицы измерения для перевода в абсолютную величину
 };
 

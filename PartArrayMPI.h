@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARTARRAYMPI_H
+#define PARTARRAYMPI_H
 
 #include <mpi.h>
 #include <cstdlib>
@@ -11,7 +12,6 @@
 #include "config.h"
 #include "Vect.h"
 
-using namespace std;
 
 class PartArrayMPI :
     public PartArray
@@ -42,6 +42,7 @@ public:
     PartArrayMPI(char* file);
 
     void load(char* file); //многопоточная загрузка
+    void save(string file, bool showNotifications = false);//многопоточное сохранение
     void save(char* file); //многопоточное сохранение
 
     // Бросает частицы на плоскость в многопоточном режиме, заполняет плоскость до определенного насыщения
@@ -51,9 +52,9 @@ public:
     // удаляет пересекающиеся элементы из швов после dropRandomMPI
     void filterInterMPI();
 
-    void sendParticlesTo(int thread); //отправлет частицы в другой поток
-    void sendParticlesBcast(int thread); //отправляет все частицы всем потокам, thread - номер потока из которого отправлять
-    void recieveParticlesFrom(int thread); //получает частицы из другого потока
+    void send(int fromThread); //отправлет частицы в другой поток
+    void sendBcast(int fromThread); //отправляет все частицы всем потокам, thread - номер потока из которого отправлять
+    void recieve(int toThread); //получает частицы из другого потока
 
     //проверяет, принадлежит ли сектор потоку. startFrom указывает сколько потоков отведено под root нужды.
     //Обычно это один нулевой поток, который не участвует в распределении секторовы
@@ -69,5 +70,11 @@ public:
     */
 
     Vect sector; //размер одного сектора при разделении плоскости на подзадачи (в MPI)
+
+private:
+    //преобразует массив ссылок на частицы в массив частиц
+    vector<Part> &transformToParts();
+    void transformFromParts(vector<Part> &temp);
 };
 
+#endif // PARTARRAY_H
