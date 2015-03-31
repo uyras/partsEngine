@@ -1,7 +1,10 @@
 #ifndef PARTARRAYMPI_H
 #define PARTARRAYMPI_H
 
-#include <mpi.h>
+#include <boost/mpi.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <partarrayboost.h>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -14,11 +17,9 @@
 
 
 class PartArrayMPI :
-    public PartArray
+        public PartArray
 {
 public:
-
-
     PartArrayMPI();
 
     /**
@@ -41,9 +42,16 @@ public:
 
     PartArrayMPI(char* file);
 
-    void load(char* file); //многопоточная загрузка
-    void save(string file, bool showNotifications = false);//многопоточное сохранение
-    void save(char* file); //многопоточное сохранение
+    /**
+      * Сериализация класса
+    **/
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        (void)version; //Заглушка для компиллятора
+        ar & boost::serialization::base_object<PartArray>(*this);
+    }
 
     // Бросает частицы на плоскость в многопоточном режиме, заполняет плоскость до определенного насыщения
     // Может дополнительно добрасывать частицы на уже набросанную плоскость
@@ -51,10 +59,6 @@ public:
 
     // удаляет пересекающиеся элементы из швов после dropRandomMPI
     void filterInterMPI();
-
-    void send(int fromThread); //отправлет частицы в другой поток
-    void sendBcast(int fromThread); //отправляет все частицы всем потокам, thread - номер потока из которого отправлять
-    void recieve(int toThread); //получает частицы из другого потока
 
     //проверяет, принадлежит ли сектор потоку. startFrom указывает сколько потоков отведено под root нужды.
     //Обычно это один нулевой поток, который не участвует в распределении секторовы
@@ -73,8 +77,11 @@ public:
 
 private:
     //преобразует массив ссылок на частицы в массив частиц
-    vector<Part> &transformToParts();
+    vector<Part> transformToParts();
     void transformFromParts(vector<Part> &temp);
+    void _construct();
+    boost::mpi::environment env;
+    boost::mpi::communicator world;
 };
 
 #endif // PARTARRAY_H

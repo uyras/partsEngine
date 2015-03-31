@@ -23,7 +23,6 @@ SOURCES += Vect.cpp \
     StateMachineFree.cpp
 
 HEADERS += Vect.h \
-    typizator.h \
     PartArray.h \
     Part.h \
     INIReader.h \
@@ -33,25 +32,6 @@ HEADERS += Vect.h \
     StateMachine.h \
     StateMachineFree.h
 
-contains(MODES,mpi) {
-    CONFIG(release,debug|release){
-        TARGET = PartsEngineMpi
-    }
-
-    message(Build with MPI library)
-    HEADERS += PartArrayMPI.h
-    SOURCES += PartArrayMPI.cpp
-    INCLUDEPATH += /usr/include/mpi
-    DEPENDPATH += /usr/include/mpi
-
-    QMAKE_CXX = mpicxx
-    QMAKE_CXXFLAGS_DEBUG = -O1 -fno-omit-frame-pointer -g
-    QMAKE_CXX_RELEASE = $$QMAKE_CXX
-    QMAKE_CXX_DEBUG = $$QMAKE_CXX
-    QMAKE_LINK = $$QMAKE_CXX
-    QMAKE_CC = mpicc
-    DEFINES += WITH_MPI=true
-}
 
 contains(MODES,boost) {
     CONFIG(release,debug|release){
@@ -62,11 +42,13 @@ contains(MODES,boost) {
     QMAKE_CXX = mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX
+    QMAKE_CXXFLAGS_DEBUG = -O1 -fno-omit-frame-pointer -g
     QMAKE_LINK = $$QMAKE_CXX
     QMAKE_CC = mpicc
 
     HEADERS += partarrayboost.h
-    SOURCES += partarrayboost.cpp
+    HEADERS += PartArrayMPI.h
+    SOURCES += PartArrayMPI.cpp
     LIBS+= -lboost_mpi -lboost_serialization
     DEFINES += WITH_BOOST=true
 }

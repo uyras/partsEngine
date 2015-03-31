@@ -1,49 +1,40 @@
 #include <QCoreApplication>
-#include <QSettings>
-#include <QString>
-#include <iostream>
-#include <sstream>
+#include <boost/mpi.hpp>
 #include "config.h"
 #include "partarrayboost.h"
 #include "PartArray.h"
-#include <boost/mpi/environment.hpp>
-#include <boost/mpi/communicator.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include "PartArrayMPI.h"
 
-//namespace mpi=boost::mpi;
+namespace mpi=boost::mpi;
 using namespace std;
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    mpi::environment env;
+    mpi::communicator world;
+    config::Instance()->srand(time(NULL)+world.rank());
 
-    config::Instance()->srand(time(NULL));
 
-    PartArray aaa(10.,10.,10.);
-    aaa.dropRandom(2);
-    aaa.calcEnergy1FastIncrementalFirst();
-    aaa.state->randomize(1);
-    aaa.cout();
-    aaa.state->draw();
-    cout<<endl;
+    if (world.rank()==0){
+        PartArrayMPI aaa(10.,10.,10.);
+        aaa.dropRandom(3);
+        aaa.calcEnergy1FastIncrementalFirst();
+        aaa.state->randomize(1);
+        aaa.cout();
+        aaa.state->draw();
+        cout<<endl;
+        world.send(1,1,aaa);
+    }
+    if (world.rank()==1){
+        PartArrayMPI bbb(10.,10.,10.);
+        world.recv(0,1,bbb);
+        //cout<<parts.size();
 
-    std::ofstream ofs("data.text");
-    std::ifstream ifs("data.text");
-    boost::archive::text_oarchive oa(ofs);
-    oa<<(aaa);
-    ofs.close();
-    cout<<"ready"<<endl;
-
-    boost::archive::text_iarchive ia(ifs);
-    PartArray v2;
-    ia>>v2;
-    ifs.close();
-    aaa.state->randomize();
-    v2.cout();
-    v2.state->draw();
-    cout<<endl;
-    aaa.cout();
-    aaa.state->draw();
+        //bbb.insert(&p);
+        bbb.cout();
+        bbb.state->draw();
+        cout<<endl;
+    }
 
     return a.exec();
 }

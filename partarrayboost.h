@@ -1,6 +1,8 @@
 #ifndef PARTARRAYBOOST_H
 #define PARTARRAYBOOST_H
 
+#define UNUSED(x) (void)x; //Макрос для того, чтобы компилятор не ругался на неиспользуемые параметры
+
 #include <boost/mpi.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
@@ -16,6 +18,8 @@ namespace serialization {
 
 template<class Archive> void serialize(Archive & ar, Vect & v, const unsigned int version)
 {
+    UNUSED(version)
+
     ar & v.x;
     ar & v.y;
     ar & v.z;
@@ -23,6 +27,8 @@ template<class Archive> void serialize(Archive & ar, Vect & v, const unsigned in
 
 template<class Archive> void serialize(Archive & ar, Part & p, const unsigned int version)
 {
+    UNUSED(version)
+
     ar & p.pos;
     ar & p.m;
     ar & p.h;
@@ -39,44 +45,39 @@ template<class Archive> void serialize(Archive & ar, Part & p, const unsigned in
 
 template<class Archive> void serialize(Archive & ar, StateMachine & v, const unsigned int version)
 {
+    UNUSED(version)
+
     ar & v._state;
 }
 
 template<class Archive> void load(Archive & ar, PartArray & v, const unsigned int version)
 {
+    UNUSED(version)
+
     ar & v.E1;
     ar & v.E2;
     ar & v.eIncrementalTemp;
-    ar & v.parts;
     ar & v.size;
+    ar & v.parts;
+
     v._construct();
 }
 
 template<class Archive> void save(Archive & ar,const PartArray & v, const unsigned int version)
 {
+    UNUSED(version)
+
     ar & v.E1;
     ar & v.E2;
     ar & v.eIncrementalTemp;
-    ar & v.parts;
     ar & v.size;
+    ar & v.parts;
 }
 
 } // namespace serialization
 } // namespace boost
 
 BOOST_SERIALIZATION_SPLIT_FREE(PartArray)
-
-namespace mpi=boost::mpi;
-
-class PartArrayBoost : public PartArray
-{
-public:
-    PartArrayBoost(mpi::communicator *comm=0);
-    ~PartArrayBoost();
-
-protected:
-    mpi::environment *env;
-    mpi::communicator *comm;
-};
+BOOST_IS_MPI_DATATYPE(Vect)
 
 #endif // PARTARRAYBOOST_H
