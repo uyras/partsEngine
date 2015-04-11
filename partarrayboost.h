@@ -43,7 +43,7 @@ template<class Archive> void serialize(Archive & ar, Part & p, const unsigned in
     ar & p.w1;
 }
 
-template<class Archive> void serialize(Archive & ar, StateMachine & v, const unsigned int version)
+template<class Archive> void serialize(Archive & ar, StateMachineFree & v, const unsigned int version)
 {
     UNUSED(version)
 

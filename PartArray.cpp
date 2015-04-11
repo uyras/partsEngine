@@ -312,6 +312,61 @@ void PartArray::dropSpinIce(double partW, double partH, double lattice)
     }
 }
 
+void PartArray::dropHoneyComb(int m, int n, double a, Part *tmp)
+{
+    double mLength=0; //магнитный момент одной частицы
+    if (tmp==0){ //если шаблон частицы не был передан, делаем шаблон по умолчанию
+        tmp = new Part();
+        mLength = config::Instance()->m;
+    } else {
+        mLength = tmp->m.length();
+    }
+
+    double r=a*sqrt(3)/2;
+    for(int i=0;i<m;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            double x=2*r*i+r*(pow(-1,j)+1)/2;
+            double y=sqrt(3*r*r)*j;
+            vector<Part*> hexPart;
+
+            //genHexPart start
+            for(int k=0;k<6;k++)
+            {
+                Part* temp = tmp->copy();
+                temp->pos.x = r*cos(2*M_PI*k/6)+x;
+                temp->pos.y = r*sin(2*M_PI*k/6)+y;
+                temp->m.x = cos(2*M_PI*k/6+M_PI/2)*mLength;
+                temp->m.y = sin(2*M_PI*k/6+M_PI/2)*mLength;
+                hexPart.push_back(temp);
+            }
+            //genHexPart end
+
+            vector<Part*>::iterator iter = hexPart.begin();
+            while (iter!=hexPart.end()){
+                bool add=true;
+                vector<Part*>::iterator iter2 = this->parts.begin();
+                while(iter2!=this->parts.end()){
+                    if (
+                            this->_double_equals((*iter2)->pos.x,(*iter)->pos.x) &&
+                            this->_double_equals((*iter2)->pos.y,(*iter)->pos.y)
+                            )
+                            add=false;
+                    iter2++;
+                }
+
+                if(add)
+                    this->insert(*iter);
+                else
+                    delete (*iter); //удаляем из памяти
+
+                iter++;
+            }
+        }
+    }
+}
+
 //перемешать магнитные моменты частиц M
 void PartArray::shuffleM(){
     bool rotate;
@@ -1333,6 +1388,11 @@ void PartArray::scaleSystem(double coff){
 
 void PartArray::_construct(){
     this->state = new StateMachine(this);
+}
+
+bool PartArray::_double_equals(double a, double b)
+{
+    return fabs(a - b) < 1e-12;
 }
 
 

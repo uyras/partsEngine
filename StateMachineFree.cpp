@@ -8,18 +8,19 @@ StateMachineFree::StateMachineFree(StateMachine* state){
     *this = *state;
 }
 
-void StateMachineFree::draw(){
+std::string StateMachineFree::toString(){
     std::vector<bool>::iterator iter;
+    std::string s="";
     iter = this->_state.begin();
     while (iter!=this->_state.end()){
         if (*iter==0){
-            std::cout<<"0";
+            s+="0";
         } else {
-            std::cout<<"1";
+            s+="1";
         }
         iter++;
     }
-    std::cout<<std::endl;
+    return s;
 }
 
 bool StateMachineFree::next(){

@@ -80,6 +80,15 @@ public:
      */
     virtual void dropSpinIce(double partW, double partH, double lattice);
 
+    /**
+     * @brief dropHoneyComb Создать решетку гексагональной формы
+     * @param m Количество ячеек по горизонтали
+     * @param n Количество ячеек по вертикали
+     * @param a Расстояние между двумя соседними частицами honeycomb решетки
+     * @param tmp Шаблон добавляемой частицы. Будут перезаписываться координаты и направление магнитного момента (длина сохраняется)
+     */
+    virtual void dropHoneyComb(int m, int n, double a, Part * tmp = 0);
+
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
     /*рассчитывает плотность массива
@@ -290,6 +299,9 @@ public:
     Vect absSize;  //размер плоскости в абсолютных единицах
 
     void _construct(); //стандартный конструктор.
+
+private:
+    bool _double_equals(double a, double b); //сравнение double
 };
 
 #endif // PARTARRAY_H

@@ -15,22 +15,20 @@ QT       -= gui
 SOURCES += Vect.cpp \
     PartArray.cpp \
     Part.cpp \
-    INIReader.cpp \
-    ini.c \
     distributionLaw.cpp \
     config.cpp \
     StateMachine.cpp \
-    StateMachineFree.cpp
+    StateMachineFree.cpp \
+    statemachinebase.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
     Part.h \
-    INIReader.h \
-    ini.h \
     distributionLaw.h \
     config.h \
     StateMachine.h \
-    StateMachineFree.h
+    StateMachineFree.h \
+    statemachinebase.h
 
 
 contains(MODES,boost) {

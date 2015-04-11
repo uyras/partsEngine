@@ -1,7 +1,7 @@
 #ifndef STATEMACHINEFREE_H
 #define STATEMACHINEFREE_H
 #include <vector>
-#include <iostream>
+#include <string>
 #include "StateMachine.h"
 
 class StateMachine;
@@ -37,7 +37,7 @@ public:
 
     std::vector<bool> _state;
 
-    void draw();
+    std::string toString();
 
     void reset();
 
