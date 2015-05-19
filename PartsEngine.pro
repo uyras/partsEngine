@@ -46,7 +46,8 @@ contains(MODES,boost) {
 
     HEADERS += partarrayboost.h
     HEADERS += PartArrayMPI.h
-    SOURCES += PartArrayMPI.cpp
+    SOURCES += PartArrayMPI.cpp\
+        statemachinegmp.cpp
     LIBS+= -lboost_mpi -lboost_serialization
     DEFINES += WITH_BOOST=true
 }

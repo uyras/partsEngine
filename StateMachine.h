@@ -3,10 +3,15 @@
 
 #include <vector>
 
+#ifdef WITH_BOOST
+#include <boost/multiprecision/cpp_int.hpp>
+#endif //WITH_BOOST
+
 #include "PartArray.h"
 #include "Part.h"
 #include "config.h"
 #include "StateMachineFree.h"
+
 
 class PartArray; //фикс, так как используется перекрестное объявление с этим классом
 class StateMachineFree;
@@ -65,6 +70,10 @@ public:
     std::vector<Part*>::iterator end();
 
     std::vector<Part*> _state;
+
+    #ifdef WITH_BOOST
+    void add(const boost::multiprecision::cpp_int & b);
+    #endif //WITH_BOOST
 };
 
 #endif // STATEMACHINE_H

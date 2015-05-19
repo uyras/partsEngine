@@ -120,7 +120,7 @@ void StateMachineFree::reset(){
 }
 
 int StateMachineFree::randomize(int count){
-    int randnum, parts = this->_state.size();
+    int randnum=0, parts = this->_state.size();
     vector<bool>::iterator iter;
     for (int i=0;i<count;i++){
         randnum = config::Instance()->rand()%parts;

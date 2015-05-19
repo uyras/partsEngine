@@ -4,6 +4,7 @@
 #include <boost/mpi.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <partarrayboost.h>
 #include <cstdlib>
 #include <iostream>
@@ -65,6 +66,8 @@ public:
     bool isMySector(int sector, int startFrom=1);
 
     bool setToGroundState(int thread=0); //переводим систему в GS методом полного перебора. Пространство состояний разбиваем динамически
+
+    void getMinMaxEnergy(double & eMin, double & eMax); //получает минимум и максимум энергии, записывает их в eMin и eMax
 
 
     /*

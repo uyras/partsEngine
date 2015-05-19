@@ -371,6 +371,39 @@ bool PartArrayMPI::setToGroundState(int thread){
     boost::mpi::broadcast(world,*this,thread);
 }
 
+void PartArrayMPI::getMinMaxEnergy(double &eMin, double &eMax)
+{
+    //делим пространство состояний на подпространства
+    boost::multiprecision::cpp_int dState=1, //дельта каждого состояния
+            dTotal=1; //Всего состояний
+    dTotal<<=this->count()-1;
+    dState=dTotal/(world.size()-1);
+
+    double eeMin=DBL_MAX,eeMax=DBL_MIN,eTemp=0;
+
+    this->state->reset();
+    double eInit =calcEnergy1FastIncrementalFirst();
+    if (world.rank()!=0){
+        this->state->add(dState*(world.rank()-1)); //потоки обрабатывают свою часть работы, главный остатки
+    } else {
+        this->state->add(dState*(world.size()-1));
+        dState = dTotal - (dState*(world.size()-1));
+    }
+    while(dState!=0){
+        eTemp = this->calcEnergy1FastIncremental(eInit);
+        if (eeMin>eTemp){
+            eeMin = eTemp;
+        }
+        if (eeMax<eTemp){
+            eeMax = eTemp;
+        }
+        dState--; this->state->next();
+    }
+    boost::mpi::all_reduce(world,eeMin,eMin,boost::mpi::minimum<double>());
+    boost::mpi::all_reduce(world,eeMax,eMax,boost::mpi::maximum<double>());
+    this->state->reset();
+}
+
 vector<Part> PartArrayMPI::transformToParts()
 {
     vector<Part> temp;

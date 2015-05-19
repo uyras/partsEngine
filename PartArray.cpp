@@ -1591,7 +1591,7 @@ bool PartArray::setToGroundState(){
                 eMin = eTemp;
                 minstate = *this->state;
             }
-    } while (this->state->next());
+    } while (this->state->halfNext());
 
     *(this->state) = minstate;
 
@@ -1619,7 +1619,7 @@ bool PartArray::setToMaximalState(){
                 eMax = eTemp;
                 maxstate = *this->state;
             }
-    } while (this->state->next());
+    } while (this->state->halfNext());
 
     *(this->state) = maxstate;
 

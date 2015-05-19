@@ -64,9 +64,9 @@ void StateMachine::setSystem(PartArray* system){
 }
 
 void StateMachine::draw(){
-    std::vector<Part*>::iterator iter;
-    iter = this->_state.begin();
-    while (iter!=this->_state.end()){
+    std::vector<Part*>::reverse_iterator iter;
+    iter = this->_state.rbegin();
+    while (iter!=this->_state.rend()){
         if ((*iter)->state==0){
             std::cout<<"0";
         } else {
@@ -106,7 +106,7 @@ std::vector<Part*>::iterator StateMachine::end(){
 }
 
 int StateMachine::randomize(int count){
-    int randnum,
+    int randnum=0,
             rm = config::Instance()->rand_max,
             parts = this->_state.size(),
             rotated = 0;
