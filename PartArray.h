@@ -12,6 +12,7 @@
 #include <string>
 #include "Part.h"
 #include "StateMachine.h"
+#include "StateMachineFree.h"
 
 using namespace std;
 class StateMachine;

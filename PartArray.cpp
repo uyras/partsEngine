@@ -379,7 +379,6 @@ void PartArray::shuffleM(){
 
 void PartArray::insert(Part * part){
     this->parts.push_back(part);
-    this->state->_state.push_back(part);
 }
 
 void PartArray::dropLattice(double distance){
@@ -578,21 +577,18 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy){
 
     std::vector<int> zeros; //хранит инфу на каких позициях нули
     //ищем нули
-    iter = state->begin();
-    int i=0;
-    while(iter != state->end()){
-        if ( (*iter)->state == 0){
-            zeros.push_back(i);
+    for (unsigned int j=0;j<state->size();j++){
+        if ((*this->state)[j]==0){
+            zeros.push_back(j);
         }
-        iter++; i++;
     }
 
 
     //рассчитываем энергию
     double E=initEnergy;
     std::vector<int>::iterator iter2;
-    iter = state->begin();
-    while(iter != state->end()){
+    iter = parts.begin();
+    while(iter != parts.end()){
         if ( (*iter)->state == true){
             iter2 = zeros.begin();
             while (iter2!=zeros.end()){
@@ -1247,7 +1243,6 @@ void PartArray::clear(){
         delete (*iter); //удаляем все что по есть по ссылкам на частицы
         iter++;
     }
-    this->state->_state.clear();
     this->parts.clear();
 }
 
@@ -1307,8 +1302,6 @@ void PartArray::saveEachMagnetization(string file) {
     std::ofstream f(file.c_str());
 
     vector<Part*>::iterator iter = this->parts.begin();
-    vector<Part*>::iterator iter2 = this->parts.begin();
-    Vect tempv;
     this->calcH();
     while (iter != this->parts.end()) {
         f <<
@@ -1318,8 +1311,6 @@ void PartArray::saveEachMagnetization(string file) {
              (*iter)->m.y << "\t" <<
              (*iter)->h.x << "\t" <<
              (*iter)->h.y << "\t" << endl;
-
-        iter2 = this->parts.begin();
         iter++;
     }
 

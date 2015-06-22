@@ -6,6 +6,9 @@
 #include "PartArrayMPI.h"
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "StateMachine.h"
+#include "StateMachineFree.h"
+
 namespace mpi=boost::mpi;
 using namespace std;
 int main(int argc, char *argv[])
@@ -21,20 +24,17 @@ int main(int argc, char *argv[])
     PartArray sys;
     sys.dropHoneyComb(3,1,1);
     sys.state->next();
-    sys.state->hardReset();
-    PartArrayMPI sys2;
-    sys2.dropHoneyComb(3,1,1);
-    sys2.state->next();
-    sys2.state->hardReset();
-    double eMin,eMax;
-    sys2.getMinMaxEnergy(eMin,eMax);
-    sys.setToGroundState();
-
-    if (world.rank()==0){
-        cout<<sys.calcEnergy1()<<endl;
-        cout<<eMin<<endl;
-    }
-
+    sys.state->next();
+    StateMachineFree s;
+    s = sys.state;
+    sys.state->next();
+    cout<<s.toString()<<endl;
+    s.prev();
+    cout<<s.toString()<<endl;
+    s.next();
+    s.fromString(s.toString());
+    cout<<s.toString()<<endl;
     cout<<"finish"<<endl;
-    return a.exec();
+    return 0;
+    //return a.exec();
 }

@@ -21,7 +21,8 @@ HEADERS += \
     PartArrayTest3D.h \
     PartArrayTest2D.h \
     VectTest2D.h \
-    StateMachineTest.h
+    StateMachineTest.h \
+    statemachinefreetest.h
 
 INCLUDEPATH += ../
 LIBS += -L$$PWD/../ -lPartsEngine

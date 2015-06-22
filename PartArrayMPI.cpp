@@ -344,7 +344,7 @@ bool PartArrayMPI::setToGroundState(int thread){
     //считаем минимум для каждого потока
     do {
         eTemp = this->calcEnergy1FastIncremental(eInit);
-        if (eTemp<minE) { minE=eTemp; minstate = this->state; }
+        if (eTemp<minE) { minE=eTemp; minstate = (*this->state); }
 
         for (int j=0;j<config::Instance()->size-1;j++){
             if (!this->state->halfNext())
@@ -383,12 +383,14 @@ void PartArrayMPI::getMinMaxEnergy(double &eMin, double &eMax)
 
     this->state->reset();
     double eInit =calcEnergy1FastIncrementalFirst();
+    StateMachineGmp tempState = *this->state;
     if (world.rank()!=0){
-        this->state->add(dState*(world.rank()-1)); //потоки обрабатывают свою часть работы, главный остатки
+        tempState+=(dState*(world.rank()-1)); //потоки обрабатывают свою часть работы, главный остатки
     } else {
-        this->state->add(dState*(world.size()-1));
+        tempState+=(dState*(world.size()-1));
         dState = dTotal - (dState*(world.size()-1));
     }
+    (*this->state)=tempState;
     while(dState!=0){
         eTemp = this->calcEnergy1FastIncremental(eInit);
         if (eeMin>eTemp){

@@ -2,10 +2,186 @@
 
 StateMachineFree::StateMachineFree()
 {
+    this->_state.clear();
 }
 
+StateMachineFree::StateMachineFree(const unsigned long size)
+{
+    this->_state.resize(size,false);
+}
+
+StateMachineFree::StateMachineFree(const StateMachine &state)
+{
+    this->_state.clear();
+    for (unsigned int i=0;i<state.size();i++){
+        this->_state.push_back(state[i]);
+    }
+}
+
+StateMachineFree::StateMachineFree(const StateMachine *state):StateMachineFree(*state)
+{
+
+}
+
+/*
 StateMachineFree::StateMachineFree(StateMachine* state){
-    *this = *state;
+    this->_state.clear();
+    for (int i=0;i<state->size();i++){
+        this->_state.push_back(state[i]);
+    }
+}
+*/
+
+void StateMachineFree::reset(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while(iter!=this->_state.end()){
+        *iter = false;
+        iter++;
+    }
+}
+
+void StateMachineFree::setLast(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while(iter!=this->_state.end()){
+        *iter = true;
+        iter++;
+    }
+}
+
+int StateMachineFree::randomize(int count){
+    int randnum=0, parts = this->_state.size();
+    vector<bool>::iterator iter;
+    for (int i=0;i<count;i++){
+        randnum = config::Instance()->rand()%parts;
+        iter = this->_state.begin()+randnum;
+        *iter = !*iter;
+    }
+    if (count==1)
+        return randnum;
+    else
+        return count;
+}
+
+bool StateMachineFree::isFirst(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while (iter!=this->_state.end()){
+        if (*iter==true)
+            return false;
+        iter++;
+    }
+    return true;
+}
+
+bool StateMachineFree::isLast(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while (iter!=this->_state.end()){
+        if (*iter==false)
+            return false;
+        iter++;
+    }
+    return true;
+}
+
+bool StateMachineFree::isHalfLast(){
+    vector<bool>::iterator iter = this->_state.begin();
+    while (iter!=this->_state.end()-1){
+        if (*iter==false)
+            return false;
+        iter++;
+    }
+    return true;
+}
+
+bool StateMachineFree::next(){
+    std::vector<bool>::iterator iter;
+    iter = this->_state.begin();
+
+    while (iter != this->_state.end()){
+        if (*iter==0){
+            *iter=1;
+            return true;
+            break;
+        } else {
+            *iter=0;
+        }
+        iter++;
+    }
+
+    return false;
+}
+
+bool StateMachineFree::halfNext(){
+    std::vector<bool>::iterator iter;
+    iter = this->_state.begin();
+
+    while (iter != (this->_state.end()-1)){
+        if (*iter==0){
+            *iter=1;
+            return true;
+            break;
+        } else {
+            *iter=0;
+        }
+        iter++;
+    }
+
+    return false;
+}
+
+bool StateMachineFree::prev(){
+    std::vector<bool>::iterator iter;
+    iter = this->_state.begin();
+
+    while (iter != this->_state.end()){
+        if (*iter==1){
+            *iter=0;
+            return true;
+            break;
+        } else {
+            *iter=1;
+        }
+        iter++;
+    }
+
+    return false;
+}
+
+bool StateMachineFree::halfPrev(){
+    std::vector<bool>::iterator iter;
+    iter = this->_state.begin();
+
+    while (iter != (this->_state.end()-1)){
+        if (*iter==1){
+            *iter=0;
+            return true;
+            break;
+        } else {
+            *iter=1;
+        }
+        iter++;
+    }
+
+    return false;
+}
+
+bool StateMachineFree::operator++()
+{
+    return this->next();
+}
+
+bool StateMachineFree::operator--()
+{
+    return this->prev();
+}
+
+bool StateMachineFree::operator++(int)
+{
+    return this->next();
+}
+
+bool StateMachineFree::operator--(int)
+{
+    return this->prev();
 }
 
 std::string StateMachineFree::toString(){
@@ -23,33 +199,28 @@ std::string StateMachineFree::toString(){
     return s;
 }
 
-bool StateMachineFree::next(){
-    //версия для типа bool
-    std::vector<bool>::iterator iter;
-    iter = this->_state.begin();
-
-    while (iter!=(this->_state.end()-1)){
-        if (*iter==0){
-            *iter=1;
-            return true;
-            break;
-        } else {
-            *iter=0;
-        }
-        iter++;
+bool StateMachineFree::fromString(const std::string &s)
+{
+    this->_state.clear();
+    for (unsigned int i=0;i<s.size();i++){
+        this->_state.push_back(s[i]!='0');
     }
-
-    return false;
+    return true;
 }
 
-StateMachineFree & StateMachineFree::operator= (const StateMachine & one){
+bool StateMachineFree::operator [](const unsigned long int num) const{
+    return this->_state[num];
+}
+
+unsigned long int StateMachineFree::size() const{
+    return this->_state.size();
+}
+
+StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
     this->_state.clear();
 
-    vector<Part*>::const_iterator iter = one._state.begin();
-    while(iter!=one._state.end()){
-        this->_state.push_back((*iter)->state);
-        iter++;
-    }
+    for (unsigned int i=0;i<one.size();i++)
+        this->_state.push_back(one[i]);
 
     return *this;
 }
@@ -76,33 +247,6 @@ bool StateMachineFree::operator==(const StateMachineFree &one)
     return true;
 }
 
-bool StateMachineFree::operator==(const StateMachine &one)
-{
-    if (one._state.size()!=this->_state.size()) return false;
-    if (one._state.size()==this->_state.size() && (one._state.size()==0 || one._state.size()==1)) return true;
-
-    vector<Part*>::const_iterator iter1 = one._state.begin();
-    vector<bool>::iterator iter2 = this->_state.begin();
-
-    //вычисляем, прямое или обратное совпадение считать
-    bool compEquals=true;
-    if ((*iter2) != (*iter1)->state)
-        compEquals = false;
-
-    while(iter2!=this->_state.end()){
-        if ( ((*iter1)->state == *iter2) != compEquals)
-            return false;
-        iter1++; iter2++;
-    }
-
-    return true;
-}
-
-bool StateMachineFree::operator++()
-{
-    return this->next();
-}
-
 StateMachineFree &StateMachineFree::operator+=(int val)
 {
     for (int i=0;i<val;i++){
@@ -111,44 +255,9 @@ StateMachineFree &StateMachineFree::operator+=(int val)
     return *this;
 }
 
-void StateMachineFree::reset(){
-    vector<bool>::iterator iter = this->_state.begin();
-    while(iter!=this->_state.end()){
-        *iter = false;
-        iter++;
-    }
-}
-
-int StateMachineFree::randomize(int count){
-    int randnum=0, parts = this->_state.size();
-    vector<bool>::iterator iter;
-    for (int i=0;i<count;i++){
-        randnum = config::Instance()->rand()%parts;
-        iter = this->_state.begin()+randnum;
-        *iter = !*iter;
-    }
-    if (count==1)
-        return randnum;
-    else
-        return -1;
-}
-
-bool StateMachineFree::isInitial(){
-    vector<bool>::iterator iter = this->_state.begin();
-    while (iter!=this->_state.end()){
-        if (*iter==true)
-            return false;
-        iter++;
-    }
-    return true;
-}
-
-std::vector<bool>::iterator StateMachineFree::begin(){
-    return this->_state.begin();
-}
-
-std::vector<bool>::iterator StateMachineFree::end(){
-    return this->_state.end();
+void StateMachineFree::resize(const unsigned long size)
+{
+    this->_state.resize(size);
 }
 
 

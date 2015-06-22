@@ -2,6 +2,8 @@
 #define STATEMACHINEFREE_H
 #include <vector>
 #include <string>
+#include "config.h"
+#include "statemachinebase.h"
 #include "StateMachine.h"
 
 class StateMachine;
@@ -9,47 +11,46 @@ class StateMachine;
  * @brief The StateMachineFree class представляет собой класс, не привязанный к какой-либо системе.
  * Поддерживает стандартное представление StateMachine и умеет копировать из него состояния
  */
-class StateMachineFree
+class StateMachineFree: public StateMachineBase
 {
 public:
     StateMachineFree();
 
-    StateMachineFree(StateMachine* state);
+    StateMachineFree(const unsigned long int size);
 
-    StateMachineFree & operator= (const StateMachine & one);
+    StateMachineFree(const StateMachine &state);
+    StateMachineFree(const StateMachine *state);
+
+
+    virtual void reset();
+    virtual void setLast();
+    virtual int randomize(int count=1);
+    virtual bool isFirst();
+    virtual bool isLast();
+    virtual bool isHalfLast();
+    virtual bool next();
+    virtual bool halfNext();
+    virtual bool prev();
+    virtual bool halfPrev();
+    virtual bool operator++();
+    virtual bool operator--();
+    virtual bool operator++(int);
+    virtual bool operator--(int);
+    virtual std::string toString();
+    virtual bool fromString(const std::string&);
+    virtual bool operator [](const unsigned long int) const;
+    virtual unsigned long int size() const;
+
+    StateMachineFree & operator= (const StateMachineFree & one);
 
     bool operator==(const StateMachineFree & one);
-    bool operator==(const StateMachine & one);
-    bool  operator++();
+
     StateMachineFree &  operator+=(int val);
 
-    /**
-     * @brief isInitial Проверяет, находится ли система в начальном состоянии
-     * @return true если поворот всех спинов - 0.
-     */
-    bool isInitial();
+    void resize(const unsigned long int size);
 
-    /**
-     * @brief next переключиться на следующее состояние
-     * @return false если система возвращается в начальное состояние
-     */
-    bool next();
-
+protected:
     std::vector<bool> _state;
-
-    std::string toString();
-
-    void reset();
-
-    /**
-     * @brief randomize Переворачивает несколько случайных частиц
-     * @param count Количество частиц, которые должны быть перевернуты
-     * @return если перевернуть одну частицу, возвращает ее номер, иначе 0
-     */
-    int randomize(int count=1);
-
-    std::vector<bool>::iterator begin();
-    std::vector<bool>::iterator end();
 };
 
 #endif // STATEMACHINEFREE_H

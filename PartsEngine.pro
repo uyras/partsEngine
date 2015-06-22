@@ -17,18 +17,22 @@ SOURCES += Vect.cpp \
     Part.cpp \
     distributionLaw.cpp \
     config.cpp \
+    statemachinebase.cpp \
     StateMachine.cpp \
     StateMachineFree.cpp \
-    statemachinebase.cpp
+    squarespinicearray.cpp \
+    squarespinicecell.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
     Part.h \
     distributionLaw.h \
     config.h \
+    statemachinebase.h \
     StateMachine.h \
     StateMachineFree.h \
-    statemachinebase.h
+    squarespinicearray.h \
+    squarespinicecell.h
 
 
 contains(MODES,boost) {
@@ -36,7 +40,7 @@ contains(MODES,boost) {
         TARGET = PartsEngineBoost
     }
 
-    message(Build with Boost.mpi library);
+    message(Build with Boost libraries);
     QMAKE_CXX = mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX
@@ -45,7 +49,8 @@ contains(MODES,boost) {
     QMAKE_CC = mpicc
 
     HEADERS += partarrayboost.h
-    HEADERS += PartArrayMPI.h
+    HEADERS += PartArrayMPI.h \
+        statemachinegmp.h
     SOURCES += PartArrayMPI.cpp\
         statemachinegmp.cpp
     LIBS+= -lboost_mpi -lboost_serialization

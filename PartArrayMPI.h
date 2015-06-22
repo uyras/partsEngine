@@ -15,6 +15,7 @@
 #include "PartArray.h"
 #include "config.h"
 #include "Vect.h"
+#include "statemachinegmp.h"
 
 
 class PartArrayMPI :

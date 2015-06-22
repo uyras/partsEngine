@@ -3,27 +3,45 @@
 
 #include <vector>
 
-#ifdef WITH_BOOST
-#include <boost/multiprecision/cpp_int.hpp>
-#endif //WITH_BOOST
-
 #include "PartArray.h"
 #include "Part.h"
 #include "config.h"
+#include "statemachinebase.h"
 #include "StateMachineFree.h"
-
 
 class PartArray; //фикс, так как используется перекрестное объявление с этим классом
 class StateMachineFree;
-class StateMachine
+
+class StateMachine:
+        public StateMachineBase
 {
 public:
-    StateMachine(PartArray*);
+    StateMachine();
+    StateMachine(PartArray *system);
+    StateMachine(PartArray & system);
 
-    /**
-     * @brief reset сбросить состояние в начальное, т.е. все состояния по нулям
-     */
-    void reset();
+    virtual void reset();
+    virtual void setLast();
+    virtual int randomize(int count=1);
+    virtual bool isFirst();
+    virtual bool isLast();
+    virtual bool isHalfLast();
+    virtual bool next();
+    virtual bool halfNext();
+    virtual bool prev();
+    virtual bool halfPrev();
+    virtual bool operator++();
+    virtual bool operator--();
+    virtual bool operator++(int);
+    virtual bool operator--(int);
+    virtual std::string toString();
+    virtual bool fromString(const std::string&);
+    virtual bool operator[](const unsigned long int) const;
+    virtual unsigned long int size() const;
+
+    void connect(PartArray *system);
+    void disconnect();
+    bool connected() const;
 
     /**
      * @brief hardReset Жестко обнуляет состояния частиц, не трогая их намагниченности.
@@ -31,49 +49,17 @@ public:
      */
     void hardReset();
 
-    /**
-     * @brief randomize Переворачивает несколько случайных частиц
-     * @param count Количество частиц, которые должны быть перевернуты
-     * @return если перевернуть одну частицу, возвращает ее номер, иначе count. При ошибке возвращает -1.
-     */
-    int randomize(int count=1);
+    StateMachine &  operator+=(const unsigned long int val);
+    bool operator==(const StateMachine &one);
 
-    void setSystem(PartArray*);
 
-    /**
-     * @brief isInitial Проверяет, находится ли система в начальном состоянии
-     * @return true если поворот всех спинов - 0.
-     */
-    bool isInitial();
+    StateMachine& operator=(const StateMachineFree &state);
 
-    /**
-     * @brief next переключиться на следующее состояние
-     * @return false если система возвращается в начальное состояние
-     */
-    bool next();
-    /**
-     * @brief halfNext аналог next, но перебирается только половина состояний
-     * @return false если система прошла половину состояний
-     */
-    bool halfNext();
-
-    bool operator++();
-    StateMachine &  operator+=(int val);
-
-    StateMachine & operator= (const StateMachineFree & one);
-    bool operator==(const StateMachineFree & one);
-    bool operator==(const StateMachine & one);
-
-    void draw();
-
-    std::vector<Part*>::iterator begin();
-    std::vector<Part*>::iterator end();
-
-    std::vector<Part*> _state;
-
-    #ifdef WITH_BOOST
-    void add(const boost::multiprecision::cpp_int & b);
-    #endif //WITH_BOOST
+private:
+    PartArray* _system;
+    //#ifdef WITH_BOOST
+    //void add(const boost::multiprecision::cpp_int & b);
+    //#endif //WITH_BOOST
 };
 
 #endif // STATEMACHINE_H
