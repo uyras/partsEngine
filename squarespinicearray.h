@@ -32,8 +32,8 @@ public:
      */
     Part* findByPosition(const Vect& pos, double epsilon=1e-15);
 
-    void setToGroundState();
-    void setToMaximalState();
+    bool setToGroundState();
+    bool setToMaximalState();
 
     vector<SquareSpinIceCell*> cells;
 };

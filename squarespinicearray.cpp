@@ -104,7 +104,7 @@ Part *SquareSpinIceArray::findByPosition(const Vect &pos, double epsilon)
     return 0;
 }
 
-void SquareSpinIceArray::setToGroundState()
+bool SquareSpinIceArray::setToGroundState()
 {
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
     double m = config::Instance()->m;
@@ -119,10 +119,10 @@ void SquareSpinIceArray::setToGroundState()
 
         iter++;
     }
-
+    return true;
 }
 
-void SquareSpinIceArray::setToMaximalState()
+bool SquareSpinIceArray::setToMaximalState()
 {
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
     double m = config::Instance()->m;
@@ -137,5 +137,6 @@ void SquareSpinIceArray::setToMaximalState()
 
         iter++;
     }
+    return true;
 }
 

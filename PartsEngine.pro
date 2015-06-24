@@ -21,7 +21,9 @@ SOURCES += Vect.cpp \
     StateMachine.cpp \
     StateMachineFree.cpp \
     squarespinicearray.cpp \
-    squarespinicecell.cpp
+    squarespinicecell.cpp \
+    wanglandau.cpp \
+    wanglandauparallel.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
@@ -32,7 +34,9 @@ HEADERS += Vect.h \
     StateMachine.h \
     StateMachineFree.h \
     squarespinicearray.h \
-    squarespinicecell.h
+    squarespinicecell.h \
+    wanglandau.h \
+    wanglandauparallel.h
 
 
 contains(MODES,boost) {
@@ -44,9 +48,9 @@ contains(MODES,boost) {
     QMAKE_CXX = mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX
-    QMAKE_CXXFLAGS_DEBUG = -O1 -fno-omit-frame-pointer -g
     QMAKE_LINK = $$QMAKE_CXX
     QMAKE_CC = mpicc
+    QMAKE_CXXFLAGS_DEBUG = -O0
 
     HEADERS += partarrayboost.h
     HEADERS += PartArrayMPI.h \
