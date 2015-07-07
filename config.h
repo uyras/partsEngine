@@ -61,7 +61,7 @@ private:
     bool U2D; //Use2Directions, если true - то используется плоскость (2D), иначе пространство (3D)
     static config* _self;
     config();
-    ~config(){};
+    virtual ~config();
 
     void rand_file_open(const char* file);
     void rand_file_close();

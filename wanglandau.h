@@ -15,7 +15,7 @@ public:
     static vector<double> dos(PartArray & sys, const int intervals=1000, const int steps=10000, const double accuracy=0.8);
     static vector<double> scale(PartArray & sys, const int intervals=1000);
 
-private:
+
     static unsigned int getIntervalNumber(double Energy, const double eMin, const double dE);
     static void setValues(vector<double> & histogramm, double value);
     static bool isFlat(vector<double> &histogramm, const double accuracy);

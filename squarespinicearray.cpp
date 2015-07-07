@@ -2,13 +2,12 @@
 
 SquareSpinIceArray::SquareSpinIceArray()
 {
-    SquareSpinIceArray::PartArray();
+
 }
 
 SquareSpinIceArray::~SquareSpinIceArray()
 {
-    this->cells.clear();
-    this->PartArray::~PartArray();
+    this->clearCells();
 }
 
 void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
@@ -138,5 +137,15 @@ bool SquareSpinIceArray::setToMaximalState()
         iter++;
     }
     return true;
+}
+
+void SquareSpinIceArray::clearCells()
+{
+    vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
+    while (iter!=this->cells.end()){
+        delete (*iter); //удаляем все что по есть по ссылкам на частицы
+        iter++;
+    }
+    this->cells.clear();
 }
 

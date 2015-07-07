@@ -23,7 +23,8 @@ SOURCES += Vect.cpp \
     squarespinicearray.cpp \
     squarespinicecell.cpp \
     wanglandau.cpp \
-    wanglandauparallel.cpp
+    wanglandauparallel.cpp \
+    wanglandauparallelwalker.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
@@ -36,7 +37,8 @@ HEADERS += Vect.h \
     squarespinicearray.h \
     squarespinicecell.h \
     wanglandau.h \
-    wanglandauparallel.h
+    wanglandauparallel.h \
+    wanglandauparallelwalker.h
 
 
 contains(MODES,boost) {

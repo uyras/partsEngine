@@ -36,6 +36,9 @@ public:
     bool setToMaximalState();
 
     vector<SquareSpinIceCell*> cells;
+
+private:
+    void clearCells(); //чистим информацию о ячейках
 };
 
 #endif // SQUARESPINICEARRAY_H

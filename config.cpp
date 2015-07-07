@@ -26,6 +26,11 @@ config::config(){
     this->randmode_standart();
 }
 
+config::~config()
+{
+    delete config::_self;
+}
+
 config* config::Instance()
 {
     if(!config::_self)
