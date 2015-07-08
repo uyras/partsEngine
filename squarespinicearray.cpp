@@ -110,7 +110,7 @@ bool SquareSpinIceArray::setToGroundState()
     SquareSpinIceCell *temp;
     while (iter!=this->cells.end()){
         temp = *iter;
-        int direction = (temp->row+temp->column)%2*2-1;
+        int direction = (temp->row+temp->column)%2*2-1; //либо +1 либо -1, в шахматном порядке
         temp->top->m = Vect(m*direction,0,0);
         temp->bottom->m = Vect(m*direction*-1.,0,0);
         temp->left->m = Vect(0,m*direction,0);
@@ -137,6 +137,52 @@ bool SquareSpinIceArray::setToMaximalState()
         iter++;
     }
     return true;
+}
+
+SquareSpinIceArray *SquareSpinIceArray::copy()
+{
+    SquareSpinIceArray *temp = new SquareSpinIceArray();
+    temp->E1 = this->E1;
+    temp->E2 = this->E2;
+    temp->eIncrementalTemp = this->eIncrementalTemp;
+    temp->size = this->size;
+    temp->absSize = this->absSize;
+
+    //копируем частицы
+    vector<Part*>::iterator iter1 = this->parts.begin();
+    while(iter1!=this->parts.end()){
+        temp->insert((*iter1)->copy());
+        iter1++;
+    }
+
+    //копируем содержание ячеек
+    vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
+    SquareSpinIceCell *tempCell, *oldCell;
+    while(iter!=this->cells.end()){
+        tempCell = new SquareSpinIceCell();
+        oldCell = *iter;
+        for (int i=0;i<this->count();i++){
+            if (oldCell->top==this->parts[i])
+                tempCell->top=temp->parts[i];
+
+            if (oldCell->right==this->parts[i])
+                tempCell->right=temp->parts[i];
+
+            if (oldCell->bottom==this->parts[i])
+                tempCell->bottom=temp->parts[i];
+
+            if (oldCell->left==this->parts[i])
+                tempCell->left=temp->parts[i];
+        }
+
+        tempCell->column = oldCell->column;
+        tempCell->row = oldCell->row;
+        tempCell->pos = oldCell->pos;
+        temp->cells.push_back(tempCell);
+        iter++;
+    }
+
+    return temp;
 }
 
 void SquareSpinIceArray::clearCells()

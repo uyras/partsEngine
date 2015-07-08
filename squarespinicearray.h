@@ -37,6 +37,8 @@ public:
 
     vector<SquareSpinIceCell*> cells;
 
+    virtual SquareSpinIceArray *copy();
+
 private:
     void clearCells(); //чистим информацию о ячейках
 };

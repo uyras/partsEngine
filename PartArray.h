@@ -46,7 +46,7 @@ public:
 
 	void operator=(const PartArray& a);
 
-	PartArray* copy();
+    virtual PartArray* copy();
 
     /**
     * Изменяет размер подложки и чистит массив частиц

@@ -14,10 +14,12 @@ class WangLandauParallelWalker
 {
 public:
     friend class WangLandauParallel;
-    WangLandauParallelWalker(PartArray system,
+    WangLandauParallelWalker(PartArray *system,
             unsigned int intervals,
             double eMin,
             double eMax,
+                             double overlap,
+                             unsigned int gaps,
             double gap,
             int number
             );
@@ -36,7 +38,7 @@ public:
     bool walk();
 
 protected:
-    PartArray sys;
+    PartArray *sys;
     unsigned intervals;
     double eMin, eMax, dE, eInit, gaps;
     int number;

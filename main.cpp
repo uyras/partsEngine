@@ -1,4 +1,6 @@
 #include <QCoreApplication>
+#include <ctime>
+
 #include "config.h"
 #include "PartArray.h"
 #include "squarespinicearray.h"
@@ -6,6 +8,7 @@
 #include "StateMachine.h"
 #include "StateMachineFree.h"
 #include "wanglandauparallel.h"
+
 
 using namespace std;
 
@@ -25,7 +28,10 @@ int main(int argc, char *argv[])
     sys->dropSpinIce(3,3);
     cout<<"Parts: "<<sys->count()<<endl;
 
-    WangLandauParallel w(*sys,1000);
+
+    qDebug()<<"init Wang Landau Parallel";
+    WangLandauParallel w(sys,1000);
+    qDebug()<<"start Wang Landau DOS";
     w.dos();
 
 

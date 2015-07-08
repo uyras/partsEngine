@@ -1,32 +1,37 @@
 #include "wanglandauparallel.h"
 
-WangLandauParallel::WangLandauParallel(PartArray &system, unsigned int intervals, unsigned int gaps, double overlap, unsigned int walkersByGap):
-    sys(system),
+WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals, unsigned int gaps, double overlap, unsigned int walkersByGap):
+    sys(system->copy()),
     intervals(intervals),
     gaps(gaps),
     walkersByGap(walkersByGap),
     overlap(overlap)
 {
-    sys.setToGroundState();
-    this->eMin = sys.calcEnergy1();
-    sys.setToMaximalState();
-    this->eMax = sys.calcEnergy1();
+    qDebug()<<"calculate min and max";
+    sys->setToMaximalState();
+    this->eMax = sys->calcEnergy1();
+    sys->setToGroundState();
+    this->eMin = sys->calcEnergy1();
 
-    sys.state->reset();
-    this->eInit = sys.calcEnergy1FastIncrementalFirst();
+    sys->state->reset();
+    this->eInit = sys->calcEnergy1FastIncrementalFirst();
 
+    qDebug()<<"Start creating walkers";
     for (unsigned int i=0;i<gaps;i++){
         for (unsigned int j=0;j<walkersByGap;j++){
             walkers.push_back(
                         WangLandauParallelWalker(
-                            system,
+                            sys->copy(),
                             this->intervals,
                             this->eMin,
                             this->eMax,
+                            this->overlap,
+                            this->gaps,
                             i,
                             i*walkersByGap+j));
         }
     }
+    qDebug()<<"Finish creating walkers";
 }
 
 WangLandauParallel::~WangLandauParallel()
@@ -36,15 +41,19 @@ WangLandauParallel::~WangLandauParallel()
 
 vector<double> WangLandauParallel::dos()
 {
+
+    qDebug()<<"start DOS";
     bool continueFlag=true;
     //выполняем несколько шагов WL на каждом walker'е. Каждый walker имеет свой критерий плоскости
     while (continueFlag){
+        qDebug()<<"start step";
         continueFlag=false;
         for (unsigned w=0;w<walkers.size();w++){
             if (walkers[w].walk())
                 continueFlag=true;
         }
 
+        qDebug()<<"swap gaps";
         for (unsigned int gap1=0; gap1 < this->gaps-1; gap1++){
             //подбираем двух случайных walker из двух соседних блуждателей и переворачиваем
             unsigned int gap2=gap1+1;
@@ -53,6 +62,7 @@ vector<double> WangLandauParallel::dos()
         }
     }
 
+    qDebug()<<"save to file";
     //сохраняем walker в файл
     vector<double>::iterator iter;
     for (unsigned w=0;w<walkers.size();w++){
@@ -70,22 +80,23 @@ vector<double> WangLandauParallel::dos()
 
 bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2)
 {
-    double ex = walker1->sys.calcEnergy1FastIncremental(eInit), ey = walker2->sys.calcEnergy1FastIncremental(eInit);
+    double ex = walker1->sys->calcEnergy1FastIncremental(eInit), ey = walker2->sys->calcEnergy1FastIncremental(eInit);
 
     double p = (walker1->getG(ex)+walker2->getG(ey)) - (walker1->getG(ey)+walker2->getG(ex));
 
     if (double(config::Instance()->rand()) / double(config::Instance()->rand_max) <= p){
-            unsigned tempGap = walker1->gap();
-            walker1->setGap(walker2->gap());
-            walker2->setGap(tempGap);
-            return true;
+        qDebug()<<"swap "<<walker1->number<<" and "<<walker2->number;
+        unsigned tempGap = walker1->gap();
+        walker1->setGap(walker2->gap());
+        walker2->setGap(tempGap);
+        return true;
     } else
         return false;
 }
 
 WangLandauParallelWalker *WangLandauParallel::takeRandomFromGap(unsigned int gapNumber)
 {
-    unsigned int randnum = unsigned(floor(double(config::Instance()->rand()) / double(config::Instance()->rand_max) * (double)walkersByGap))+1;
+    unsigned int randnum = unsigned(floor(double(config::Instance()->rand()) / double(config::Instance()->rand_max+1) * (double)walkersByGap))+1;
     vector<WangLandauParallelWalker>::iterator iter = walkers.begin();
     while (iter!=walkers.end()){
         if (randnum>0 && (*iter).gap()==gapNumber){

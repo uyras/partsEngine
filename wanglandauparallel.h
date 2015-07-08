@@ -22,7 +22,7 @@ public:
      * @param gaps Число энергетических интервалов
      * @param walkersByGap Количество простых блуждателей на каждый интервал
      */
-    WangLandauParallel(PartArray & system, unsigned int intervals, unsigned int gaps=10, double overlap=0.75, unsigned int walkersByGap=5);
+    WangLandauParallel(PartArray *system, unsigned int intervals, unsigned int gaps=10, double overlap=0.75, unsigned int walkersByGap=5);
     ~WangLandauParallel();
 
     vector<double> dos();
@@ -32,7 +32,7 @@ private:
     bool swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2);
     WangLandauParallelWalker * takeRandomFromGap(unsigned int gapNumber);
 
-    PartArray & sys;
+    PartArray *sys;
     vector<WangLandauParallelWalker> walkers;
     double eMin,eMax;
     double eInit;

@@ -8,6 +8,7 @@
 #include "StateMachine.h"
 #include "StateMachineFree.h"
 #include <string>
+#include <ctime>
 
 class StateMachineFreeTest : public QObject
 {
