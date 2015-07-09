@@ -37,6 +37,14 @@ public:
      */
     bool walk();
 
+    /**
+     * @brief getIntervalNumber Получить номер интервала
+     * @param Energy
+     * @return
+     */
+    unsigned int getIntervalNumber(double Energy);
+
+    bool isFlat();
 protected:
     PartArray *sys;
     unsigned intervals;

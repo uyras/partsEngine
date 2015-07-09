@@ -74,7 +74,7 @@ bool WangLandauParallelWalker::walk()
 
             if (
                     double(config::Instance()->rand())/double(config::Instance()->rand_max) <=
-                    exp(g[WangLandau::getIntervalNumber(eOld,eMin,dE)]-g[WangLandau::getIntervalNumber(eNew,eMin,dE)])
+                    exp(g[this->getIntervalNumber(eOld)]-g[this->getIntervalNumber(eNew)])
                     ) {
                 eOld = eNew;
                 ffile<<eNew<<endl;
@@ -83,8 +83,8 @@ bool WangLandauParallelWalker::walk()
                 sys->parts[partNum]->rotate(); //откатываем состояние
             }
 
-            g[WangLandau::getIntervalNumber(eOld,eMin,dE)]+=log(f);
-            h[WangLandau::getIntervalNumber(eOld,eMin,dE)]+=1;
+            g[this->getIntervalNumber(eOld)]+=log(f);
+            h[this->getIntervalNumber(eOld)]+=1;
 
         } else {
             i--;
@@ -92,7 +92,7 @@ bool WangLandauParallelWalker::walk()
     }
 
     //проверяем ровность диаграммы
-    if (WangLandau::isFlat(h,accuracy)){
+    if (this->isFlat()){
         WangLandau::normalize(g);
         WangLandau::setValues(h,0);
         f=sqrt(f);
@@ -100,5 +100,35 @@ bool WangLandauParallelWalker::walk()
         qDebug()<<"modify f="<<f<<" on "<<this->number<<" walker";
     }
     return f>fMin;
+}
+
+unsigned int WangLandauParallelWalker::getIntervalNumber(double Energy)
+{
+    return round((Energy-this->eMin)/this->dE);
+}
+
+//критерий плоскости гистограммы
+bool WangLandauParallelWalker::isFlat()
+{
+    vector<double>::iterator iter;
+
+    //считаем среднее значение
+    double average=0; int step=0;
+    iter = h.begin()+this->getIntervalNumber(this->from);
+    while (iter!=h.begin()+this->getIntervalNumber(this->to)+1){
+        if (*iter != 0){
+            average = (average*step+(*iter))/(step+1);
+            step++;
+        }
+        iter++;
+    }
+
+    iter = h.begin()+this->getIntervalNumber(this->from);
+    while (iter!=h.begin()+this->getIntervalNumber(this->to)+1){
+        if ((*iter)!=0 && fabs(*iter-average)/average > (1.0 - accuracy)) //критерий плоскости
+            return false;
+        iter++;
+    }
+    return true;
 }
 
