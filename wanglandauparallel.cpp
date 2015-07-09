@@ -41,11 +41,27 @@ WangLandauParallel::~WangLandauParallel()
 
 vector<double> WangLandauParallel::dos()
 {
+    for (int i=0;i<walkers.size();i++){
+        (walkers[i]).makeNormalInitState();
+    }
 
     qDebug()<<"start DOS";
     bool continueFlag=true;
     //выполняем несколько шагов WL на каждом walker'е. Каждый walker имеет свой критерий плоскости
     while (continueFlag){
+        //analys
+        ofstream f("analys.txt");
+        f<<"#\tgap\tfrom\tto\tf"<<endl;
+        for (unsigned w=0;w<walkers.size();w++){
+            f<<
+                walkers[w].number<<"\t"<<
+                walkers[w].gap()<<"\t"<<
+                walkers[w].from<<"\t"<<
+                walkers[w].to<<"\t"<<
+                walkers[w].f<<"\t"<<endl;
+        }
+        f.close();
+
         qDebug()<<"start step";
         continueFlag=false;
         for (unsigned w=0;w<walkers.size();w++){
@@ -96,7 +112,7 @@ bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLand
 
 WangLandauParallelWalker *WangLandauParallel::takeRandomFromGap(unsigned int gapNumber)
 {
-    unsigned int randnum = unsigned(floor(double(config::Instance()->rand()) / double(config::Instance()->rand_max+1) * (double)walkersByGap))+1;
+    unsigned int randnum = Random::Instance()->next(walkersByGap)+1;
     vector<WangLandauParallelWalker>::iterator iter = walkers.begin();
     while (iter!=walkers.end()){
         if (randnum>0 && (*iter).gap()==gapNumber){

@@ -4,11 +4,13 @@
 #include "wanglandau.h"
 #include "wanglandauparallelwalker.h"
 #include "PartArray.h"
+#include "random.h"
 
 #include <QDebug>
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <omp.h>
 
 using namespace std;
 class WangLandauParallelWalker;

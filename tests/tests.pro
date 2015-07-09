@@ -23,7 +23,8 @@ HEADERS += \
     VectTest2D.h \
     StateMachineTest.h \
     statemachinefreetest.h \
-    squarespinicetest.h
+    squarespinicetest.h \
+    randomtest.h
 
 INCLUDEPATH += ../
 LIBS += -L$$PWD/../ -lPartsEngine

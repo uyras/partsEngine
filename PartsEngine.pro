@@ -24,7 +24,8 @@ SOURCES += Vect.cpp \
     squarespinicecell.cpp \
     wanglandau.cpp \
     wanglandauparallel.cpp \
-    wanglandauparallelwalker.cpp
+    wanglandauparallelwalker.cpp \
+    random.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
@@ -38,7 +39,8 @@ HEADERS += Vect.h \
     squarespinicecell.h \
     wanglandau.h \
     wanglandauparallel.h \
-    wanglandauparallelwalker.h
+    wanglandauparallelwalker.h \
+    random.h
 
 
 contains(MODES,boost) {

@@ -55,29 +55,31 @@ double WangLandauParallelWalker::getG(double e)
 
 bool WangLandauParallelWalker::walk()
 {
-    ofstream ffile(QString("e_%1.txt").arg(number).toStdString().c_str(),ios_base::out|ios_base::app);
-
     if (f<=fMin)
         return false;
 
-    double eOld = eInit,eNew=eInit;
+    ofstream ffile(QString("e_%1.txt").arg(number).toStdString().c_str(),ios_base::out|ios_base::app);
+
     const int count = sys->count();
+
+    double eOld = sys->calcEnergy1FastIncremental(eInit);
+    double eNew = eOld;
 
     //повторяем алгоритм сколько-то шагов
     for (unsigned i=1;i<=stepsPerWalk;i++){
-        double rand = double(config::Instance()->rand())/double(config::Instance()->rand_max+1);
-        int partNum = (int)floor(rand*(double)count);
-        sys->parts[partNum]->rotate();
-        eNew = sys->calcEnergy1FastIncremental(eInit);
+        int partNum = sys->state->randomize();
 
-        if (eNew<=to && eNew>=from){
+        eNew = sys->calcEnergy1FastIncremental(eInit);
+        ffile<<eNew<<endl;
+
+        //if (eNew<=to && eNew>=from){
 
             if (
+                    eNew<=to && eNew>=from &&
                     double(config::Instance()->rand())/double(config::Instance()->rand_max) <=
                     exp(g[this->getIntervalNumber(eOld)]-g[this->getIntervalNumber(eNew)])
                     ) {
                 eOld = eNew;
-                ffile<<eNew<<endl;
             }
             else {
                 sys->parts[partNum]->rotate(); //откатываем состояние
@@ -86,9 +88,9 @@ bool WangLandauParallelWalker::walk()
             g[this->getIntervalNumber(eOld)]+=log(f);
             h[this->getIntervalNumber(eOld)]+=1;
 
-        } else {
-            i--;
-        }
+       // } else {
+       //     i--;
+        //}
     }
 
     //проверяем ровность диаграммы
@@ -130,5 +132,18 @@ bool WangLandauParallelWalker::isFlat()
         iter++;
     }
     return true;
+}
+
+void WangLandauParallelWalker::makeNormalInitState()
+{
+    unsigned long int i=0;
+    double eTemp = sys->calcEnergy1FastIncremental(eInit);
+
+    while (eTemp > this->to || eTemp < this->from){
+        this->sys->state->randomize();
+        eTemp = sys->calcEnergy1FastIncremental(eInit);
+        i++;
+    }
+    qDebug()<<this->number<<": normalize init state takes "<<i<<" steps";
 }
 

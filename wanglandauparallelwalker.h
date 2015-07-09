@@ -4,6 +4,7 @@
 #include "PartArray.h"
 #include "wanglandau.h"
 #include "wanglandauparallel.h"
+#include "random.h"
 
 #include <iostream>
 #include <QString>
@@ -45,6 +46,8 @@ public:
     unsigned int getIntervalNumber(double Energy);
 
     bool isFlat();
+
+    void makeNormalInitState();
 protected:
     PartArray *sys;
     unsigned intervals;

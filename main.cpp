@@ -9,13 +9,14 @@
 #include "StateMachineFree.h"
 #include "wanglandauparallel.h"
 
+#include "random.h"
+
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
 
     config::Instance()->srand(time(NULL));
     config::Instance()->m = 1;
