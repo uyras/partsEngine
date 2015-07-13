@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
 
 
     delete sys;
+
     cout<<"finish"<<endl;
     return 0;
     //return a.exec();

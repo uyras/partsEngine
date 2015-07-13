@@ -31,6 +31,16 @@ WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals
                             i*walkersByGap+j));
         }
     }
+
+    //Создаем файл с энергиями
+    ofstream f("energies.txt");
+    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap); //ширина перекрытия
+    for (unsigned int i=0;i<gaps;i++){
+        double from=this->eMin + (double)i * x * (1.-overlap);
+        f<<from<<endl<<from+x<<endl;
+    }
+    f.close();
+
     qDebug()<<"Finish creating walkers";
 }
 
@@ -63,11 +73,13 @@ vector<double> WangLandauParallel::dos()
         f.close();
 
         qDebug()<<"start step";
-        continueFlag=false;
+        unsigned int finished = 0;
         for (unsigned w=0;w<walkers.size();w++){
-            if (walkers[w].walk())
-                continueFlag=true;
+            if (!walkers[w].walk())
+                finished++;
         }
+        continueFlag = (finished!=walkers.size()); //если не все закончили, продолжаем
+        qDebug()<<finished<<" of "<<walkers.size()<<" walkers has already finished";
 
         qDebug()<<"swap gaps";
         for (unsigned int gap1=0; gap1 < this->gaps-1; gap1++){

@@ -23,15 +23,7 @@ int Random::next(const int maxValue)
 
 int Random::next(const int minValue, const int maxValue)
 {
-    return int(
-                floor(
-                   (double)(rand())
-                   /
-                   (double)(randmax)
-                   *
-                   (double)(maxValue-minValue)
-                   )
-                )+minValue;
+    return rand()%(maxValue-minValue)+minValue;
 }
 
 int Random::next()

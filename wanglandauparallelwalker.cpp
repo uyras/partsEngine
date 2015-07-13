@@ -37,7 +37,7 @@ WangLandauParallelWalker::~WangLandauParallelWalker()
 
 void WangLandauParallelWalker::setGap(unsigned int gap)
 {
-    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap);
+    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap); //ширина одного интервала
     this->from = this->eMin + (double)gap * x * (1.-overlap);
     this->to = this->from+x;
     this->gapNumber = gap;
@@ -55,6 +55,7 @@ double WangLandauParallelWalker::getG(double e)
 
 bool WangLandauParallelWalker::walk()
 {
+    double saveToFile=false;
     if (f<=fMin)
         return false;
 
@@ -70,7 +71,7 @@ bool WangLandauParallelWalker::walk()
         int partNum = sys->state->randomize();
 
         eNew = sys->calcEnergy1FastIncremental(eInit);
-        ffile<<eNew<<endl;
+        if (saveToFile) ffile<<eNew<<endl;
 
         //if (eNew<=to && eNew>=from){
 
