@@ -34,6 +34,10 @@ private:
     bool swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2);
     WangLandauParallelWalker * takeRandomFromGap(unsigned int gapNumber);
 
+    void averageHistogramms();
+
+    vector<WangLandauParallelWalker*> getByGap(unsigned gapNumber);
+
     PartArray *sys;
     vector<WangLandauParallelWalker> walkers;
     double eMin,eMax;

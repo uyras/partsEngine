@@ -51,7 +51,7 @@ WangLandauParallel::~WangLandauParallel()
 
 vector<double> WangLandauParallel::dos()
 {
-    for (int i=0;i<walkers.size();i++){
+    for (unsigned i=0;i<walkers.size();i++){
         (walkers[i]).makeNormalInitState();
     }
 
@@ -81,6 +81,9 @@ vector<double> WangLandauParallel::dos()
         continueFlag = (finished!=walkers.size()); //если не все закончили, продолжаем
         qDebug()<<finished<<" of "<<walkers.size()<<" walkers has already finished";
 
+        qDebug()<<"average g";
+        this->averageHistogramms();
+
         qDebug()<<"swap gaps";
         for (unsigned int gap1=0; gap1 < this->gaps-1; gap1++){
             //подбираем двух случайных walker из двух соседних блуждателей и переворачиваем
@@ -108,12 +111,18 @@ vector<double> WangLandauParallel::dos()
 
 bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2)
 {
-    double ex = walker1->sys->calcEnergy1FastIncremental(eInit), ey = walker2->sys->calcEnergy1FastIncremental(eInit);
+    double ex = walker1->sys->calcEnergy1FastIncremental(walker1->eInit), ey = walker2->sys->calcEnergy1FastIncremental(walker2->eInit);
 
     double p = (walker1->getG(ex)+walker2->getG(ey)) - (walker1->getG(ey)+walker2->getG(ex));
 
-    if (double(config::Instance()->rand()) / double(config::Instance()->rand_max) <= p){
-        qDebug()<<"swap "<<walker1->number<<" and "<<walker2->number;
+    double randnum = Random::Instance()->nextDouble();
+    if (0.0==randnum) //логарифма нуля не существует
+        randnum=10e-20;
+    randnum = std::log(randnum);
+
+
+    if ( randnum <= p){
+        qDebug()<<"swap "<<walker1->number<<" ("<<walker1->gapNumber<<")"<<" and "<<walker2->number<<" ("<<walker2->gapNumber<<")";
         unsigned tempGap = walker1->gap();
         walker1->setGap(walker2->gap());
         walker2->setGap(tempGap);
@@ -124,17 +133,37 @@ bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLand
 
 WangLandauParallelWalker *WangLandauParallel::takeRandomFromGap(unsigned int gapNumber)
 {
-    unsigned int randnum = Random::Instance()->next(walkersByGap)+1;
-    vector<WangLandauParallelWalker>::iterator iter = walkers.begin();
-    while (iter!=walkers.end()){
-        if (randnum>0 && (*iter).gap()==gapNumber){
-            randnum--;
-            if (randnum==0)
-                return &(*iter);
-        }
+    return this->getByGap(gapNumber)[Random::Instance()->next(walkersByGap)];
+}
 
+void WangLandauParallel::averageHistogramms()
+{
+    vector<WangLandauParallelWalker*> w;
+    double average=0;
+    for (int gap=0;gap<gaps;gap++){
+        w = getByGap(gap);
+        for (unsigned i=0;i<this->intervals;i++){
+            average=0;
+            for (unsigned j=0;j<walkersByGap;j++){
+                average = (average * (double)j + w[j]->g[i]) / (double)(j+1);
+            }
+
+            for (unsigned j=0;j<walkersByGap;j++){
+                w[j]->g[i] = average;
+            }
+        }
+    }
+}
+
+vector<WangLandauParallelWalker *> WangLandauParallel::getByGap(unsigned gapNumber)
+{
+    vector<WangLandauParallelWalker*> w;
+    vector<WangLandauParallelWalker>::iterator iter = this->walkers.begin();
+    while (w.size()<walkersByGap && iter!=walkers.end()){
+        if ((*iter).gapNumber==gapNumber)
+            w.push_back(&(*iter));
         iter++;
     }
-    return &(*iter);
+    return w;
 }
 
