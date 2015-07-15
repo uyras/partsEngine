@@ -12,15 +12,12 @@ StateMachineFree::StateMachineFree(const unsigned long size)
 
 StateMachineFree::StateMachineFree(const StateMachine &state)
 {
-    this->_state.clear();
-    for (unsigned int i=0;i<state.size();i++){
-        this->_state.push_back(state[i]);
-    }
+    this->_construct(&state);
 }
 
-StateMachineFree::StateMachineFree(const StateMachine *state):StateMachineFree(*state)
+StateMachineFree::StateMachineFree(const StateMachine *state)
 {
-
+    this->_construct(state);
 }
 
 /*
@@ -212,6 +209,11 @@ bool StateMachineFree::operator [](const unsigned long int num) const{
     return this->_state[num];
 }
 
+bool StateMachineFree::at(const unsigned long num) const
+{
+    return this->operator [](num);
+}
+
 unsigned long int StateMachineFree::size() const{
     return this->_state.size();
 }
@@ -258,6 +260,14 @@ StateMachineFree &StateMachineFree::operator+=(int val)
 void StateMachineFree::resize(const unsigned long size)
 {
     this->_state.resize(size);
+}
+
+void StateMachineFree::_construct(const StateMachine *state)
+{
+    this->_state.clear();
+    for (unsigned int i=0;i<state->size();i++){
+        this->_state.push_back(state->operator[](i));
+    }
 }
 
 

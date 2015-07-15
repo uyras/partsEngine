@@ -14,7 +14,7 @@ WangLandauParallelWalker::WangLandauParallelWalker(PartArray *system,
     gaps(gaps),
     number(number),
     accuracy(0.8),
-    stepsPerWalk(10000) //число шагов на одно блуждание
+    stepsPerWalk(1000) //число шагов на одно блуждание
 {
     for (unsigned i=0;i<intervals;i++){
         g.push_back(0);
@@ -66,7 +66,16 @@ bool WangLandauParallelWalker::walk()
     double eOld = sys->calcEnergy1FastIncremental(eInit);
     double eNew = eOld;
 
-    do {
+    double average = 0;
+    unsigned hCount = 0;
+    unsigned long int falseRotations=0; //pfobnf от случайного выпрыгивания из блуждателя из энергетического участка
+
+    do {//повторяем блуждания пока гистограмма не станет плоской
+        //защита от зацикливания
+        if (falseRotations>10e7){
+            this->makeNormalInitState();
+        }
+
         //повторяем алгоритм сколько-то шагов
         for (unsigned i=1;i<=stepsPerWalk;i++){
             int partNum = sys->state->randomize();
@@ -76,8 +85,10 @@ bool WangLandauParallelWalker::walk()
             if (eNew>to || eNew<from){
                 sys->parts[partNum]->rotate(); //откатываем состояние
                 i--;
+                falseRotations++;
                 continue;
             }
+            falseRotations=0;
 
             if (saveToFile) ffile<<eNew<<endl;
 
@@ -96,13 +107,20 @@ bool WangLandauParallelWalker::walk()
                 sys->parts[partNum]->rotate(); //откатываем состояние
             }
 
-            h[this->getIntervalNumber(eOld)]+=1;
             g[this->getIntervalNumber(eOld)]+=log(f);
 
-        }
-    } while (!this->isFlat());//повторяем пока гистограмма не станет плоской
+            if ((h[this->getIntervalNumber(eOld)]+=1) == 1){ //прибавляем h и одновременно считаем среднее значение
+                //случай если изменилось число ненулевых элементов
+                hCount++;
+                average = (average * (hCount-1) + 1) / hCount;
+            } else {
+                average += (1./(double)hCount);
+            }
 
-    //WangLandau::normalize(g);
+        }
+    } while (!this->isFlat(average));//повторяем пока гистограмма не станет плоской
+
+    WangLandau::normalize(g);
     WangLandau::setValues(h,0); //обнуляем гистограмму
     f=sqrt(f);
     qDebug()<<"modify f="<<f<<" on "<<this->number<<" walker";
@@ -117,22 +135,23 @@ unsigned int WangLandauParallelWalker::getIntervalNumber(double Energy)
 }
 
 //критерий плоскости гистограммы
-bool WangLandauParallelWalker::isFlat()
+bool WangLandauParallelWalker::isFlat(double average)
 {
     vector<double>::iterator iter;
 
-    //считаем среднее значение
-    double average=0; int step=0;
-
-    iter = h.begin()+this->getIntervalNumber(this->from);
-    while (iter!=h.begin()+this->getIntervalNumber(this->to)+1){ //плоскость гистограммы только в своем интервале
-    //iter = h.begin(); //плоскость гистограммы целиком
-    //while (iter!=h.end()){
-        if (*iter != 0){
-            average = (average*step+(*iter))/(step+1);
-            step++;
+    if (average==0.0){
+        //считаем среднее значение
+        int step=0;
+        iter = h.begin()+this->getIntervalNumber(this->from);
+        while (iter!=h.begin()+this->getIntervalNumber(this->to)+1){ //плоскость гистограммы только в своем интервале
+        //iter = h.begin(); //плоскость гистограммы целиком
+        //while (iter!=h.end()){
+            if (*iter != 0){
+                average = (average*step+(*iter))/(step+1);
+                step++;
+            }
+            iter++;
         }
-        iter++;
     }
 
     iter = h.begin()+this->getIntervalNumber(this->from);

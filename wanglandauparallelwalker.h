@@ -45,7 +45,7 @@ public:
      */
     unsigned int getIntervalNumber(double Energy);
 
-    bool isFlat();
+    bool isFlat(double average=0.0);
 
     void makeNormalInitState();
 protected:

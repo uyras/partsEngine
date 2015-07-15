@@ -39,6 +39,7 @@ public:
     virtual std::string toString();
     virtual bool fromString(const std::string&);
     virtual bool operator [](const unsigned long int) const;
+    virtual bool at(const unsigned long int num) const;
     virtual unsigned long int size() const;
 
     StateMachineFree & operator= (const StateMachineFree & one);
@@ -50,6 +51,7 @@ public:
     void resize(const unsigned long int size);
 
 protected:
+    virtual void _construct(const StateMachine *state);
     std::vector<bool> _state;
 };
 

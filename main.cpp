@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
 
     qDebug()<<"init Wang Landau Parallel";
-    WangLandauParallel w(sys,1000);
+    WangLandauParallel w(sys,1000,6,0.75,3);
     qDebug()<<"start Wang Landau DOS";
     w.dos();
 
