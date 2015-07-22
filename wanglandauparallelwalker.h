@@ -34,9 +34,15 @@ public:
 
     /**
      * @brief walk Проводит 100 WL-шагов до тех пор, пока f не достигнет fmin
-     * @return true если возможен следующий walk(), false если невозможен
+     * @return true если гистограмма плоская, следующий walk(), false если невозможен
      */
-    bool walk();
+    void walk(unsigned stepsPerWalk); //число шагов на одно блуждание
+
+    /**
+     * @brief processWalk Выполняется только когда h стала плоской
+     * @return true если f достигла минимума, false если еще возможны шаги
+     */
+    bool processWalk();
 
     /**
      * @brief getIntervalNumber Получить номер интервала
@@ -45,9 +51,12 @@ public:
      */
     unsigned int getIntervalNumber(double Energy);
 
-    bool isFlat(double average=0.0);
+    bool isFlat(); //true если g(E) - плоская
+    bool finished(); //true если f меньше порогового значения
 
     void makeNormalInitState();
+
+    void updateGH(double E=0); //обновляет гистограммы g и h, обновляет среднее значение гистограмм
 protected:
     PartArray *sys;
     unsigned intervals;
@@ -55,8 +64,11 @@ protected:
     int number;
     double from,to;
     double overlap;
-    unsigned int gapNumber,stepsPerWalk;
+    unsigned int gapNumber;
     double f,fMin, accuracy;
+
+    double average; //подсчитывает среднее число для h
+    unsigned hCount; //количество ненулевых элементов h, нужно для подсчета среднего
 
     vector<double> h,g;//g - логарифм плотности состояний (энтропия), h - вспомогательная гистограмма, которая должна быть плоской
 };

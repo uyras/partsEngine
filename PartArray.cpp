@@ -599,6 +599,11 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy){
         iter++;
     }
 
+//    double E2=this->calcEnergy1();
+//    if (floor(E*1e8)!=floor(E2*1e8)){
+//        int i=0;
+//    }
+
     return E;
 }
 

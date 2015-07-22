@@ -54,6 +54,7 @@ public:
 
 
     StateMachine& operator=(const StateMachineFree &state);
+    StateMachine& operator=(const StateMachine & state);
 
 private:
     PartArray* _system;

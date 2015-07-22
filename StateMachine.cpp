@@ -31,6 +31,22 @@ StateMachine& StateMachine::operator=(const StateMachineFree &state)
     return *this;
 }
 
+StateMachine &StateMachine::operator=(const StateMachine &state)
+{
+    long unsigned int s;
+    if (this->size() < state.size())
+        s = this->size();
+    else
+        s=state.size();
+
+    for (unsigned int i=0;i<s;i++){
+        if (this->operator[](i) != state[i]){
+            this->_system->parts[i]->rotate();
+        }
+    }
+    return *this;
+}
+
 void StateMachine::connect(PartArray *system)
 {
     this->_system=system;
@@ -266,7 +282,7 @@ bool StateMachine::fromString(const std::string & s)
     return true;
 }
 
-bool StateMachine::operator [](const unsigned long int num) const{
+bool StateMachine::operator[](const unsigned long int num) const{
     return this->_system->parts[num]->state;
 }
 

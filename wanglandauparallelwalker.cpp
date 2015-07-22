@@ -14,7 +14,8 @@ WangLandauParallelWalker::WangLandauParallelWalker(PartArray *system,
     gaps(gaps),
     number(number),
     accuracy(0.8),
-    stepsPerWalk(1000) //число шагов на одно блуждание
+    average(0),
+    hCount(0)
 {
     for (unsigned i=0;i<intervals;i++){
         g.push_back(0);
@@ -50,83 +51,66 @@ unsigned int WangLandauParallelWalker::gap()
 
 double WangLandauParallelWalker::getG(double e)
 {
-    return this->g[WangLandau::getIntervalNumber(e, this->eMin, this->dE)];
+    return this->g[this->getIntervalNumber(e)];
 }
 
-bool WangLandauParallelWalker::walk()
+void WangLandauParallelWalker::walk(unsigned stepsPerWalk)
 {
     double saveToFile=false;
-    if (f<=fMin)
-        return false;
 
     ofstream ffile(QString("e_%1.txt").arg(number).toStdString().c_str(),ios_base::out|ios_base::app);
 
-    const int count = sys->count();
-
     double eOld = sys->calcEnergy1FastIncremental(eInit);
-    double eNew = eOld;
+    double eNew;
 
-    double average = 0;
-    unsigned hCount = 0;
-    unsigned long int falseRotations=0; //pfobnf от случайного выпрыгивания из блуждателя из энергетического участка
+    unsigned long int
+            totalRotations=0, //всего вращений системы
+            discartedRotations=0; //отмененных вращений системы
 
-    do {//повторяем блуждания пока гистограмма не станет плоской
-        //защита от зацикливания
-        if (falseRotations>10e7){
-            this->makeNormalInitState();
-        }
+    //повторяем алгоритм сколько-то шагов
+    for (unsigned i=1;i<=stepsPerWalk;i++){
 
-        //повторяем алгоритм сколько-то шагов
-        for (unsigned i=1;i<=stepsPerWalk;i++){
-            int partNum = sys->state->randomize();
+        int partNum = sys->state->randomize(); totalRotations++;
 
-            eNew = sys->calcEnergy1FastIncremental(eInit);
+        eNew = sys->calcEnergy1FastIncremental(eInit);
 
-            if (eNew>to || eNew<from){
+        /*if (eNew>to || eNew<from){
                 sys->parts[partNum]->rotate(); //откатываем состояние
-                i--;
-                falseRotations++;
+                discartedRotations++;
                 continue;
-            }
-            falseRotations=0;
+            }*/
 
-            if (saveToFile) ffile<<eNew<<endl;
+        if (saveToFile) ffile<<eNew<<endl;
 
-            double randnum = Random::Instance()->nextDouble();
-            if (randnum==0.0)
-                randnum=10e-20;
-            randnum = std::log(randnum);
+        double randnum = Random::Instance()->nextDouble();
+        if (randnum==0.0)
+            randnum=10e-20;
+        randnum = std::log(randnum);
 
-            if (
-                    randnum <=
-                    this->getG(eOld)-this->getG(eNew)
-                    ) {
-                eOld = eNew;
-            }
-            else {
-                sys->parts[partNum]->rotate(); //откатываем состояние
-            }
-
-            g[this->getIntervalNumber(eOld)]+=log(f);
-
-            if ((h[this->getIntervalNumber(eOld)]+=1) == 1){ //прибавляем h и одновременно считаем среднее значение
-                //случай если изменилось число ненулевых элементов
-                hCount++;
-                average = (average * (hCount-1) + 1) / hCount;
-            } else {
-                average += (1./(double)hCount);
-            }
-
+        if (
+                (eNew>=from && eNew<=to) &&
+                randnum <= this->getG(eOld)-this->getG(eNew)
+                ) {
+            eOld = eNew;
         }
-    } while (!this->isFlat(average));//повторяем пока гистограмма не станет плоской
+        else {
+            sys->parts[partNum]->rotate(); //откатываем состояние
+        }
 
-    WangLandau::normalize(g);
-    WangLandau::setValues(h,0); //обнуляем гистограмму
-    f=sqrt(f);
-    qDebug()<<"modify f="<<f<<" on "<<this->number<<" walker";
+        this->updateGH(eOld);
+    }
 
     ffile.close();
-    return f>fMin;
+}
+
+bool WangLandauParallelWalker::processWalk()
+{
+    WangLandau::setValues(h,0); //обнуляем гистограмму
+    f=sqrt(f);
+    average = 0;
+    hCount = 0;
+    qDebug()<<"modify f="<<f<<" on "<<this->number<<" walker";
+    return this->finished();
 }
 
 unsigned int WangLandauParallelWalker::getIntervalNumber(double Energy)
@@ -135,12 +119,13 @@ unsigned int WangLandauParallelWalker::getIntervalNumber(double Energy)
 }
 
 //критерий плоскости гистограммы
-bool WangLandauParallelWalker::isFlat(double average)
+bool WangLandauParallelWalker::isFlat()
 {
     vector<double>::iterator iter;
 
     if (average==0.0){
-        //считаем среднее значение
+        return false;
+        /*//считаем среднее значение, устаревший код
         int step=0;
         iter = h.begin()+this->getIntervalNumber(this->from);
         while (iter!=h.begin()+this->getIntervalNumber(this->to)+1){ //плоскость гистограммы только в своем интервале
@@ -151,7 +136,7 @@ bool WangLandauParallelWalker::isFlat(double average)
                 step++;
             }
             iter++;
-        }
+        }*/
     }
 
     iter = h.begin()+this->getIntervalNumber(this->from);
@@ -165,6 +150,11 @@ bool WangLandauParallelWalker::isFlat(double average)
     return true;
 }
 
+bool WangLandauParallelWalker::finished()
+{
+    return f<=fMin;
+}
+
 void WangLandauParallelWalker::makeNormalInitState()
 {
     unsigned long int i=0;
@@ -176,5 +166,26 @@ void WangLandauParallelWalker::makeNormalInitState()
         i++;
     }
     qDebug()<<this->number<<": normalize init state takes "<<i<<" steps";
+}
+
+void WangLandauParallelWalker::updateGH(double E)
+{
+    if (E==0.){
+        E = this->sys->calcEnergy1FastIncremental(this->eInit);
+    }
+
+    g[this->getIntervalNumber(E)]+=log(f);
+
+    bool increased = (h[this->getIntervalNumber(E)]+=1) == 1;
+
+    if (E>=from && E<=to){
+        if (increased){ //прибавляем h и одновременно считаем среднее значение
+            //случай если изменилось число ненулевых элементов
+            hCount++;
+            average = (average * (hCount-1) + 1) / hCount;
+        } else {
+            average += (1./(double)hCount);
+        }
+    }
 }
 

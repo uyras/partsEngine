@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     sys = new SquareSpinIceArray();
 
-    sys->dropSpinIce(3,3);
+    sys->dropSpinIce(2,3);
     cout<<"Parts: "<<sys->count()<<endl;
 
 
