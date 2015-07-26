@@ -95,7 +95,7 @@ vector<double> WangLandauParallel::dos()
                     flatted++;
             }
 
-            if (flatted==gapwalkers.size()){ //если все блуждатели плоские, уменьшаем f, обнуляем h и усредняем g
+            if (flatted==gapwalkers.size()){ //если все блуждатели в интервале плоские, уменьшаем f, обнуляем h и усредняем g
                 averageHistogramms(gap);
                 for (unsigned w=0;w<gapwalkers.size();w++){
                     if (gapwalkers[w]->processWalk())
