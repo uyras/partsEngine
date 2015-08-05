@@ -26,12 +26,12 @@ int main(int argc, char *argv[])
 
     sys = new SquareSpinIceArray();
 
-    sys->dropSpinIce(2,3);
+    sys->dropSpinIce(3,3);
     cout<<"Parts: "<<sys->count()<<endl;
 
 
     qDebug()<<"init Wang Landau Parallel";
-    WangLandauParallel w(sys,1000,6,0.75,3);
+    WangLandauParallel w(sys,1000,4,0.8,4);
     qDebug()<<"start Wang Landau DOS";
     w.dos();
 

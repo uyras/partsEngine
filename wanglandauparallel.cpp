@@ -13,6 +13,10 @@ WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals
     sys->setToGroundState();
     this->eMin = sys->calcEnergy1();
 
+    //слегка расширяем границы, дабы нормально работало сравнение double
+    double delta=(eMax-eMin)*0.2/(double)(intervals-1);
+    eMax+=delta; eMin-=delta;
+
     sys->state->reset();
     this->eInit = sys->calcEnergy1FastIncrementalFirst();
 
@@ -60,17 +64,7 @@ vector<double> WangLandauParallel::dos()
     //выполняем несколько шагов WL на каждом walker'е. Каждый walker имеет свой критерий плоскости
     while (continueFlag){
         //analys
-        ofstream f("analys.txt");
-        f<<"#\tgap\tfrom\tto\tf"<<endl;
-        for (unsigned w=0;w<walkers.size();w++){
-            f<<
-                walkers[w].number<<"\t"<<
-                walkers[w].gap()<<"\t"<<
-                walkers[w].from<<"\t"<<
-                walkers[w].to<<"\t"<<
-                walkers[w].f<<"\t"<<endl;
-        }
-        f.close();
+        makeAnalyseFile();
 
         qDebug()<<"start step";
         for (unsigned w=0;w<walkers.size();w++){
@@ -86,7 +80,6 @@ vector<double> WangLandauParallel::dos()
         }
 
 
-        unsigned int finished = 0;
         for (unsigned int gap=0; gap < this->gaps; gap++){
             vector<WangLandauParallelWalker*> gapwalkers = getByGap(gap);
             unsigned flatted=0;
@@ -98,13 +91,20 @@ vector<double> WangLandauParallel::dos()
             if (flatted==gapwalkers.size()){ //если все блуждатели в интервале плоские, уменьшаем f, обнуляем h и усредняем g
                 averageHistogramms(gap);
                 for (unsigned w=0;w<gapwalkers.size();w++){
-                    if (gapwalkers[w]->processWalk())
-                        finished++;
+                    gapwalkers[w]->processWalk();
                 }
             }
         }
 
         //qDebug()<<finished<<" of "<<walkers.size()<<" walkers has already finished";
+        //смотрим количество завершенных процессов
+        unsigned int finished = 0;
+        for (unsigned w=0;w<walkers.size();w++){
+            if (walkers[w].finished())
+                finished++;
+            else
+                break; //нет смысла продолжать опрос, если хотя бы один не завершен
+        }
 
         //если все блуждатели завершили работу, сохраняем результат и выходим
         if (finished==walkers.size()){
@@ -118,7 +118,7 @@ vector<double> WangLandauParallel::dos()
                 iter=walkers[w].g.begin();
                 int i=0;
                 while (iter!=walkers[w].g.end()){
-                    f<<i<<"\t"<<*iter<<endl;
+                    f<<i<<"\t"<<walkers[w].getEnergyByInterval(i)<<"\t"<<*iter<<endl;
                     iter++; i++;
                 }
                 f.close();
@@ -142,9 +142,9 @@ bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLand
         randnum=10e-20;
     randnum = std::log(randnum);
 
-    StateMachineFree tempState;
-
     if ( randnum <= p){
+
+        StateMachineFree tempState;
         //qDebug()<<"swap "<<walker1->number<<" ("<<walker1->gapNumber<<")"<<" and "<<walker2->number<<" ("<<walker2->gapNumber<<")";
 
         tempState = *(walker1->sys->state);
@@ -190,5 +190,20 @@ vector<WangLandauParallelWalker *> WangLandauParallel::getByGap(unsigned gapNumb
         iter++;
     }
     return w;
+}
+
+void WangLandauParallel::makeAnalyseFile()
+{
+    ofstream f("analys.txt");
+    f<<"#\tgap\tfrom\tto\tf"<<endl;
+    for (unsigned w=0;w<walkers.size();w++){
+        f<<
+            walkers[w].number<<"\t"<<
+            walkers[w].gap()<<"\t"<<
+            walkers[w].from<<"\t"<<
+            walkers[w].to<<"\t"<<
+            walkers[w].f<<"\t"<<endl;
+    }
+    f.close();
 }
 

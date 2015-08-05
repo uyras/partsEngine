@@ -38,6 +38,8 @@ private:
 
     vector<WangLandauParallelWalker*> getByGap(unsigned gapNumber);
 
+    void makeAnalyseFile();
+
     PartArray *sys;
     vector<WangLandauParallelWalker> walkers;
     double eMin,eMax;

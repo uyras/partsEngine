@@ -40,9 +40,8 @@ public:
 
     /**
      * @brief processWalk Выполняется только когда h стала плоской
-     * @return true если f достигла минимума, false если еще возможны шаги
      */
-    bool processWalk();
+    void processWalk();
 
     /**
      * @brief getIntervalNumber Получить номер интервала
@@ -50,6 +49,7 @@ public:
      * @return
      */
     unsigned int getIntervalNumber(double Energy);
+    double getEnergyByInterval(unsigned int interval);
 
     bool isFlat(); //true если g(E) - плоская
     bool finished(); //true если f меньше порогового значения
@@ -57,12 +57,17 @@ public:
     void makeNormalInitState();
 
     void updateGH(double E=0); //обновляет гистограммы g и h, обновляет среднее значение гистограмм
+
+    double calcAverageH(); //считает среднее H
+
+    bool inRange(double E);//Входит ли число в интервал
 protected:
     PartArray *sys;
     unsigned intervals;
     double eMin, eMax, dE, eInit, gaps;
     int number;
     double from,to;
+    unsigned nFrom,nTo;//номера интервалов ОТ и ДО
     double overlap;
     unsigned int gapNumber;
     double f,fMin, accuracy;
