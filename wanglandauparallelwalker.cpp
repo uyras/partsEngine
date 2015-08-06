@@ -21,10 +21,10 @@ WangLandauParallelWalker::WangLandauParallelWalker(PartArray *system,
         g.push_back(0);
         h.push_back(0);
     }
-    this->setGap(gap);
     this->dE = (eMax-eMin)/(intervals-1);
     this->fMin=1.00001;
     this->f = exp(1);
+    this->setGap(gap);
 
     sys->state->reset();
     eInit = sys->calcEnergy1FastIncrementalFirst();
@@ -162,12 +162,14 @@ void WangLandauParallelWalker::updateGH(double E)
 
     bool increased = (h[this->getIntervalNumber(E)]+=1) == 1;
 
-    if (increased){ //прибавляем h и одновременно считаем среднее значение
-        //случай если изменилось число ненулевых элементов
-        hCount++;
-        average = (average * (hCount-1) + 1) / hCount;
-    } else {
-        average += (1./(double)hCount);
+    if (inRange(E)){//считаем среднее только в разрешенном интервале
+        if (increased){ //прибавляем h и одновременно считаем среднее значение
+            //случай если изменилось число ненулевых элементов
+            hCount++;
+            average = (average * (hCount-1) + 1) / hCount;
+        } else {
+            average += (1./(double)hCount);
+        }
     }
 }
 
