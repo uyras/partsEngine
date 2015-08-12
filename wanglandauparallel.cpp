@@ -66,12 +66,12 @@ vector<double> WangLandauParallel::dos()
         //analys
         makeAnalyseFile();
 
-        qDebug()<<"start step";
+        //qDebug()<<"start step";
         for (unsigned w=0;w<walkers.size();w++){
             walkers[w].walk(1000);
         }
 
-        qDebug()<<"swap configurations";
+        //qDebug()<<"swap configurations";
         for (unsigned int gap1=0; gap1 < this->gaps-1; gap1++){
             //подбираем двух случайных walker из двух соседних блуждателей и переворачиваем
             unsigned int gap2=gap1+1;
@@ -134,6 +134,9 @@ bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLand
 {
     double ex = walker1->sys->calcEnergy1FastIncremental(walker1->eInit), ey = walker2->sys->calcEnergy1FastIncremental(walker2->eInit);
     //double ex = walker1->sys->calcEnergy1(), ey = walker2->sys->calcEnergy1();
+
+    if (!walker1->inRange(ey) || !walker2->inRange(ex)) //если энергия блуждателя за границей, отменять обмен
+        return false;
 
     double p = (walker1->getG(ex)+walker2->getG(ey)) - (walker1->getG(ey)+walker2->getG(ex));
 

@@ -83,16 +83,13 @@ void WangLandauParallelWalker::walk(unsigned stepsPerWalk)
             randnum=10e-20;
         randnum = std::log(randnum);
 
-        if (inRange(eNew))
-        {
-            if ( randnum <= this->getG(eOld)-this->getG(eNew) ) {
-                eOld = eNew;
-            } else {
-                sys->parts[partNum]->rotate(); //откатываем состояние
-            }
-
-            this->updateGH(eOld);
+        if (inRange(eNew) && randnum <= this->getG(eOld)-this->getG(eNew) ) {
+            eOld = eNew;
+        } else {
+            sys->parts[partNum]->rotate(); //откатываем состояние
         }
+
+        this->updateGH(eOld);
     }
 
     ffile.close();
