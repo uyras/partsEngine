@@ -5,19 +5,10 @@
 #include "squarespinicecell.h"
 #include "Vect.h"
 
-struct oneCell{
-    Part
-    *top,
-    *bottom,
-    *left,
-    *right;
-    Vect pos;
-    int column,row;
-    int type;
-};
 
 class SquareSpinIceArray : public PartArray
 {
+
 public:
     SquareSpinIceArray();
     virtual ~SquareSpinIceArray();
@@ -38,6 +29,8 @@ public:
     vector<SquareSpinIceCell*> cells;
 
     virtual SquareSpinIceArray *copy();
+
+    virtual void clear();
 
 private:
     void clearCells(); //чистим информацию о ячейках

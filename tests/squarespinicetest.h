@@ -20,6 +20,25 @@ private slots:
         config::Instance()->m = 1;
     }
 
+    void cellTypes(){
+        SquareSpinIceArray *sys1;
+        sys1 = new SquareSpinIceArray();
+        sys1->dropSpinIce(2,2);
+        QCOMPARE((int)sys1->cells.size(),4);
+        sys1->clear();
+        sys1->dropSpinIce(1,1);
+        QCOMPARE((int)sys1->cells.size(),1);
+
+        sys1->setToMaximalState();
+        QCOMPARE(sys1->cells[0]->type(),3);
+
+        sys1->state->next();
+        QCOMPARE(sys1->cells[0]->type(),2);
+
+        sys1->setToGroundState();
+        QCOMPARE(sys1->cells[0]->type(),0);
+    }
+
     void copy(){
         SquareSpinIceArray *sys1,*sys2;
         sys1 = new SquareSpinIceArray();

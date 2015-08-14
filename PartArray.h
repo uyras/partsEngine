@@ -193,7 +193,7 @@ public:
     void load(string file, bool showNotifications = false);
 
     //чистим массив частиц
-    void clear();
+    virtual void clear();
 
     //возвращает количество частиц на объекте
     int count();

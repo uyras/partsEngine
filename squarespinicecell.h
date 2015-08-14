@@ -6,11 +6,20 @@
 #include "Part.h"
 
 using namespace std;
+
+
+struct oneCell{ //ячейка нужна для определения конфигураций
+    Vect
+    top, bottom, left, right;
+    unsigned short int type;
+};
+
 /**
  * @brief The SpinIceCell class Одна ячейка спинового льда
  */
 class SquareSpinIceCell
 {
+
 public:
     SquareSpinIceCell();
     virtual ~SquareSpinIceCell();
@@ -26,14 +35,7 @@ public:
     int column,row;
 
 private:
-    struct oneCell{
-        Vect
-        top, bottom, left, right;
-        unsigned short int type;
-    };
-
-    void makeTypes();
-    vector<oneCell> types;
+    int types[16][4][4];
 };
 
 #endif // SQUARESPINICECELL_H

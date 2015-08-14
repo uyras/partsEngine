@@ -1,65 +1,126 @@
 #include "squarespinicecell.h"
 
+
 SquareSpinIceCell::SquareSpinIceCell()
+    :types(
 {
-    this->makeTypes();
+{//#1
+{1,0,0,0},
+{0,-1,0,0},
+{-1,0,0,0},
+{0,1,0,0}
+         },
+{//#2
+{-1,0,0,1},
+{0,1,0,1},
+{-1,0,0,1},
+{0,1,0,1}
+         },
+{//#3
+{1,0,0,1},
+{0,1,0,1},
+{1,0,0,1},
+{0,1,0,1}
+         },
+{//#4
+{-1,0,0,2},
+{0,-1,0,2},
+{-1,0,0,2},
+{0,1,0,2}
+         },
+{//#5
+{-1,0,0,2},
+{0,-1,0,2},
+{1,0,0,2},
+{0,-1,0,2}
+         },
+{//#6
+{-1,0,0,2},
+{0,1,0,2},
+{-1,0,0,2},
+{0,-1,0,2}
+         },
+{//#7
+{1,0,0,2},
+{0,-1,0,2},
+{-1,0,0,2},
+{0,-1,0,2}
+         },
+{//#8
+{-1,0,0,3},
+{0,-1,0,3},
+{1,0,0,3},
+{0,1,0,3}
+         },
+         //дальше предыдущие конфиги, умноженные на -1
+{//#9
+{-1,0,0,0},
+{0,1,0,0},
+{1,0,0,0},
+{0,-1,0,0}
+         },
+{//#10
+{1,0,0,1},
+{0,-1,0,1},
+{1,0,0,1},
+{0,-1,0,1}
+         },
+{//#11
+{-1,0,0,1},
+{0,-1,0,1},
+{-1,0,0,1},
+{0,-1,0,1}
+         },
+{//#12
+{1,0,0,2},
+{0,1,0,2},
+{1,0,0,2},
+{0,-1,0,2}
+         },
+{//#13
+{1,0,0,2},
+{0,1,0,2},
+{-1,0,0,2},
+{0,1,0,2}
+         },
+{//#14
+{1,0,0,2},
+{0,-1,0,2},
+{1,0,0,2},
+{0,1,0,2}
+         },
+{//#15
+{-1,0,0,2},
+{0,1,0,2},
+{1,0,0,2},
+{0,1,0,2}
+         },
+{//#16
+{1,0,0,3},
+{0,1,0,3},
+{-1,0,0,3},
+{0,-1,0,3}
+         }
+         }
+         )
+{
 }
 
 SquareSpinIceCell::~SquareSpinIceCell()
 {
-    this->types.clear();
 }
 
 int SquareSpinIceCell::type()
 {
-    vector<oneCell>::iterator iter = this->types.begin();
-    while (iter!=this->types.end()){
+    for (int i=0;i<16;i++){
         if (
-                this->top->m.scalar((*iter).top)>=0 &&
-                this->right->m.scalar((*iter).right)>=0 &&
-                this->bottom->m.scalar((*iter).bottom)>=0 &&
-                this->left->m.scalar((*iter).left)>=0
+                this->top->m.scalar(Vect(types[i][0][0],types[i][0][1],types[i][0][2]))>=0 &&
+                this->right->m.scalar(Vect(types[i][1][0],types[i][1][1],types[i][1][2]))>=0 &&
+                this->bottom->m.scalar(Vect(types[i][2][0],types[i][2][1],types[i][2][2]))>=0 &&
+                this->left->m.scalar(Vect(types[i][3][0],types[i][3][1],types[i][3][2]))>=0
                 ) {
-            return (*iter).type;
+            return types[i][0][3];
         }
-        iter++;
     }
     return -1;
-}
-
-void SquareSpinIceCell::makeTypes()
-{
-    int configs[][5] =
-    {   //mx_top, my_right, mx_bottom, my_left, type
-        {1,-1,-1,1,0},
-        {-1,1,-1,1,1},
-        {1,1,1,1,1},
-        {-1,-1,-1,1,2},
-        {1,1,-1,1,2},
-        {1,-1,1,1,2},
-        {1,-1,-1,-1,2},
-        {-1,-1,1,1,3}
-    };
-
-    this->types.clear();
-
-    //создаем в памяти конфигурации и заполняем их
-    for (int i=0;i<8;i++){
-        oneCell cell;
-        cell.top = Vect(configs[i][0],0,0);
-        cell.right = Vect(0,configs[i][1],0);
-        cell.bottom = Vect(configs[i][2],0,0);
-        cell.left = Vect(0,configs[i][3],0);
-        cell.type = configs[i][4];
-        this->types.push_back(cell);
-
-        //Зеркальная конфигурация
-        cell = oneCell();
-        cell.top= Vect(configs[i][0] * -1,0,0);
-        cell.right = Vect(0,configs[i][1] * -1,0);
-        cell.bottom = Vect(configs[i][2] * -1,0,0);
-        cell.left = Vect(0,configs[i][3] * -1,0);
-        cell.type = configs[i][4];
-        this->types.push_back(cell);
-    }
 }

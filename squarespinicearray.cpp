@@ -185,6 +185,18 @@ SquareSpinIceArray *SquareSpinIceArray::copy()
     return temp;
 }
 
+void SquareSpinIceArray::clear()
+{
+    vector<SquareSpinIceCell*>::iterator iter = cells.begin();
+    while (iter!=cells.end()){
+        delete (*iter);
+        iter++;
+    }
+    cells.clear();
+
+    PartArray::clear();
+}
+
 void SquareSpinIceArray::clearCells()
 {
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
