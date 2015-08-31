@@ -24,7 +24,8 @@ HEADERS += \
     StateMachineTest.h \
     statemachinefreetest.h \
     squarespinicetest.h \
-    randomtest.h
+    randomtest.h \
+    honeycombspinicetest.h
 
 INCLUDEPATH += ../
 LIBS += -L$$PWD/../ -lPartsEngine

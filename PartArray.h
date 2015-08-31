@@ -47,6 +47,8 @@ public:
 	void operator=(const PartArray& a);
 
     virtual PartArray* copy();
+    virtual PartArray* beforeCopy(); //Возвращает экземпляр чистой системы частиц
+    virtual void afterCopy(PartArray*);
 
     /**
     * Изменяет размер подложки и чистит массив частиц
@@ -194,6 +196,9 @@ public:
 
     //чистим массив частиц
     virtual void clear();
+    //события для удобной кастомизации процесса очистки
+    virtual void beforeClear();
+    virtual void afterClear();
 
     //возвращает количество частиц на объекте
     int count();
@@ -301,7 +306,7 @@ public:
 
     void _construct(); //стандартный конструктор.
 
-private:
+protected:
     bool _double_equals(double a, double b); //сравнение double
 };
 

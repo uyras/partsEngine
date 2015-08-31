@@ -139,22 +139,14 @@ bool SquareSpinIceArray::setToMaximalState()
     return true;
 }
 
-SquareSpinIceArray *SquareSpinIceArray::copy()
+PartArray *SquareSpinIceArray::beforeCopy()
 {
-    SquareSpinIceArray *temp = new SquareSpinIceArray();
-    temp->E1 = this->E1;
-    temp->E2 = this->E2;
-    temp->eIncrementalTemp = this->eIncrementalTemp;
-    temp->size = this->size;
-    temp->absSize = this->absSize;
+    return new SquareSpinIceArray();
+}
 
-    //копируем частицы
-    vector<Part*>::iterator iter1 = this->parts.begin();
-    while(iter1!=this->parts.end()){
-        temp->insert((*iter1)->copy());
-        iter1++;
-    }
-
+void SquareSpinIceArray::afterCopy(PartArray *temp2)
+{
+    SquareSpinIceArray* temp = (SquareSpinIceArray*) temp2;
     //копируем содержание ячеек
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
     SquareSpinIceCell *tempCell, *oldCell;
@@ -181,18 +173,11 @@ SquareSpinIceArray *SquareSpinIceArray::copy()
         temp->cells.push_back(tempCell);
         iter++;
     }
-
-    return temp;
 }
 
 void SquareSpinIceArray::clear()
 {
-    vector<SquareSpinIceCell*>::iterator iter = cells.begin();
-    while (iter!=cells.end()){
-        delete (*iter);
-        iter++;
-    }
-    cells.clear();
+    this->clearCells();
 
     PartArray::clear();
 }
@@ -201,7 +186,7 @@ void SquareSpinIceArray::clearCells()
 {
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
     while (iter!=this->cells.end()){
-        delete (*iter); //удаляем все что по есть по ссылкам на частицы
+        delete (*iter); //удаляем из памяти все ячейки
         iter++;
     }
     this->cells.clear();

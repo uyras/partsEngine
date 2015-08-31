@@ -6,6 +6,7 @@
 #include "StateMachineTest.h"
 #include "statemachinefreetest.h"
 #include "squarespinicetest.h"
+#include "honeycombspinicetest.h"
 #include "randomtest.h"
 
 int main(int argc, char *argv[])
@@ -15,6 +16,7 @@ int main(int argc, char *argv[])
     QTest::qExec(new PartArrayTest2D, argc, argv);
     QTest::qExec(new PartArrayTest3D, argc, argv);
     QTest::qExec(new SquareSpinIceTest, argc, argv);
+    QTest::qExec(new HoneycombSpinIceTest, argc, argv);
     QTest::qExec(new StateMachineTest, argc, argv);
     QTest::qExec(new StateMachineFreeTest, argc, argv);
     QTest::qExec(new RandomTest, argc, argv);

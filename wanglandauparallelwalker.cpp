@@ -65,9 +65,7 @@ void WangLandauParallelWalker::walk(unsigned stepsPerWalk)
     double eOld = sys->calcEnergy1FastIncremental(eInit);
     double eNew;
 
-    unsigned long int
-            totalRotations=0, //всего вращений системы
-            discartedRotations=0; //отмененных вращений системы
+    unsigned long int totalRotations=0; //всего вращений системы
 
     //повторяем алгоритм сколько-то шагов 10000
     for (unsigned i=1;i<=stepsPerWalk;i++){

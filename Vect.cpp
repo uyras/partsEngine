@@ -120,6 +120,16 @@ Vect Vect::operator +(const Vect& a){
     return res;
 }
 
+Vect Vect::operator-(const Vect & a)
+{
+    Vect res;
+    res.x = this->x-a.x;
+    res.y = this->y-a.y;
+    res.z = this->z-a.z;
+
+    return res;
+}
+
 Vect Vect::operator*(const double num)
 {
     return Vect(

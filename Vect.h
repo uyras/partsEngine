@@ -35,6 +35,7 @@ public:
     Vect operator=(const Vect&); //присваивание вектора
     Vect operator+=(const Vect&); //оператор сложения
     Vect operator+(const Vect&);
+    Vect operator-(const Vect&);
     Vect operator*(const double num);
     Vect operator*=(const double num);
     Vect operator/(const double num);

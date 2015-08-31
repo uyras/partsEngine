@@ -28,7 +28,8 @@ public:
 
     vector<SquareSpinIceCell*> cells;
 
-    virtual SquareSpinIceArray *copy();
+    PartArray* beforeCopy();
+    void afterCopy(PartArray *temp2);
 
     virtual void clear();
 

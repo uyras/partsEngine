@@ -42,21 +42,31 @@ void PartArray::operator= (const PartArray& a){
 }
 
 PartArray* PartArray::copy(){
-    PartArray *temp = new PartArray();
+
+    PartArray *temp = this->beforeCopy();
     temp->E1 = this->E1;
     temp->E2 = this->E2;
     temp->eIncrementalTemp = this->eIncrementalTemp;
     temp->size = this->size;
     temp->absSize = this->absSize;
 
+    //копируем частицы
     vector<Part*>::iterator iter = this->parts.begin();
     while(iter!=this->parts.end()){
         temp->insert((*iter)->copy());
         iter++;
     }
 
+    this->afterCopy(temp);
+
     return temp;
 }
+
+PartArray *PartArray::beforeCopy(){
+    return new PartArray();
+}
+
+void PartArray::afterCopy(PartArray * ){}
 
 PartArray::PartArray(double x, double y, double z, double density) {
     this->_construct();
@@ -1243,14 +1253,19 @@ void PartArray::load(string file,bool showNotifications) {
 }
 
 void PartArray::clear(){
+    this->beforeClear();
     vector<Part*>::iterator iter = this->parts.begin();
     while (iter!=this->parts.end()){
         delete (*iter); //удаляем все что по есть по ссылкам на частицы
         iter++;
     }
     this->parts.clear();
+    this->afterClear();
 }
 
+void PartArray::beforeClear(){}
+
+void PartArray::afterClear(){}
 
 
 

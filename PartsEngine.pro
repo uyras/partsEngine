@@ -26,7 +26,8 @@ SOURCES += Vect.cpp \
     wanglandauparallel.cpp \
     wanglandauparallelwalker.cpp \
     random.cpp \
-    honeycombspinicearray.cpp
+    honeycombspinicearray.cpp \
+    honeycombspinicecell.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
@@ -42,7 +43,8 @@ HEADERS += Vect.h \
     wanglandauparallel.h \
     wanglandauparallelwalker.h \
     random.h \
-    honeycombspinicearray.h
+    honeycombspinicearray.h \
+    honeycombspinicecell.h
 
 
 contains(MODES,boost) {

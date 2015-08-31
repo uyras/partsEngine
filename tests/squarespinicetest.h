@@ -43,7 +43,7 @@ private slots:
         SquareSpinIceArray *sys1,*sys2;
         sys1 = new SquareSpinIceArray();
         sys1->dropSpinIce(3,3);
-        sys2 = sys1->copy();
+        sys2 = (SquareSpinIceArray*)sys1->copy();
         QCOMPARE(sys2->count(),sys1->count());
         QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
 

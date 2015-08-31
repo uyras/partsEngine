@@ -64,11 +64,10 @@ public:
 protected:
     PartArray *sys;
     unsigned intervals;
-    double eMin, eMax, dE, eInit, gaps;
+    double eMin, eMax, dE, eInit, overlap, gaps;
     int number;
     double from,to;
     unsigned nFrom,nTo;//номера интервалов ОТ и ДО
-    double overlap;
     unsigned int gapNumber;
     double f,fMin, accuracy;
 

@@ -299,14 +299,14 @@ private slots:
         PartArray sys1(10,10,1,3),sys2(10,10,1,3),sys3(10,10,1,4);
         StateMachine s1(&sys2),s2(&sys2);
         QVERIFY(*sys1.state==*sys2.state);
-        s1 = StateMachine(&sys2);
+        s1.connect(&sys2);
         QVERIFY(*sys1.state==s1);
 
         sys1.parts[0]->rotate();
         QVERIFY(!(*sys1.state==*sys2.state));
         QVERIFY(!(*sys1.state==s1));
 
-        s2 = StateMachine(&sys3);
+        s2.connect(&sys3);
         QVERIFY(!(*sys2.state==*sys3.state));
         QVERIFY(!(*sys2.state==s2));
         QVERIFY(!(s1==s2));
@@ -314,9 +314,9 @@ private slots:
         sys2.parts[1]->rotate();
         sys2.parts[2]->rotate();
         QVERIFY(*sys1.state==*sys2.state);
-        s2 = StateMachine(&sys2);
+        s2.connect(&sys2);
         QVERIFY(*sys1.state==s2);
-        s1 = StateMachine(&sys1);
+        s1.connect(&sys1);
         QVERIFY(s1==s2);
 
     }
@@ -330,7 +330,7 @@ private slots:
         QVERIFY(s1==s2);
 
         sys1.dropRandom(1);
-        s1 = StateMachine(&sys1);
+        s1.connect(&sys1);
         QVERIFY(!(*sys1.state==*sys2.state));
         QVERIFY(!(*sys1.state==s2));
         QVERIFY(!(s1==*sys2.state));
@@ -338,7 +338,7 @@ private slots:
 
 
         sys2.dropRandom(1);
-        s2 = StateMachine(&sys2);
+        s2.connect(&sys2);
         QVERIFY(*sys1.state==*sys2.state);
         QVERIFY(*sys1.state==s2);
         QVERIFY(s1==*sys2.state);
@@ -346,7 +346,7 @@ private slots:
 
 
         sys2.dropRandom(2);
-        s2 = StateMachine(&sys2);
+        s2.connect(&sys2);
         QVERIFY(!(*sys1.state==*sys2.state));
         QVERIFY(!(*sys1.state==s2));
         QVERIFY(!(s1==*sys2.state));
