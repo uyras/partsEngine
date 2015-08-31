@@ -27,11 +27,19 @@ int main(int argc, char *argv[])
 
     sys = new HoneycombSpinIceArray();
     sys->dropHoneyComb(2,2,1);
+    sys->setToGroundState();
+    cout<<sys->calcEnergy1()<<endl;
+    sys->save("min1.dat");
+    sys->PartArray::setToGroundState();
+    cout<<sys->calcEnergy1()<<endl;
+    sys->save("min2.dat");
 
+    /*
     qDebug()<<"init Wang Landau Parallel";
     WangLandauParallel w(sys,1000,4,0.8,4);
     qDebug()<<"start Wang Landau DOS";
     w.dos();
+    */
 
 
     delete sys;

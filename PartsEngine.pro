@@ -47,28 +47,6 @@ HEADERS += Vect.h \
     honeycombspinicecell.h
 
 
-contains(MODES,boost) {
-    CONFIG(release,debug|release){
-        TARGET = PartsEngineBoost
-    }
-
-    message(Build with Boost libraries);
-    QMAKE_CXX = mpicxx
-    QMAKE_CXX_RELEASE = $$QMAKE_CXX
-    QMAKE_CXX_DEBUG = $$QMAKE_CXX
-    QMAKE_LINK = $$QMAKE_CXX
-    QMAKE_CC = mpicc
-    QMAKE_CXXFLAGS_DEBUG = -O0
-
-    HEADERS += partarrayboost.h
-    HEADERS += PartArrayMPI.h \
-        statemachinegmp.h
-    SOURCES += PartArrayMPI.cpp\
-        statemachinegmp.cpp
-    LIBS+= -lboost_mpi -lboost_serialization
-    DEFINES += WITH_BOOST=true
-}
-
 CONFIG(debug,debug|release) {
     SOURCES += main.cpp
     TEMPLATE = app
