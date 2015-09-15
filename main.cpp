@@ -19,7 +19,11 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    config::Instance()->srand(time(NULL));
+    Random::Instance(4);
+    Random::Instance(5)->next(10);
+    Random::Instance(6)->next(15);
+    Random::Instance(7)->next(200);
+            /*
     config::Instance()->m = 1;
 
 
@@ -39,12 +43,12 @@ int main(int argc, char *argv[])
     WangLandauParallel w(sys,1000,4,0.8,4);
     qDebug()<<"start Wang Landau DOS";
     w.dos();
-    */
+
 
 
     delete sys;
 
-    cout<<"finish"<<endl;
+    cout<<"finish"<<endl;*/
     return 0;
     //return a.exec();
 }

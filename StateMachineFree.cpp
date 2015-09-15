@@ -181,8 +181,8 @@ bool StateMachineFree::operator--(int)
     return this->prev();
 }
 
-std::string StateMachineFree::toString(){
-    std::vector<bool>::iterator iter;
+std::string StateMachineFree::toString() const{
+    std::vector<bool>::const_iterator iter;
     std::string s="";
     iter = this->_state.begin();
     while (iter!=this->_state.end()){

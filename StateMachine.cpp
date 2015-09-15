@@ -255,8 +255,8 @@ StateMachine &StateMachine::operator+=(const unsigned long int  val)
     return *this;
 }
 
-std::string StateMachine::toString(){
-    std::vector<Part*>::iterator iter;
+std::string StateMachine::toString() const{
+    std::vector<Part*>::const_iterator iter;
     std::string s="";
     iter = this->_system->parts.begin();
     while (iter!=this->_system->parts.end()){

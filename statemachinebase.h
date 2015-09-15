@@ -54,7 +54,7 @@ public:
     virtual bool operator++(int)=0;
     virtual bool operator--(int)=0;
 
-    virtual std::string toString()=0;
+    virtual std::string toString() const=0;
 
     virtual bool fromString(const std::string&)=0;
 

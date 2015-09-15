@@ -14,7 +14,7 @@ WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals
     this->eMin = sys->calcEnergy1();
 
     //слегка расширяем границы, дабы нормально работало сравнение double
-    double delta=(eMax-eMin)*0.2/(double)(intervals-1);
+    double delta=(eMax-eMin)*0.01/(double)(intervals-1);
     eMax+=delta; eMin-=delta;
 
     sys->state->reset();

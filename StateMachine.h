@@ -34,7 +34,7 @@ public:
     virtual bool operator--();
     virtual bool operator++(int);
     virtual bool operator--(int);
-    virtual std::string toString();
+    virtual std::string toString() const;
     virtual bool fromString(const std::string&);
     virtual bool operator[](const unsigned long int) const;
     virtual unsigned long int size() const;

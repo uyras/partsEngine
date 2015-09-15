@@ -103,14 +103,14 @@ void config::randmode_file(const char *file, int srand){
     this->rand_file_close(); //закрываем старый файл
     this->_randmode = 1;
     this->rand_file_open(file);
-    this->srand(srand);
+    //this->srand(srand);
     this->rand_max = 32767;
 }
 
 void config::randmode_standart(int srand){
     this->rand_file_close();
     this->_randmode = 0;
-    this->srand(srand);
+    //this->srand(srand);
     this->rand_max = RAND_MAX;
 }
 

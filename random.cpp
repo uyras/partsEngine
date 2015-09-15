@@ -1,9 +1,9 @@
 #include "random.h"
-Random*  Random::_self;
+Random*  Random::_self=0;
 
 Random *Random::Instance(int srand)
 {
-    if(!Random::_self)
+    if(Random::_self==0)
     {
         Random::_self = new Random(srand);
     }
