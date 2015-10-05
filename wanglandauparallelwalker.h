@@ -17,8 +17,6 @@ public:
     friend class WangLandauParallel;
     WangLandauParallelWalker(PartArray *system,
             unsigned int intervals,
-            double eMin,
-            double eMax,
                              double overlap,
                              unsigned int gaps,
             double gap,
@@ -26,7 +24,6 @@ public:
             );
     ~WangLandauParallelWalker();
 
-    void setGap(unsigned int gap);
     unsigned int gap();
     void getRangeFrom();
     void getRangeTo();
@@ -61,6 +58,8 @@ public:
     double calcAverageH(); //считает среднее H
 
     bool inRange(double E);//Входит ли число в интервал
+
+    void setMinMaxEnergy(double eMin, double eMax);
 protected:
     PartArray *sys;
     unsigned intervals;

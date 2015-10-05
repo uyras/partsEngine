@@ -92,6 +92,8 @@ public:
      */
     virtual void dropHoneyComb(int m, int n, double a, Part * tmp = 0);
 
+    virtual void dropTetrahedron(int x, int y, int z, Part * tmp = 0);
+
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
     /*рассчитывает плотность массива

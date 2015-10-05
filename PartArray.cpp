@@ -377,6 +377,35 @@ void PartArray::dropHoneyComb(int m, int n, double a, Part *tmp)
     }
 }
 
+void PartArray::dropTetrahedron(int x, int y, int z, Part *tmp)
+{
+    double mLength=0; //магнитный момент одной частицы
+    if (tmp==0){ //если шаблон частицы не был передан, делаем шаблон по умолчанию
+        tmp = new Part();
+        mLength = config::Instance()->m;
+    } else {
+        mLength = tmp->m.length();
+    }
+
+    for (int i=0;i<10;i++){
+        //Создаем временную частицу в памяти
+        Part* temp = tmp->copy();
+
+        //задаем ее позицию
+        temp->pos.setXYZ(i,i,i);
+        //temp->pos = Vect(i,i,i);
+//        temp->pos.x =i; temp->pos.y=i;
+
+        //задаем магнитный момент
+        temp->m.setXYZ(1,1,1);
+
+        //добавляем частицу в систему
+        this->insert(temp);
+
+    }
+
+}
+
 //перемешать магнитные моменты частиц M
 void PartArray::shuffleM(){
     bool rotate;

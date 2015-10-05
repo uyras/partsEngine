@@ -19,36 +19,22 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    Random::Instance(4);
-    Random::Instance(5)->next(10);
-    Random::Instance(6)->next(15);
-    Random::Instance(7)->next(200);
-            /*
+    config::Instance()->set3D();
+
     config::Instance()->m = 1;
 
 
-    HoneycombSpinIceArray *sys;
+    PartArray *sys = new PartArray();
 
-    sys = new HoneycombSpinIceArray();
-    sys->dropHoneyComb(2,2,1);
-    sys->setToGroundState();
-    cout<<sys->calcEnergy1()<<endl;
-    sys->save("min1.dat");
-    sys->PartArray::setToGroundState();
-    cout<<sys->calcEnergy1()<<endl;
-    sys->save("min2.dat");
 
-    /*
-    qDebug()<<"init Wang Landau Parallel";
-    WangLandauParallel w(sys,1000,4,0.8,4);
-    qDebug()<<"start Wang Landau DOS";
-    w.dos();
+    sys->dropTetrahedron(1,1,1);
+    sys->savePVPython("sys.py");
 
 
 
     delete sys;
 
-    cout<<"finish"<<endl;*/
+    cout<<"finish"<<endl;
     return 0;
     //return a.exec();
 }

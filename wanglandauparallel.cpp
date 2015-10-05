@@ -2,23 +2,13 @@
 
 WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals, unsigned int gaps, double overlap, unsigned int walkersByGap):
     sys(system->copy()),
+    eMin(0),
+    eMax(0),
     intervals(intervals),
     gaps(gaps),
     walkersByGap(walkersByGap),
     overlap(overlap)
 {
-    qDebug()<<"calculate min and max";
-    sys->setToMaximalState();
-    this->eMax = sys->calcEnergy1();
-    sys->setToGroundState();
-    this->eMin = sys->calcEnergy1();
-
-    //слегка расширяем границы, дабы нормально работало сравнение double
-    double delta=(eMax-eMin)*0.01/(double)(intervals-1);
-    eMax+=delta; eMin-=delta;
-
-    sys->state->reset();
-    this->eInit = sys->calcEnergy1FastIncrementalFirst();
 
     qDebug()<<"Start creating walkers";
     for (unsigned int i=0;i<gaps;i++){
@@ -27,23 +17,12 @@ WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals
                         WangLandauParallelWalker(
                             sys->copy(),
                             this->intervals,
-                            this->eMin,
-                            this->eMax,
                             this->overlap,
                             this->gaps,
                             i,
                             i*walkersByGap+j));
         }
     }
-
-    //Создаем файл с энергиями
-    ofstream f("energies.txt");
-    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap); //ширина перекрытия
-    for (unsigned int i=0;i<gaps;i++){
-        double from=this->eMin + (double)i * x * (1.-overlap);
-        f<<from<<endl<<from+x<<endl;
-    }
-    f.close();
 
     qDebug()<<"Finish creating walkers";
 }
@@ -55,8 +34,28 @@ WangLandauParallel::~WangLandauParallel()
 
 vector<double> WangLandauParallel::dos()
 {
+    if (this->eMin==0 && this->eMax==0){
+        qDebug()<< "(init) calculating maximal state";
+        this->sys->setToMaximalState();
+        double min = sys->calcEnergy1();
+
+        qDebug()<<"(init) calculating ground state";
+        this->sys->setToGroundState();
+        double max = sys->calcEnergy1();
+
+        this->setMinMaxEnergy(min,max);
+    }
+
+    sys->state->reset();
+    this->eInit = sys->calcEnergy1FastIncrementalFirst();
+
+    WangLandauParallelWalker *temp;
     for (unsigned i=0;i<walkers.size();i++){
-        (walkers[i]).makeNormalInitState();
+        temp = &(walkers[i]);
+
+        temp->sys->state->reset();
+        temp->eInit = temp->sys->calcEnergy1FastIncrementalFirst();
+        temp->makeNormalInitState();
     }
 
     qDebug()<<"start DOS";
@@ -128,6 +127,32 @@ vector<double> WangLandauParallel::dos()
     }
 
     return walkers[0].g;
+}
+
+void WangLandauParallel::setMinMaxEnergy(double eMin, double eMax)
+{
+    //слегка расширяем границы, дабы нормально работало сравнение double
+    double delta=(eMax-eMin)*0.01/(double)(intervals-1);
+    eMax+=delta; eMin-=delta;
+
+    this->eMax = eMax;
+    this->eMin = eMin;
+
+    WangLandauParallelWalker *temp;
+    for (unsigned i=0;i<walkers.size();i++){
+        temp = &(walkers[i]);
+
+        temp->setMinMaxEnergy(eMin,eMax);
+    }
+
+    //Создаем файл с энергиями
+    ofstream f("energies.txt");
+    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap); //ширина перекрытия
+    for (unsigned int i=0;i<gaps;i++){
+        double from=this->eMin + (double)i * x * (1.-overlap);
+        f<<from<<endl<<from+x<<endl;
+    }
+    f.close();
 }
 
 bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2)

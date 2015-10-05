@@ -29,6 +29,7 @@ public:
 
     vector<double> dos();
 
+    void setMinMaxEnergy(double eMin, double eMax);
 
 private:
     bool swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2);

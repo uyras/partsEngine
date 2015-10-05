@@ -2,17 +2,16 @@
 
 WangLandauParallelWalker::WangLandauParallelWalker(PartArray *system,
         unsigned int intervals,
-        double eMin,
-        double eMax, double overlap, unsigned int gaps,
+        double overlap,
+        unsigned int gaps,
         double gap,
         int number):
     sys(system),
     intervals(intervals),
-    eMin(eMin),
-    eMax(eMax),
     overlap(overlap),
     gaps(gaps),
     number(number),
+    gapNumber(gap),
     accuracy(0.8),
     average(0),
     hCount(0)
@@ -21,29 +20,16 @@ WangLandauParallelWalker::WangLandauParallelWalker(PartArray *system,
         g.push_back(0);
         h.push_back(0);
     }
-    this->dE = (eMax-eMin)/(intervals-1);
+
     this->fMin=1.00001;
     this->f = exp(1);
-    this->setGap(gap);
 
-    sys->state->reset();
-    eInit = sys->calcEnergy1FastIncrementalFirst();
     ofstream ffile(QString("e_%1.txt").arg(number).toStdString().c_str());
     ffile.close();
 }
 
 WangLandauParallelWalker::~WangLandauParallelWalker()
 {
-}
-
-void WangLandauParallelWalker::setGap(unsigned int gap)
-{
-    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap); //ширина одного интервала
-    this->from = this->eMin + (double)gap * x * (1.-overlap);
-    this->to = this->from+x;
-    this->nFrom = getIntervalNumber(from);
-    this->nTo = getIntervalNumber(to);
-    this->gapNumber = gap;
 }
 
 unsigned int WangLandauParallelWalker::gap()
@@ -188,5 +174,18 @@ bool WangLandauParallelWalker::inRange(double E)
 {
     unsigned i = getIntervalNumber(E);
     return i<=nTo && i>=nFrom;
+}
+
+void WangLandauParallelWalker::setMinMaxEnergy(double eMin, double eMax)
+{
+    this->eMax = eMax;
+    this->eMin = eMin;
+    this->dE = (eMax-eMin)/(intervals-1);
+
+    double x = (this->eMax-this->eMin)/((double)gaps*(1.-overlap)+overlap); //ширина одного интервала
+    this->from = this->eMin + (double)gapNumber * x * (1.-overlap);
+    this->to = this->from+x;
+    this->nFrom = getIntervalNumber(from);
+    this->nTo = getIntervalNumber(to);
 }
 
