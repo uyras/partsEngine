@@ -13,7 +13,7 @@ SquareSpinIceArray::~SquareSpinIceArray()
 void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
 {
     if (config::Instance()->dimensions()!=2)
-        return;
+        qFatal("Square spin ice is possible only in 2 dimensionals model");
     double l_2 = l/2.; //полурешетка
     Vect center(0,0,0);
 
@@ -106,15 +106,19 @@ Part *SquareSpinIceArray::findByPosition(const Vect &pos, double epsilon)
 bool SquareSpinIceArray::setToGroundState()
 {
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
-    double m = config::Instance()->m;
     SquareSpinIceCell *temp;
     while (iter!=this->cells.end()){
         temp = *iter;
         int direction = (temp->row+temp->column)%2*2-1; //либо +1 либо -1, в шахматном порядке
-        temp->top->m = Vect(m*direction,0,0);
-        temp->bottom->m = Vect(m*direction*-1.,0,0);
-        temp->left->m = Vect(0,m*direction,0);
-        temp->right->m = Vect(0,m*direction*-1.,0);
+
+        if (temp->top->m.scalar(Vect(direction,0,0))<0)
+            temp->top->rotate();
+        if (temp->bottom->m.scalar(Vect(direction*-1.,0,0))<0)
+            temp->bottom->rotate();
+        if (temp->left->m.scalar(Vect(0,direction,0))<0)
+            temp->left->rotate();
+        if (temp->right->m.scalar(Vect(0,direction*-1.,0))<0)
+            temp->right->rotate();
 
         iter++;
     }
@@ -124,15 +128,19 @@ bool SquareSpinIceArray::setToGroundState()
 bool SquareSpinIceArray::setToMaximalState()
 {
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
-    double m = config::Instance()->m;
     SquareSpinIceCell *temp;
     while (iter!=this->cells.end()){
         temp = *iter;
         int direction = (temp->row+temp->column)%2*2-1;
-        temp->top->m = Vect(m*direction,0,0);
-        temp->bottom->m = Vect(m*direction*-1.,0,0);
-        temp->left->m = Vect(0,m*direction*-1.,0);
-        temp->right->m = Vect(0,m*direction,0);
+
+        if (temp->top->m.scalar(Vect(direction,0,0))<0)
+            temp->top->rotate();
+        if (temp->bottom->m.scalar(Vect(direction*-1.,0,0))<0)
+            temp->bottom->rotate();
+        if (temp->left->m.scalar(Vect(0,direction*-1.,0))<0)
+            temp->left->rotate();
+        if (temp->right->m.scalar(Vect(0,direction,0))<0)
+            temp->right->rotate();
 
         iter++;
     }

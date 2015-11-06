@@ -4,6 +4,7 @@
 #include "PartArray.h"
 #include "squarespinicecell.h"
 #include "Vect.h"
+#include <QtDebug>
 
 
 class SquareSpinIceArray : public PartArray
