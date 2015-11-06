@@ -92,7 +92,7 @@ public:
      */
     virtual void dropHoneyComb(int m, int n, double a, Part * tmp = 0);
 
-    virtual void dropTetrahedron(int x, int y, int z, Part * tmp = 0);
+    virtual void dropTetrahedron(int x, int y, int z, double R = 1, Part * tmp = 0);
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
@@ -310,6 +310,7 @@ public:
 
 protected:
     bool _double_equals(double a, double b); //сравнение double
+    virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
 };
 
 #endif // PARTARRAY_H

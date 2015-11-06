@@ -377,33 +377,135 @@ void PartArray::dropHoneyComb(int m, int n, double a, Part *tmp)
     }
 }
 
-void PartArray::dropTetrahedron(int x, int y, int z, Part *tmp)
-{
-    double mLength=0; //магнитный момент одной частицы
-    if (tmp==0){ //если шаблон частицы не был передан, делаем шаблон по умолчанию
+//Вспомогательная функция генерирующая спины
+//Генерируется 4 спина (1 пирамида)
+//Неуверен в правельности реализации функции и передачи самой системы
+void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double vect, double rot, double r){
+
+    double mLength=0;
+    if (tmp==0){
         tmp = new Part();
         mLength = config::Instance()->m;
     } else {
         mLength = tmp->m.length();
     }
 
-    for (int i=0;i<10;i++){
-        //Создаем временную частицу в памяти
-        Part* temp = tmp->copy();
+    double x0,y0,z0,x1,y1,z1,x2,y2,z2,x3,y3,z3,cx,cy,cz;
 
-        //задаем ее позицию
-        temp->pos.setXYZ(i,i,i);
-        //temp->pos = Vect(i,i,i);
-//        temp->pos.x =i; temp->pos.y=i;
+    x0 = x + r * cos((rot + 0) * M_PI / 180);
+    y0 = y + r * sin((rot + 0) * M_PI / 180);
+    z0 = z;
 
-        //задаем магнитный момент
-        temp->m.setXYZ(1,1,1);
+    x1 = x + r * cos((rot + 120) * M_PI / 180);
+    y1 = y + r * sin((rot + 120) * M_PI / 180);
+    z1 = z;
 
-        //добавляем частицу в систему
-        this->insert(temp);
 
+    x2 = x + r * cos((rot + 240) * M_PI / 180);
+    y2 = y + r * sin((rot + 240) * M_PI / 180);
+    z2 = z;
+
+    x3 = x;
+    y3 = y;
+    z3 = z + vect * r * sqrt(2);
+
+    //центр пирамиды
+    double l = sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
+    cx = x + 0;
+    cy = y + 0;
+    cz = z3 - vect * l / sqrt(3);
+    double _o= sqrt((cx-x0)*(cx-x0)+(cy-y0)*(cy-y0)+(cz-z0)*(cz-z0));
+
+
+    //посмотри вот этот ужас с temp1,2,3 и исправь
+    //слаб в указателях и ссылках
+    vector<Part*> hexPart;
+
+    Part* temp1 = tmp->copy();
+    temp1->pos.setXYZ(x0,y0,z0);
+    temp1->m.setXYZ((cx-x0)/_o,(cy-y0)/_o,(cz-z0)/_o);
+    hexPart.push_back(temp1);
+
+    Part* temp2 = tmp->copy();
+    temp2->pos.setXYZ(x1,y1,z1);
+    temp2->m.setXYZ((cx-x1)/_o,(cy-y1)/_o,(cz-z1)/_o);
+    hexPart.push_back(temp2);
+
+    Part* temp3 = tmp->copy();
+    temp3->pos.setXYZ(x2,y2,z2);
+    temp3->m.setXYZ((cx-x2)/_o,(cy-y2)/_o,(cz-z2)/_o);
+    hexPart.push_back(temp3);
+
+    Part* temp4 = tmp->copy();
+    temp4->pos.setXYZ(x3,y3,z3);
+    temp4->m.setXYZ((cx-x3)/_o,(cy-y3)/_o,(cz-z3)/_o);
+    hexPart.push_back(temp4);
+
+    //цент пирамиды
+    //Part* temp5 = tmp->copy();
+    //temp5->pos.setXYZ(cx,cy,cz);
+    //temp4->m.setXYZ(1,1,1);
+    //hexPart.push_back(temp5);
+
+    //Использовал вашу сортировку от повторений
+    vector<Part*>::iterator iter = hexPart.begin();
+    while (iter!=hexPart.end()){
+        bool add=true;
+        vector<Part*>::iterator iter2 = this->parts.begin();
+        while(iter2!=this->parts.end()){
+            if (
+                    this->_double_equals((*iter2)->pos.x,(*iter)->pos.x) &&
+                    this->_double_equals((*iter2)->pos.y,(*iter)->pos.y) &&
+                    this->_double_equals((*iter2)->pos.z,(*iter)->pos.z)
+                    )
+                    add=false;
+            iter2++;
+        }
+        if(add)
+            this->insert(*iter);
+        else
+            delete (*iter); //удаляем из памяти
+        iter++;
+    }
+}
+
+void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
+{
+    double mx[6];
+    double my[6];
+    double r = 2*R; //2R
+    double a = sqrt(2);
+
+//инициализация начального шестиугольника
+    for(int i = 0; i < 6; i++)
+    {
+        mx[i] = (r * cos((60 * i) * M_PI / 180));
+        my[i] = (r * sin((60 * i) * M_PI / 180));
     }
 
+// расчет растояния между шестиугольниками
+    double deleyx = sqrt(12) * R * cos(90 * M_PI / 180);
+    double deleyy = sqrt(12) * R * sin(90 * M_PI / 180);
+    double deleyx2 = sqrt(12) * R * cos(M_PI / 6);
+    double deleyy2 = sqrt(12) * R * sin(M_PI / 6);
+
+
+    for (int z = 0; z < m; z++)
+    {
+        for (int k = 0; k < n; k++)
+        {
+            for (int j = 0; j < h; j += 2)
+            {
+                for (int i = 0; i < 6; i += 2)
+                {   //12 пирамид (2 кольца)
+                    this->subTetrahedron(tmp, mx[i] - r * j + deleyx * k + deleyx2 * z, my[i] + deleyy * k + deleyy2 * z, 2 * j * a);
+                    this->subTetrahedron(tmp, mx[i + 1] - r * j + deleyx * k + deleyx2 * z, my[i + 1] + deleyy * k + deleyy2 * z, 2 * j * a, -1, 180);
+                    this->subTetrahedron(tmp, mx[i] - r * (j + 1) + deleyx * k + deleyx2 * z, my[i] + deleyy * k + deleyy2 * z, 2 * (j + 1) * a, 1);
+                    this->subTetrahedron(tmp, mx[i + 1] - r * (j + 1) + deleyx * k + deleyx2 * z, my[i + 1] + deleyy * k + deleyy2 * z, 2 * (j + 1) * a, -1, 180);
+                }
+            }
+        }
+    }
 }
 
 //перемешать магнитные моменты частиц M
@@ -1112,7 +1214,7 @@ void PartArray::savePVPython(string file, int thteta, int phi)
     f<<"i=0"<<endl;
     f<<"for [x,y,z,r,ax,ay,az] in spheres:"<<endl;
     f<<"\tprint(str(i)+\" of \"+str(len(spheres)))"<<endl;
-    f<<"\tSphere( Radius=r, Center=[x, y, z], ThetaResolution="<<thteta<<", PhiResolution="<<phi<<" )"<<endl;
+    f<<"\tSphere( Radius=r/4, Center=[x, y, z], ThetaResolution="<<thteta<<", PhiResolution="<<phi<<" )"<<endl;
     f<<"\tShow()"<<endl;
     f<<"\tLine( Point1=[x, y, z], Point2=[x+ax, y+ay, z+az], Resolution=1 )"<<endl;
     f<<"\tShow()"<<endl;
