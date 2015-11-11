@@ -24,6 +24,9 @@ public:
 
     virtual void clear();
 
+    virtual void load(QString file);
+    virtual void save(QString file);
+
     PartArray* beforeCopy();
     void afterCopy(PartArray* temp2);
 

@@ -2,7 +2,7 @@
 
 HoneycombSpinIceArray::HoneycombSpinIceArray()
 {
-
+     _type = "honeycomb";
 }
 
 HoneycombSpinIceArray::~HoneycombSpinIceArray()
@@ -114,6 +114,86 @@ void HoneycombSpinIceArray::clear()
     PartArray::clear();
 }
 
+void HoneycombSpinIceArray::load(QString file)
+{
+    this->clear();
+    //load base part of file
+    PartArray::load(file);
+
+    //open file
+    QFile infile(file);
+    infile.open(QFile::ReadOnly);
+    QTextStream f(&infile);
+
+    //skip to cells section
+    QString s;
+    while (s!="[cells]"){
+        s = f.readLine();
+    }
+
+
+    //read particles data
+    s=f.readLine();
+
+    QStringList params;
+    HoneycombSpinIceCell *tempCell;
+    while (! (
+               (s[0]=='[' && s[s.length()-1]==']') ||
+               (s.isEmpty())
+               )){ //read due to the next section or end of file
+        params = s.split('\t');
+        tempCell = new HoneycombSpinIceCell();
+        tempCell->pos = Vect(
+                    params[0].toDouble(),
+                    params[1].toDouble(),
+                    1
+                    );
+        if (tempCell->pos.y==0)
+            m++;
+        for (int i=2;i<8;i++)
+            tempCell->parts.push_back(this->getById(i));
+
+        this->cells.push_back(tempCell);
+
+        s=f.readLine();
+    }
+
+    //close file
+    infile.close();
+
+    n = this->cells.size()/m;
+}
+
+void HoneycombSpinIceArray::save(QString file)
+{
+    //save base part of file
+    PartArray::save(file);
+
+    //open file in append mode
+    QFile outfile(file);
+    outfile.open(QFile::WriteOnly | QFile::Append);
+    QTextStream f(&outfile);
+
+    //write header
+    f<<"[cells]"<<endl;
+
+    //write particles
+    vector<HoneycombSpinIceCell*>::iterator iter = this->cells.begin();
+    while (iter != this->cells.end()) {
+        vector<Part*>::iterator iter2 = (*iter)->parts.begin();
+        f<<(*iter)->pos.x<<"\t"<<(*iter)->pos.y;
+        while (iter2 != (*iter)->parts.end()){
+            f<<"\t"<<(*iter2)->Id();
+            iter2++;
+        }
+        f << endl;
+        iter++;
+    }
+
+    //close file
+    outfile.close();
+}
+
 PartArray *HoneycombSpinIceArray::beforeCopy()
 {
     return (PartArray*) new HoneycombSpinIceArray();
@@ -152,5 +232,6 @@ void HoneycombSpinIceArray::clearCells()
         iter++;
     }
     this->cells.clear();
+    this->m = this->n = 0;
 }
 

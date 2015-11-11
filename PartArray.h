@@ -10,14 +10,19 @@
 
 #include <vector>
 #include <string>
+#include <QString>
+#include <QFile>
+#include <QTextStream>
 #include "Part.h"
 #include "StateMachine.h"
 #include "StateMachineFree.h"
 
 using namespace std;
 class StateMachine;
+class SysLoader;
 
 class PartArray {
+    friend SysLoader;
 public:
     double E1, E2;
 
@@ -42,13 +47,14 @@ public:
     */
     PartArray(double x, double y, double z, int count);
 
-    PartArray(string file);
-
 	void operator=(const PartArray& a);
 
     virtual PartArray* copy();
     virtual PartArray* beforeCopy(); //Возвращает экземпляр чистой системы частиц
     virtual void afterCopy(PartArray*);
+
+    //получить частицу по уникальному идентификатору
+    Part* getById(unsigned id);
 
     /**
     * Изменяет размер подложки и чистит массив частиц
@@ -174,7 +180,9 @@ public:
     */
     void cout();
 
-    void save(string file, bool showNotifications = false);
+    void save_v1(string file, bool showNotifications = false);
+    void save_v2(QString file);
+    virtual void save(QString file);
 
     /**
      * @brief savePVPython Сохраняет систему в скрипте ParaView
@@ -194,7 +202,9 @@ public:
      */
     void savePVPythonAnimation(PartArray *secondSystem, string file, int thteta=8, int phi=8, int frames=100);
 
-    void load(string file, bool showNotifications = false);
+    void load_v1(string file, bool showNotifications = false);
+    void load_v2(QString file);
+    virtual void load(QString file);
 
     //чистим массив частиц
     virtual void clear();
@@ -308,9 +318,14 @@ public:
 
     void _construct(); //стандартный конструктор.
 
+    virtual QString type();
+
 protected:
+    double eMin,eMax,eInit,eTemp;
+    unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
+    QString _type;
 };
 
 #endif // PARTARRAY_H

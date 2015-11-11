@@ -18,7 +18,21 @@ Part::Part() :
     this->r = config::Instance()->partR; //по умолчанию радиус задается в конфигах
     this->e = 0;
     this->w1 = this->h1 = 0;
+    this->id = -1; //значит что уникальный ИД не задан
 }
+
+Part::Part(unsigned int id) :
+    state(false)
+{
+    this->id = id;
+    //по умолчанию на частицу ничего не действует
+    this->h.x = this->h.y = this->h.z = 0;
+    sector = 0; //по умолчанию, все частицы из сектора 0
+    this->r = config::Instance()->partR; //по умолчанию радиус задается в конфигах
+    this->e = 0;
+    this->w1 = this->h1 = 0;
+}
+
 Part::~Part(){
     this->eArray.clear();
 }
@@ -73,4 +87,9 @@ double Part::volume()
     } else {
         return (4.0/3.0) * M_PI * this->r * this->r * this->r;
     }
+}
+
+int Part::Id()
+{
+    return this->id;
 }

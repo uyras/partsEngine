@@ -5,7 +5,10 @@
 *
 * Created on 20 Ноябрь 2012 г., 15:55
 */
-#pragma once
+
+#ifndef VECT_H
+#define VECT_H
+
 class Vect {
 public:
     double x, y, z; //основные параметры векторов
@@ -45,3 +48,4 @@ public:
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
 };
 
+#endif // VECT_H

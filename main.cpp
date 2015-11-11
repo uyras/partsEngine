@@ -8,9 +8,11 @@
 
 #include "StateMachine.h"
 #include "StateMachineFree.h"
-#include "wanglandauparallel.h"
+#include "squarespinicearray.h"
+#include "sysloader.h"
 
 #include "random.h"
+#include <cmath>
 
 
 using namespace std;
@@ -19,20 +21,24 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    config::Instance()->set3D();
+    config::Instance()->set2D();
 
     config::Instance()->m = 1;
 
 
-    PartArray *sys = new PartArray();
+    SquareSpinIceArray *sys = new SquareSpinIceArray();
+    sys->dropSpinIce(10,5,1);
+    sys->save("out.dat");
 
+    PartArray *sys2 = SysLoader::load("out.dat");
+    sys2->state->next();
+    sys2->save("out2.dat");
 
-    sys->dropTetrahedron(1,1,1);
-    sys->savePVPython("sys.py");
+    cout<<sys2->type().toStdString();
 
-
-
-    delete sys;
+    PartArray *sys3 = SysLoader::load("out2.dat");
+    sys3->state->next();
+    sys3->save("out3.dat");
 
     cout<<"finish"<<endl;
     return 0;

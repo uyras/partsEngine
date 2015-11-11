@@ -2,7 +2,7 @@
 
 SquareSpinIceArray::SquareSpinIceArray()
 {
-
+    this->_type = "squarespinice";
 }
 
 SquareSpinIceArray::~SquareSpinIceArray()
@@ -188,6 +188,89 @@ void SquareSpinIceArray::clear()
     this->clearCells();
 
     PartArray::clear();
+}
+
+void SquareSpinIceArray::load(QString file)
+{
+    this->clear();
+    //load base part of file
+    PartArray::load(file);
+
+    //open file
+    QFile infile(file);
+    infile.open(QFile::ReadOnly);
+    QTextStream f(&infile);
+
+    //skip to cells section
+    QString s;
+    while (s!="[cells]"){
+        s = f.readLine();
+    }
+
+
+    //read cells data
+    s=f.readLine();
+
+    QStringList params;
+    SquareSpinIceCell *tempCell;
+    while (! (
+               (s[0]=='[' && s[s.length()-1]==']') ||
+               (s.isEmpty())
+               )){ //read due to the next section or end of file
+        params = s.split('\t');
+        tempCell = new SquareSpinIceCell();
+        tempCell->pos = Vect(
+                    params[0].toDouble(),
+                    params[1].toDouble(),
+                    1
+                    );
+        tempCell->row = params[2].toInt();
+        tempCell->column = params[3].toInt();
+        tempCell->top = this->getById(params[4].toInt());
+        tempCell->bottom = this->getById(params[5].toInt());
+        tempCell->left = this->getById(params[6].toInt());
+        tempCell->right = this->getById(params[7].toInt());
+
+        this->cells.push_back(tempCell);
+
+        s=f.readLine();
+    }
+
+    //close file
+    infile.close();
+}
+
+void SquareSpinIceArray::save(QString file)
+{
+    //save base part of file
+    PartArray::save(file);
+
+    //open file in append mode
+    QFile outfile(file);
+    outfile.open(QFile::WriteOnly | QFile::Append);
+    QTextStream f(&outfile);
+
+    //write header
+    f<<"[cells]"<<endl;
+
+    //write particles
+    vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
+    while (iter != this->cells.end()) {
+        f<<(*iter)->pos.x<<"\t";
+        f<<(*iter)->pos.y<<"\t";
+        f<<(*iter)->row<<"\t";
+        f<<(*iter)->column<<"\t";
+        f<<(*iter)->top->Id()<<"\t";
+        f<<(*iter)->bottom->Id()<<"\t";
+        f<<(*iter)->left->Id()<<"\t";
+        f<<(*iter)->right->Id();
+
+        f << endl;
+        iter++;
+    }
+
+    //close file
+    outfile.close();
 }
 
 void SquareSpinIceArray::clearCells()

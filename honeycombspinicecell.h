@@ -5,10 +5,13 @@
 #include "Vect.h"
 #include <vector>
 
+class HoneycombSpinIceArray;
+
 using namespace std;
 class HoneycombSpinIceCell
 {
-public:
+    friend HoneycombSpinIceArray; //сделать недоступным класс из других кусков кода
+private:
     HoneycombSpinIceCell();
     ~HoneycombSpinIceCell();
 

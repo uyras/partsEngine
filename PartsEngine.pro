@@ -27,7 +27,8 @@ SOURCES += Vect.cpp \
     wanglandauparallelwalker.cpp \
     random.cpp \
     honeycombspinicearray.cpp \
-    honeycombspinicecell.cpp
+    honeycombspinicecell.cpp \
+    sysloader.cpp
 
 HEADERS += Vect.h \
     PartArray.h \
@@ -44,7 +45,8 @@ HEADERS += Vect.h \
     wanglandauparallelwalker.h \
     random.h \
     honeycombspinicearray.h \
-    honeycombspinicecell.h
+    honeycombspinicecell.h \
+    sysloader.h
 
 
 CONFIG(debug,debug|release) {

@@ -68,6 +68,18 @@ PartArray *PartArray::beforeCopy(){
 
 void PartArray::afterCopy(PartArray * ){}
 
+Part *PartArray::getById(unsigned id)
+{
+    vector<Part*>::iterator iter = this->parts.begin();
+    Part* temp;
+    while (iter!=this->parts.end()){
+        temp = *iter;
+        if (temp->id == id)
+            return temp;
+        iter++;
+    }
+}
+
 PartArray::PartArray(double x, double y, double z, double density) {
     this->_construct();
 
@@ -82,11 +94,6 @@ PartArray::PartArray(double x, double y, double z, int count) {
     this->resize(x,y,z); //изменяем размер подложки
     this->clear();
     this->dropRandom(count); //набрасываем в массив частицы
-}
-
-PartArray::PartArray(string file) {
-    this->_construct();
-    this->load(file);
 }
 
 void PartArray::resize(double x, double y, double z){
@@ -520,6 +527,8 @@ void PartArray::shuffleM(){
 
 void PartArray::insert(Part * part){
     this->parts.push_back(part);
+    if (part->id==-1) //если ИД частицы не задан, назначаем новый ИД
+        part->id = lastId++;
 }
 
 void PartArray::dropLattice(double distance){
@@ -1143,7 +1152,7 @@ std::vector<double> PartArray::processHEffective() {
     return history;
 }
 
-void PartArray::save(string file, bool showNotifications) {
+void PartArray::save_v1(string file, bool showNotifications) {
 
     if (showNotifications)
         std::cout<<"save "<<file<<" file start"<<endl;
@@ -1191,6 +1200,50 @@ void PartArray::save(string file, bool showNotifications) {
     if (showNotifications)
         std::cout<<"save "<<file<<" file complete"<<endl;
 
+}
+
+void PartArray::save_v2(QString file)
+{
+    //open file
+    QFile outfile(file);
+    outfile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream f(&outfile);
+
+    //write header
+    f<<"[header]"<<endl;
+    f<<"version=2"<<endl;
+    f<<"dimensions="<<config::Instance()->dimensions()<<endl;
+    f<<"type="<<this->type()<<endl;
+    f<<"size="<<this->count()<<endl;
+    f<<"emin="<<this->eMin<<endl;
+    f<<"emax="<<this->eMax<<endl;
+    f<<"state="<<QString::fromStdString(this->state->toString())<<endl;
+    f<<"sizescale=1"<<endl;
+    f<<"magnetizationscale=1"<<endl;
+
+    //write particles
+    f<<"[parts]"<<endl;
+    vector<Part*>::iterator iter = this->parts.begin();
+    while (iter != this->parts.end()) {
+        f << (*iter)->id << "\t";// << endl;
+        f << (*iter)->pos.x << "\t";// << endl;
+        f << (*iter)->pos.y << "\t";// << endl;
+        f << (*iter)->pos.z << "\t";// << endl;
+        f << (*iter)->m.x << "\t";// << endl;
+        f << (*iter)->m.y << "\t";// << endl;
+        f << (*iter)->m.z << "\t";// << endl;
+        f << int((*iter)->state) << "\t";// << endl;
+        f << endl;
+        iter++;
+    }
+
+    //close file
+    outfile.close();
+}
+
+void PartArray::save(QString file)
+{
+    this->save_v2(file);
 }
 
 void PartArray::savePVPython(string file, int thteta, int phi)
@@ -1320,7 +1373,7 @@ void PartArray::savePVPythonAnimation(PartArray* secondSystem, string file, int 
     f.close();
 }
 
-void PartArray::load(string file,bool showNotifications) {
+void PartArray::load_v1(string file,bool showNotifications) {
     if (showNotifications)
         std::cout<<"load "<<file<<" file start"<<endl;
     std::ifstream f(file.c_str());
@@ -1381,6 +1434,65 @@ void PartArray::load(string file,bool showNotifications) {
     else
         config::Instance()->set3D();
 
+}
+
+void PartArray::load_v2(QString file)
+{
+    this->clear();
+
+    //open file
+    QFile infile(file);
+    infile.open(QFile::ReadOnly);
+    QTextStream f(&infile);
+
+    //skip to parts section
+    QString s;
+    while (s!="[parts]"){
+        s = f.readLine();
+    }
+    s="";
+
+    //read particles data
+    QStringList params;
+    Part* temp;
+    s=f.readLine();
+    while (! (
+               (s[0]=='[' && s[s.length()-1]==']') ||
+               (s.isEmpty())
+               )){ //read due to the next section or end of file
+        params = s.split('\t');
+        unsigned int id = params[0].toUInt();
+        temp = new Part(id);
+
+        if (this->lastId<id){
+            lastId = id;
+        }
+
+        temp->pos = Vect(
+                    params[1].toDouble(),
+                    params[2].toDouble(),
+                    params[3].toDouble()
+                    );
+
+        temp->m = Vect(
+                    params[4].toDouble(),
+                    params[5].toDouble(),
+                    params[6].toDouble()
+                    );
+        temp->state = params[7].toInt();
+
+        this->insert(temp);
+
+        s=f.readLine();
+    }
+
+    //close file
+    infile.close();
+}
+
+void PartArray::load(QString file)
+{
+    this->load_v2(file);
 }
 
 void PartArray::clear(){
@@ -1530,6 +1642,14 @@ void PartArray::scaleSystem(double coff){
 
 void PartArray::_construct(){
     this->state = new StateMachine(this);
+    eMin = eMax = eInit = eTemp = 0;
+    this->_type="standart";
+    lastId=0;
+}
+
+QString PartArray::type()
+{
+    return this->_type;
 }
 
 bool PartArray::_double_equals(double a, double b)

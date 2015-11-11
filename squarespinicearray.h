@@ -34,6 +34,9 @@ public:
 
     virtual void clear();
 
+    virtual void load(QString file);
+    virtual void save(QString file);
+
 private:
     void clearCells(); //чистим информацию о ячейках
 };

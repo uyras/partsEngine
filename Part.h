@@ -5,12 +5,17 @@
  * Created on 20 Ноябрь 2012 г., 15:50
  */
 
-#pragma once
+#ifndef PART_H
+#define PART_H
+
 #include <vector>
 #include "Vect.h"
 
+class PartArray;
+
 class Part {
 public:
+    friend PartArray;
     enum form{CIRCLE,ELLIPSE,SQUARE};
 
     Vect pos; //координаты, для удобства в относительных величинах
@@ -32,8 +37,12 @@ public:
     void rotate(float angle=180.); //вращаем магнитный момент частицы и меняем ее состояние
     Part* copy();
     double volume(); //Возвращает объем частицы в относительных единицах
+
+    int Id();
+
+protected:
+    unsigned int id;
+    Part(unsigned int id); //конструктор с установленным ИДом разрешен только для дружественных классов
 };
 
-
-
-
+#endif // PART_H
