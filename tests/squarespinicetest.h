@@ -23,20 +23,24 @@ private slots:
     void cellTypes(){
         SquareSpinIceArray *sys1;
         sys1 = new SquareSpinIceArray();
-        sys1->dropSpinIce(2,2);
-        QCOMPARE((int)sys1->cells.size(),4);
-        sys1->clear();
         sys1->dropSpinIce(1,1);
         QCOMPARE((int)sys1->cells.size(),1);
+        sys1->clear();
+
+        sys1->dropSpinIce(2,2);
+        QCOMPARE((int)sys1->cells.size(),4);
 
         sys1->setToMaximalState();
-        QCOMPARE(sys1->cells[0]->type(),3);
+        for (int i=0;i<4;i++)
+            QCOMPARE(sys1->cells[i]->type(),3);
 
-        sys1->state->next();
+        sys1->cells[0]->top->rotate();
         QCOMPARE(sys1->cells[0]->type(),2);
 
+
         sys1->setToGroundState();
-        QCOMPARE(sys1->cells[0]->type(),0);
+        for (int i=0;i<4;i++)
+            QCOMPARE(sys1->cells[i]->type(),0);
     }
 
     void copy(){
@@ -45,13 +49,13 @@ private slots:
         sys1->dropSpinIce(3,3);
         sys2 = (SquareSpinIceArray*)sys1->copy();
         QCOMPARE(sys2->count(),sys1->count());
-        QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
+        QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
         sys1->setToGroundState(); sys2->setToGroundState();
-        QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
+        QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
         sys1->setToMaximalState(); sys2->setToMaximalState();
-        QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
+        QCOMPARE(sys1->EComplete(),sys2->EComplete());
     }
 };
 

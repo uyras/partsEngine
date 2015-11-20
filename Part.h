@@ -41,7 +41,7 @@ public:
     int Id();
 
 protected:
-    unsigned int id;
+    long int id;
     Part(unsigned int id); //конструктор с установленным ИДом разрешен только для дружественных классов
 };
 

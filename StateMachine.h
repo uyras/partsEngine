@@ -6,6 +6,7 @@
 #include "PartArray.h"
 #include "Part.h"
 #include "config.h"
+#include "random.h"
 #include "statemachinebase.h"
 #include "StateMachineFree.h"
 
@@ -50,7 +51,7 @@ public:
     void hardReset();
 
     StateMachine &  operator+=(const unsigned long int val);
-    bool operator==(const StateMachine &one);
+    bool operator==(const StateMachine &one) const;
 
 
     StateMachine& operator=(const StateMachineFree &state);

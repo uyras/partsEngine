@@ -37,6 +37,11 @@ void StateMachineFree::reset(){
     }
 }
 
+void StateMachineFree::clear()
+{
+    this->_state.clear();
+}
+
 void StateMachineFree::setLast(){
     vector<bool>::iterator iter = this->_state.begin();
     while(iter!=this->_state.end()){
@@ -227,13 +232,13 @@ StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
     return *this;
 }
 
-bool StateMachineFree::operator==(const StateMachineFree &one)
+bool StateMachineFree::operator==(const StateMachineFree &one) const
 {
     if (one._state.size()!=this->_state.size()) return false;
     if (one._state.size()==this->_state.size() && (one._state.size()==0 || one._state.size()==1)) return true;
 
     vector<bool>::const_iterator iter1 = one._state.begin();
-    vector<bool>::iterator iter2 = this->_state.begin();
+    vector<bool>::const_iterator iter2 = this->_state.begin();
 
     //вычисляем, прямое или обратное совпадение считать
     bool compEquals=true;

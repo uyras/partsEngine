@@ -360,7 +360,7 @@ private slots:
         a->dropRandom(10);
         QVERIFY(a->state->randomize()>=0);
         a->state->reset();
-        QCOMPARE(a->state->randomize(11),-1);
+        QCOMPARE(a->state->randomize(11),11);
         a->state->reset();
         QCOMPARE(a->state->randomize(2),2);
         a->state->reset();

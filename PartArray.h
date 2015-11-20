@@ -19,12 +19,13 @@
 
 using namespace std;
 class StateMachine;
+class StateMachineFree;
 class SysLoader;
 
 class PartArray {
     friend SysLoader;
+    friend StateMachine;
 public:
-    double E1, E2;
 
     PartArray();
     virtual ~PartArray();
@@ -150,30 +151,32 @@ public:
     Vect calcInteractionNeighb(Part* elem);
 
     /**
+     * @brief E Считает энергию системы. Метод подбирается автоматически исходя из конфигурации и свойств системы
+     * @return
+     */
+    virtual double E();
+
+    /**
     * рассчитывает внутреннюю энергию во всей системе частиц (метод подсчета через магнитные моменты)
 	* Возвращает её и записывает в параметр E1 класса
     * H - вектор внешнего поля
     */
-    double calcEnergy1(Vect& H);
-    double calcEnergy1();
-    void calcEnergy1Fast();
+    double EComplete(Vect& H) const;
+    double EComplete() const;
+    /**
+    * рассчитывает внутреннюю энергию для определенной частицы
+    * @param elem ссылка на элемент, для которого считать энергию
+    * @return энергия
+    */
+    double EComplete(Part *elem) const;
+    double ECompleteFast();
 
 
     double calcEnergy1FastIncremental(double initEnergy); //state - новое состояние системы
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
     double eIncrementalTemp; //энергия, нужна для инкремента. Используется только в 2-х функциях выше
 
-    /**
-    * рассчитывает внутреннюю энергию для определенной частицы
-    * @param elem ссылка на элемент, для которого считать энергию
-    * @return энергия
-    */
-    double calcEnergy1(Part* elem);
 
-    /**
-    * рассчитывает внутреннюю энергию во всей системе частиц (метод скалярного произведения H и E)
-    */
-    double calcEnergy2();
 
     /**
     * выдает все парамеры частиц на экран
@@ -261,12 +264,12 @@ public:
     **************************************************************/
 
 	//находит состояние минимума энергии системы и переводит её в это состояние.
-    //true - если операция успешна, false если GS найти не удалось
-    virtual bool setToGroundState();
+    //возвращает энергию этого состояния
+    virtual double setToGroundState();
 
     //находит состояние максимума энергии системы и переводит её в это состояние.
-    //true - если операция успешна, false если GS найти не удалось
-    virtual bool setToMaximalState();
+    //возвращает энергию этого состояния
+    virtual double setToMaximalState();
 
 	//находит состояние минимума энергии системы и переводит её в это состояние методом монте-карло
     //steps - количество попыток
@@ -299,9 +302,6 @@ public:
     //рассчитываем относительный обменный интеграл (отношение |J| к J)
 	double calcJ12();
 
-
-	double calcEnergy1FastIncrementalTemp(unsigned long long int state); //Нерабочий метод итеративного подсчета энергии. Сломал его специально для статьи.
-
 	void dropAdaptive(int cout);//тестовый метод упорядоивания во время наброса
 
     /************************
@@ -322,9 +322,12 @@ public:
 
 protected:
     double eMin,eMax,eInit,eTemp;
+    StateMachineFree *minstate,*maxstate;
     unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
+    void changeState(); //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
+    void changeSystem(); //вызывается когда изменилась вся система целиком
     QString _type;
 };
 

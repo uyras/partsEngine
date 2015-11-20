@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "PartArray.h"
 #include "config.h"
+#include "random.h"
 #include "ctime"
 
 class PartArrayTest2D : public QObject
@@ -15,9 +16,7 @@ class PartArrayTest2D : public QObject
 private slots:
     void initTestCase(){
         config::Instance()->set2D();
-        config::Instance()->srand(time(NULL));
-        config::Instance()->partR = 0.5;
-        config::Instance()->m = 1;
+        Random::Instance();
     }
     void dropRandomI()
     {
@@ -25,7 +24,7 @@ private slots:
         a->dropRandom(10);
         QCOMPARE(a->count(),10);
         a->dropRandom(1);
-        QCOMPARE(a->count(),11);
+        QCOMPARE(a->count(),1);
         delete a;
     }
     void dropRandomD(){
@@ -54,6 +53,29 @@ private slots:
 
         QCOMPARE(a.count(),18);
     }
+
+    void energy(){
+        //тест вычисления энергии после создания системы
+        PartArray *sys = new PartArray(10,10,10);
+        sys->dropRandom(20);
+
+        QCOMPARE(sys->E(), sys->EComplete());
+
+        //после встряхивания состояния
+        sys->state->randomize(10);
+        QCOMPARE(sys->E(), sys->EComplete());
+
+        //после обнуления конфигурации
+        sys->state->reset();
+        sys->state->randomize(10);
+        QCOMPARE(sys->E(), sys->EComplete());
+
+        //после полного обнуления конфигурации
+        sys->state->hardReset();
+        QCOMPARE(sys->E(), sys->EComplete());
+
+    }
+
 };
 
 #endif // PARTARRAYTEST2D_H

@@ -37,11 +37,11 @@ vector<double> WangLandauParallel::dos()
     if (this->eMin==0 && this->eMax==0){
         qDebug()<< "(init) calculating maximal state";
         this->sys->setToMaximalState();
-        double min = sys->calcEnergy1();
+        double min = sys->EComplete();
 
         qDebug()<<"(init) calculating ground state";
         this->sys->setToGroundState();
-        double max = sys->calcEnergy1();
+        double max = sys->EComplete();
 
         this->setMinMaxEnergy(min,max);
     }

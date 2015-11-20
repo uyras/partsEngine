@@ -78,33 +78,43 @@ void HoneycombSpinIceArray::dropHoneyComb(int m, int n, double a, Part *tmp)
     }
 }
 
-bool HoneycombSpinIceArray::setToGroundState()
+double HoneycombSpinIceArray::setToGroundState()
 {
-    HoneycombSpinIceCell* temp;
-    for (int i=0;i<n;i++)
-        for (int j=0;j<m;j++){
-            temp = cells[i*m+j];
-            switch ((j+(i%2))%3){
-            case 0:
-                temp->rotateClockWise();
-                break;
-            case 1:
-                temp->rotateAntiClockWise();
-                break;
-            case 2:
-                temp->rotateChaotic();
-                break;
+    if (minstate->size()==0){
+        HoneycombSpinIceCell* temp;
+        for (int i=0;i<n;i++)
+            for (int j=0;j<m;j++){
+                temp = cells[i*m+j];
+                switch ((j+(i%2))%3){
+                case 0:
+                    temp->rotateClockWise();
+                    break;
+                case 1:
+                    temp->rotateAntiClockWise();
+                    break;
+                case 2:
+                    temp->rotateChaotic();
+                    break;
+                }
             }
-        }
-    return true;
+        *minstate = *state;
+        this->changeState();
+    } else
+        *state = *minstate;
+    return eMin=E();
 }
 
-bool HoneycombSpinIceArray::setToMaximalState()
+double HoneycombSpinIceArray::setToMaximalState()
 {
-    for (int i=0;i<m*n;i++){
-        cells[i]->rotateChaotic();
-    }
-    return true;
+    if (maxstate->size()==0){
+        for (int i=0;i<m*n;i++){
+            cells[i]->rotateChaotic();
+        }
+        *maxstate = *state;
+        this->changeState();
+    } else
+        *state = *maxstate;
+    return eMax=E();
 }
 
 void HoneycombSpinIceArray::clear()

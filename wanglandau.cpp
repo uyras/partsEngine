@@ -17,9 +17,9 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
     unsigned long long int totalSteps=0;
 
     sys.setToGroundState();
-    const double eMin=sys.calcEnergy1();
+    const double eMin=sys.EComplete();
     sys.setToMaximalState();
-    const double eMax = sys.calcEnergy1();
+    const double eMax = sys.EComplete();
     const double dE = (eMax-eMin)/(intervals-1);
     sys.state->reset();
 
@@ -87,9 +87,9 @@ vector<double> WangLandau::scale(PartArray &sys, const int intervals)
 {
     const StateMachineFree initState = sys.state;
     sys.setToGroundState();
-    const double eMin=sys.calcEnergy1();
+    const double eMin=sys.EComplete();
     sys.setToMaximalState();
-    const double eMax = sys.calcEnergy1();
+    const double eMax = sys.EComplete();
     const double dE = (eMax-eMin)/(intervals-1);
     vector<double> scale;
     for (int i=0;i<intervals;i++){

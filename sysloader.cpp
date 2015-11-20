@@ -72,6 +72,8 @@ PartArray *SysLoader::load_v2(QString filename)
     }
     sys->eMin = params["emin"].toDouble();
     sys->eMax = params["emax"].toDouble();
+    sys->minstate->fromString(qUtf8Printable(params["minstate"]));
+    sys->maxstate->fromString(qUtf8Printable(params["maxstate"]));
 
     //check the state of the system
     if (QString::fromStdString(sys->state->toString()) != params["state"]){

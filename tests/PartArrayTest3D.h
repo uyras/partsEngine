@@ -25,7 +25,7 @@ private slots:
         a->dropRandom(10);
         QCOMPARE(a->count(),10);
         a->dropRandom(1);
-        QCOMPARE(a->count(),11);
+        QCOMPARE(a->count(),1);
         delete a;
     }
     void dropRandomD(){

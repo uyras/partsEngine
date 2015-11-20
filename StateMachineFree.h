@@ -23,6 +23,7 @@ public:
 
 
     virtual void reset();
+    virtual void clear();
     virtual void setLast();
     virtual int randomize(int count=1);
     virtual bool isFirst();
@@ -44,7 +45,7 @@ public:
 
     StateMachineFree & operator= (const StateMachineFree & one);
 
-    bool operator==(const StateMachineFree & one);
+    bool operator==(const StateMachineFree & one) const;
 
     StateMachineFree &  operator+=(int val);
 

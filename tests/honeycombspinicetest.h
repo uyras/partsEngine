@@ -38,13 +38,13 @@ private slots:
         sys2 = (HoneycombSpinIceArray*)sys1->copy();
         QCOMPARE(sys2->count(),sys1->count());
         QCOMPARE(sys2->cells.size(),sys1->cells.size());
-        QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
+        QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
         sys1->setToGroundState(); sys2->setToGroundState();
-        QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
+        QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
         sys1->setToMaximalState(); sys2->setToMaximalState();
-        QCOMPARE(sys1->calcEnergy1(),sys2->calcEnergy1());
+        QCOMPARE(sys1->EComplete(),sys2->EComplete());
     }
 };
 

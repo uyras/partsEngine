@@ -43,7 +43,7 @@ public:
     Vect operator*=(const double num);
     Vect operator/(const double num);
     Vect operator/=(const double num);
-    bool operator==(const Vect&);
+    bool operator==(const Vect&) const;
     static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
 };

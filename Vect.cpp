@@ -164,7 +164,7 @@ Vect Vect::operator/=(const double num)
     return *this;
 }
 
-bool Vect::operator==(const Vect & a)
+bool Vect::operator==(const Vect & a) const
 {
     if (config::Instance()->dimensions()==2){
         return (this->x==a.x && this->y==a.y);

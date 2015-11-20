@@ -32,8 +32,6 @@ PartArray::PartArray(double x, double y, double z) {
 }
 
 void PartArray::operator= (const PartArray& a){
-    this->E1 = a.E1;
-    this->E2 = a.E2;
     this->eIncrementalTemp = a.eIncrementalTemp;
     this->parts = a.parts;
     this->size = a.size;
@@ -44,11 +42,18 @@ void PartArray::operator= (const PartArray& a){
 PartArray* PartArray::copy(){
 
     PartArray *temp = this->beforeCopy();
-    temp->E1 = this->E1;
-    temp->E2 = this->E2;
     temp->eIncrementalTemp = this->eIncrementalTemp;
     temp->size = this->size;
     temp->absSize = this->absSize;
+
+    temp->eMin = this->eMin;
+    temp->eMax = this->eMax;
+    temp->eInit = this->eInit;
+    temp->eTemp = this->eTemp;
+    temp->lastId = this->lastId;
+    temp->_type = this->_type;
+    temp->minstate = this->minstate;
+    temp->maxstate = this->maxstate;
 
     //копируем частицы
     vector<Part*>::iterator iter = this->parts.begin();
@@ -71,13 +76,14 @@ void PartArray::afterCopy(PartArray * ){}
 Part *PartArray::getById(unsigned id)
 {
     vector<Part*>::iterator iter = this->parts.begin();
-    Part* temp;
+    Part* temp = 0;
     while (iter!=this->parts.end()){
         temp = *iter;
         if (temp->id == id)
             return temp;
         iter++;
     }
+    return temp;
 }
 
 PartArray::PartArray(double x, double y, double z, double density) {
@@ -100,7 +106,6 @@ void PartArray::resize(double x, double y, double z){
     this->size.x = x;
     this->size.y = y;
     this->size.z = z;
-    this->E1 = this->E2 = 0; //обнуляем энергии системы
     this->clear(); //чистим массив частиц
 }
 
@@ -174,6 +179,7 @@ void PartArray::dropRandom(double maxDestiny) {
 }
 
 void PartArray::dropRandom(int count) {
+    this->clear();
     //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
@@ -226,6 +232,7 @@ void PartArray::dropRandom(int count) {
 }
 
 void PartArray::dropChain(double distance){
+    this->clear();
     double rad = config::Instance()->partR;
     if (distance < 2.*rad)
         distance = 2.*rad;
@@ -282,6 +289,7 @@ void PartArray::dropChain(double distance){
 
 void PartArray::dropSpinIce(double partW, double partH, double lattice)
 {
+    this->clear();
     if (config::Instance()->dimensions()!=2)
         return;
 
@@ -331,6 +339,7 @@ void PartArray::dropSpinIce(double partW, double partH, double lattice)
 
 void PartArray::dropHoneyComb(int m, int n, double a, Part *tmp)
 {
+    this->clear();
     double mLength=0; //магнитный момент одной частицы
     if (tmp==0){ //если шаблон частицы не был передан, делаем шаблон по умолчанию
         tmp = new Part();
@@ -476,8 +485,20 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
     }
 }
 
+void PartArray::changeState()
+{
+    this->eTemp=0;
+}
+
+void PartArray::changeSystem()
+{
+    this->eMin = this->eMax = this->eInit = this->eTemp = 0;
+    this->minstate->clear();this->maxstate->clear();
+}
+
 void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
 {
+    this->clear();
     double mx[6];
     double my[6];
     double r = 2*R; //2R
@@ -526,6 +547,7 @@ void PartArray::shuffleM(){
 }
 
 void PartArray::insert(Part * part){
+    this->changeSystem();
     this->parts.push_back(part);
     if (part->id==-1) //если ИД частицы не задан, назначаем новый ИД
         part->id = lastId++;
@@ -649,26 +671,37 @@ void PartArray::calcH() {
     }
 }
 
+double PartArray::E()
+{
+    if (this->eTemp==0){
+        if (this->eInit==0){
+            this->eInit = this->calcEnergy1FastIncrementalFirst();
+        }
+        this->eTemp = this->calcEnergy1FastIncremental(this->eInit);
+    }
+    return this->eTemp;
+}
 
-double PartArray::calcEnergy1(Vect& H) {
-    std::vector < Part* >::iterator iterator2;
-    this->E1 = 0;
+
+double PartArray::EComplete(Vect& H) const {
+    std::vector < Part* >::const_iterator iterator2;
+    double E1=0;
     iterator2 = this->parts.begin();
     while (iterator2 != this->parts.end()) {
-        this->E1 += this->calcEnergy1(*iterator2) + H.scalar((*iterator2)->m);
+        E1 += this->EComplete(*iterator2) + H.scalar((*iterator2)->m);
         iterator2++;
     }
-    this->E1 *= 0.5;
-    return this->E1;
+    E1 *= 0.5;
+    return E1;
 }
 
-double PartArray::calcEnergy1(){
+double PartArray::EComplete() const{
     Vect temp = Vect(0,0,0);
-    return this->calcEnergy1(temp);
+    return this->EComplete(temp);
 }
 
-double PartArray::calcEnergy1(Part* elem) {
-    std::vector < Part* >::iterator iterator1;
+double PartArray::EComplete(Part* elem) const {
+    std::vector < Part* >::const_iterator iterator1;
     double r, r2, r5, E = 0;
     Vect rij;
     iterator1 = this->parts.begin();
@@ -688,11 +721,11 @@ double PartArray::calcEnergy1(Part* elem) {
     return E;
 }
 
-void PartArray::calcEnergy1Fast(){
+double PartArray::ECompleteFast(){
     std::vector < Part* >::iterator iterator1, iterator2, beginIterator, endIterator;
     double r, r2, r5, rijx, rijy;
 
-    this->E1 = 0;
+    double E1 = 0;
     beginIterator = iterator2 = this->parts.begin();
     endIterator = this->parts.end();
 
@@ -706,7 +739,7 @@ void PartArray::calcEnergy1Fast(){
                 r2 = rijx*rijx+rijy*rijy;
                 r = sqrt(r2); //трудное место, заменить бы
                 r5 = r2 * r2 * r; //радиус в пятой
-                this->E1 += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
+                E1 += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
                         (( ((*iterator1)->m.x*(*iterator2)->m.x+(*iterator1)->m.y*(*iterator2)->m.y) * r2)
                          -
                          (3 * ((*iterator2)->m.x * rijx + (*iterator2)->m.y * rijy) * ((*iterator1)->m.x * rijx + (*iterator1)->m.y * rijy)  )) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
@@ -718,7 +751,7 @@ void PartArray::calcEnergy1Fast(){
         iterator2++;
     }
 
-    this->E1 *= 0.5;
+    return E1 *= 0.5;
 }
 
 
@@ -758,7 +791,8 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy){
 }
 
 double PartArray::calcEnergy1FastIncrementalFirst(){
-    this->state->reset();//при первом запуске состояние системы должно быть 0
+    StateMachineFree tempstate = *state;
+    this->state->reset();//возращаем в начальное состояние
     double eIncrementalTemp = 0;
 
     std::vector < Part* >::iterator iterator1, iterator2, beginIterator, endIterator;
@@ -808,19 +842,9 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
         iterator2++;
     }
 
-    return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
-}
+    *state = tempstate;
 
-double PartArray::calcEnergy2() {
-    std::vector < Part* >::iterator iterator2;
-    this->E2 = 0;
-    iterator2 = this->parts.begin();
-    while (iterator2 != this->parts.end()) {
-        this->E2 -= (*iterator2)->h.scalar((*iterator2)->m);
-        iterator2++;
-    }
-    this->E2 *= 0.5;
-    return this->E2;
+    return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
 }
 
 void PartArray::cout() {
@@ -841,7 +865,6 @@ void PartArray::cout() {
                 << std::endl;
         ++iterator1;
     }
-    std::cout << "E1 : " << this->E1 << "; E2 : " << this->E2 << std::endl;
 }
 
 std::vector<double> PartArray::getEVector() {
@@ -943,13 +966,13 @@ std::vector<double> PartArray::processStep() {
     std::vector<double> history;
     iter = this->parts.begin();
     this->calcH();
-    history.push_back(this->calcEnergy2());
+    history.push_back(E());
     while (iter != this->parts.end()) {
         if ((*iter)->h.length() > config::Instance()->hc && (*iter)->h.scalar((*iter)->m) < 0) {
             //std::cout << "rotate with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
             (*iter)->m.rotate();
             this->calcH();
-            history.push_back(this->calcEnergy2());
+            history.push_back(E());
             iter = this->parts.begin();
         } else {
             //std::cout << "normal with x=" << (*iter).pos.x << "; y=" << (*iter).pos.y << std::endl;
@@ -990,8 +1013,7 @@ std::vector<double> PartArray::processMaxH() {
             mElem->m.rotate();
             this->calcH();
             //сохраняем новую энергию системы в историю
-            this->calcEnergy2();
-            history.push_back(this->E2);
+            history.push_back(this->E());
             //std::cout << "rotate with x=" << mElem->pos.x << "; z=" << mElem->pos.z << std::endl;
         }
         if (history.size()>10000)
@@ -1042,8 +1064,7 @@ std::vector<double> PartArray::processGroupMaxH() {
             //std::cout << "rotate group from " << rSize << " elements" << std::endl;
             this->calcH();
             //сохраняем новую энергию системы в историю
-            this->calcEnergy2();
-            history.push_back(this->E2);
+            history.push_back(this->E());
         }
 
         if (history.size()>10000)
@@ -1064,10 +1085,7 @@ std::vector<double> PartArray::processGroupStep() {
 
         this->calcH();
         //сохраняем новую энергию системы в историю
-        this->calcEnergy2();
-        history.push_back(this->E2);
-        //draw();
-        //std::cout << this->E2 << endl;
+        history.push_back(this->E());
 
         hasUnstable = false;
         unstable.clear(); //чистим набор нестабильных частиц
@@ -1141,8 +1159,7 @@ std::vector<double> PartArray::processHEffective() {
             //std::cout << "rotate group from " << rSize << " elements" << std::endl;
             this->calcH();
             //сохраняем новую энергию системы в историю
-            this->calcEnergy2();
-            history.push_back(this->E2);
+            history.push_back(this->E());
         }
 
         if (history.size()>10000)
@@ -1218,6 +1235,8 @@ void PartArray::save_v2(QString file)
     f<<"emin="<<this->eMin<<endl;
     f<<"emax="<<this->eMax<<endl;
     f<<"state="<<QString::fromStdString(this->state->toString())<<endl;
+    f<<"minstate="<<QString::fromStdString(this->minstate->toString())<<endl;
+    f<<"maxstate="<<QString::fromStdString(this->maxstate->toString())<<endl;
     f<<"sizescale=1"<<endl;
     f<<"magnetizationscale=1"<<endl;
 
@@ -1379,7 +1398,6 @@ void PartArray::load_v1(string file,bool showNotifications) {
     std::ifstream f(file.c_str());
 
     this->clear(); //удаляем все частицы
-    this->E1 = this->E2 = 0; //обнуляем энергии системы
 
     //сначала сохраняем xyz
     f >> this->size.x;
@@ -1502,7 +1520,9 @@ void PartArray::clear(){
         delete (*iter); //удаляем все что по есть по ссылкам на частицы
         iter++;
     }
+    this->lastId = 0;
     this->parts.clear();
+    this->changeSystem();
     this->afterClear();
 }
 
@@ -1643,6 +1663,8 @@ void PartArray::scaleSystem(double coff){
 void PartArray::_construct(){
     this->state = new StateMachine(this);
     eMin = eMax = eInit = eTemp = 0;
+    this->minstate = new StateMachineFree();
+    this->maxstate = new StateMachineFree();
     this->_type="standart";
     lastId=0;
 }
@@ -1832,60 +1854,51 @@ double PartArray::calcJ12(){
     return J1/J2;
 }
 
-bool PartArray::setToGroundState(){
-    StateMachineFree minstate;
-    this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
+double PartArray::setToGroundState(){
+    if (this->minstate->size()==0){
+        this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
 
-    double initE = this->calcEnergy1FastIncrementalFirst();
+        bool first = true;
+        do {
+            if (first){
+                eMin = E();
+                (*minstate) = (*this->state);
+                first = false;
+            } else
+                if (E() < eMin) {
+                    eMin = E();
+                    (*minstate) = (*this->state);
+                }
+        } while (this->state->halfNext());
+    }
 
-    double eMin, eTemp;
+    (*this->state) = (*minstate);
 
-    bool first = true;
-    do {
-        eTemp = this->calcEnergy1FastIncremental(initE);
-        if (first){
-            eMin = eTemp;
-            minstate = *this->state;
-            first = false;
-        }
-        else
-            if (eTemp < eMin) {
-                eMin = eTemp;
-                minstate = *this->state;
-            }
-    } while (this->state->halfNext());
-
-    *(this->state) = minstate;
-
-    return true;
+    return E();
 }
 
-bool PartArray::setToMaximalState(){
-    StateMachineFree maxstate;
-    this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
+double PartArray::setToMaximalState(){
+    if (this->maxstate->size()==0){
+        this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
 
-    double initE = this->calcEnergy1FastIncrementalFirst();
-
-    double eMax, eTemp;
-
-    bool first = true;
-    do {
-        eTemp = this->calcEnergy1FastIncremental(initE);
-        if (first){
-            eMax = eTemp;
-            maxstate = *this->state;
-            first = false;
-        }
-        else
-            if (eMax < eTemp) {
-                eMax = eTemp;
-                maxstate = *this->state;
+        bool first = true;
+        do {
+            if (first){
+                eMax = E();
+                *maxstate = *this->state;
+                first = false;
             }
-    } while (this->state->halfNext());
+            else
+                if (eMax < E()) {
+                    eMax = E();
+                    *maxstate = *this->state;
+                }
+        } while (this->state->halfNext());
+    }
 
-    *(this->state) = maxstate;
+    *this->state = *maxstate;
 
-    return true;
+    return E();
 }
 
 
@@ -1902,12 +1915,12 @@ bool PartArray::setToMonteCarloGroundState(const double t, int steps){
 }
 
 bool PartArray::processMonteCarloStep(const double t){
-    const double Eold = this->calcEnergy1();
+    const double Eold = this->E();
     const int num = this->state->randomize();
 
     //если переворот привел к увеличению энергии, либо повлияла температура, возвращаем всё обратно
     const double
-            de = Eold-this->calcEnergy1(),
+            de = Eold-this->E(),
             p = exp(de/t), //вероятность оставления системы
             randNum = (double)config::Instance()->rand()/(double)config::Instance()->rand_max; //случайное число от 0 до 1
     //если de>0 значит, оставляем переворот (новое E меньше старого), или
@@ -1916,7 +1929,6 @@ bool PartArray::processMonteCarloStep(const double t){
         return true;
     } else {
         this->parts[num]->rotate();
-        this->E1 = Eold;
         return false;
     }
 }
@@ -1931,14 +1943,14 @@ bool PartArray::setToMonteCarloGroundState2(){
     double Eold,Enew;
     vector<int> rot(count);
     do {
-        Eold = this->calcEnergy1();
+        Eold = this->E();
         rotatedCount = ( config::Instance()->rand()%(count-2) ) + 1; //решаем сколько частиц подворачивать
         for (int i=0;i<rotatedCount;i++){
             num = config::Instance()->rand()%count; //решаем какую частицу подворачивать
             this->parts.at(num)->rotate();
             rot[i] = num; //запоминаем подвернутую частицу
         }
-        Enew = this->calcEnergy1();
+        Enew = this->E();
         //если переворот привел к увеличению энергии, возвращаем всё обратно
         if (Eold<=Enew){
             for (int i=0;i<rotatedCount;i++){
@@ -2011,7 +2023,7 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
         iter2++;
         while (iter2!=systems.end()){
             double randNum = (double)config::Instance()->rand()/(double)config::Instance()->rand_max;
-            double de = ((*iter)->E1) - ((*iter2)->E1);
+            double de = ((*iter)->E()) - ((*iter2)->E());
             double p = std::min(1.,exp(de/(0.75)));
 
             if (randNum<p){
@@ -2025,9 +2037,9 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
         }
 
         //случай когда найден минимум
-        if (systems[0]->E1<=eMin){
+        if (systems[0]->E()<=eMin){
             minState = *(systems[0]->state);
-            eMin = systems[0]->E1;
+            eMin = systems[0]->E();
             //std::cout << "E=" << minSystem->E1 <<endl;
         }
 
@@ -2057,31 +2069,8 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 }
 
 
-
-double PartArray::calcEnergy1FastIncrementalTemp(unsigned long long int state){
-    unsigned long long int power = 1; //степень двойки для выуживания битов из состояния
-
-
-    //рассчитываем энергию
-    power = 1;
-    double E=this->eIncrementalTemp;
-    vector<Part*>::iterator iter;
-
-    iter = this->parts.begin();
-    while(iter!= this->parts.end()){
-        if ( (power & state) != 0){
-            for (int i=0;i<this->count();i++){
-                E -=  ( 2. * (*iter)->eArray.at(i));
-            }
-        }
-        power<<=1;
-        iter++;
-    }
-
-    return E;
-}
-
 void PartArray::dropAdaptive(int count){
+    this->clear();
     //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
     Part* temp; //временная частица
     int partCount = this->parts.size(); //количество сброшеных частиц
@@ -2146,6 +2135,7 @@ void PartArray::turnRight(){
 }
 
 void PartArray::turnToDirection(Vect *v){
+    this->changeState();
     vector<Part*>::iterator iter = this->parts.begin();
     iter = this->parts.begin();
     while(iter!=this->parts.end()){
@@ -2174,6 +2164,7 @@ void PartArray::movePosRandomly(double d){
         dir.z = 0 * lattitude;
         this->parts[i]->pos += dir;
     }
+    this->changeSystem();
 }
 
 void PartArray::moveMRandomly(double fi){
@@ -2218,4 +2209,5 @@ void PartArray::moveMRandomly(double fi){
             temp->m = newV;
         }
     }
+    this->changeSystem();
 }

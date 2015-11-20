@@ -19,8 +19,8 @@ public:
      */
     void dropHoneyComb(int m, int n, double a, Part * tmp = 0);
 
-    bool setToGroundState();
-    bool setToMaximalState();
+    double setToGroundState();
+    double setToMaximalState();
 
     virtual void clear();
 

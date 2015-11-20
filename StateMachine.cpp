@@ -28,6 +28,7 @@ StateMachine& StateMachine::operator=(const StateMachineFree &state)
             this->_system->parts[i]->rotate();
         }
     }
+    _system->changeState();
     return *this;
 }
 
@@ -44,6 +45,7 @@ StateMachine &StateMachine::operator=(const StateMachine &state)
             this->_system->parts[i]->rotate();
         }
     }
+    _system->changeState();
     return *this;
 }
 
@@ -73,6 +75,7 @@ void StateMachine::reset(){
         }
         iter++;
     }
+    _system->changeState();
 }
 
 void StateMachine::hardReset(){
@@ -82,6 +85,7 @@ void StateMachine::hardReset(){
         (*iter)->state=0;
         iter++;
     }
+    this->_system->changeSystem();
 }
 
 void StateMachine::setLast(){
@@ -93,17 +97,17 @@ void StateMachine::setLast(){
         }
         iter++;
     }
+
+    _system->changeState();
 }
 
 int StateMachine::randomize(int count){
     int randnum=0,
-            rm = config::Instance()->rand_max,
+            rm = Random::Instance()->max(),
             parts = this->_system->parts.size(),
             rotated = 0;
 
-    if (count>parts)
-        return -1;
-
+    _system->changeState();
     Part* temp;
     while (rotated<count){
         randnum = config::Instance()->rand();
@@ -160,6 +164,8 @@ bool StateMachine::next(){
     //версия для типа bool
     std::vector<Part*>::iterator iter;
 
+    _system->changeState();
+
     iter = this->_system->parts.begin();
 
     while (iter!=(this->_system->parts.end())){
@@ -175,6 +181,8 @@ bool StateMachine::next(){
 }
 
 bool StateMachine::halfNext(){
+
+    _system->changeState();
 
     //версия для типа bool
     std::vector<Part*>::iterator iter;
@@ -195,6 +203,8 @@ bool StateMachine::halfNext(){
 
 bool StateMachine::prev(){
 
+    _system->changeState();
+
     //версия для типа bool
     std::vector<Part*>::iterator iter;
 
@@ -213,6 +223,8 @@ bool StateMachine::prev(){
 }
 
 bool StateMachine::halfPrev(){
+
+    _system->changeState();
 
     //версия для типа bool
     std::vector<Part*>::iterator iter;
@@ -275,6 +287,8 @@ bool StateMachine::fromString(const std::string & s)
     if (this->_system->parts.size()<s.size())
         return false;
 
+    _system->changeState();
+
     for (unsigned int i=0;i<s.size();i++){
         if (this->_system->parts[i]->state != (s[i]!='0'))
             this->_system->parts[i]->rotate();
@@ -293,7 +307,7 @@ unsigned long StateMachine::size() const{
         return 0;
 }
 
-bool StateMachine::operator==(const StateMachine &one)
+bool StateMachine::operator==(const StateMachine &one) const
 {
     //если системы разных размеров, априори считаем их разными
     if (one._system->parts.size()!=this->_system->parts.size()) return false;

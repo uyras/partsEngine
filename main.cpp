@@ -25,10 +25,23 @@ int main(int argc, char *argv[])
 
     config::Instance()->m = 1;
 
+    HoneycombSpinIceArray sys;
+    sys.dropHoneyComb(3,3,1);
+    sys.save("norm.dat");
+    sys.setToGroundState();
+    sys.save("gs.dat");
+    sys.setToMaximalState();
+    sys.save("max.dat");
 
-    SquareSpinIceArray *sys = new SquareSpinIceArray();
+    PartArray* sys2 = SysLoader::load("max.dat");
+    sys2->setToGroundState();
+    int i=0;
+    sys2->save("new.dat");
+
+
+    /*SquareSpinIceArray *sys = new SquareSpinIceArray();
     sys->dropSpinIce(10,5,1);
-    sys->save("out.dat");
+    sys->E();
 
     PartArray *sys2 = SysLoader::load("out.dat");
     sys2->state->next();
@@ -40,7 +53,7 @@ int main(int argc, char *argv[])
     sys3->state->next();
     sys3->save("out3.dat");
 
-    cout<<"finish"<<endl;
+    cout<<"finish"<<endl;*/
     return 0;
     //return a.exec();
 }
