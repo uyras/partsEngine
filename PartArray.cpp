@@ -16,25 +16,16 @@ PartArray::~PartArray(){
     delete this->state;
 }
 
-PartArray::PartArray(double x, double y, double z) {
-    this->_construct();
-    this->resize(x,y,z); //изменяем размер подложки
-}
-
 void PartArray::operator= (const PartArray& a){
     this->eIncrementalTemp = a.eIncrementalTemp;
     this->parts = a.parts;
-    this->size = a.size;
     this->state = a.state;
-    this->absSize = a.absSize;
 }
 
 PartArray* PartArray::copy(){
 
     PartArray *temp = this->beforeCopy();
     temp->eIncrementalTemp = this->eIncrementalTemp;
-    temp->size = this->size;
-    temp->absSize = this->absSize;
 
     temp->eMin = this->eMin;
     temp->eMax = this->eMax;
@@ -76,206 +67,6 @@ Part *PartArray::getById(unsigned id)
     return temp;
 }
 
-PartArray::PartArray(double x, double y, double z, double density) {
-    this->_construct();
-
-    this->resize(x,y,z); //изменяем размер подложки
-    this->clear();
-    this->dropRandom(density); //набрасываем в массив частицы
-}
-
-PartArray::PartArray(double x, double y, double z, int count) {
-    this->_construct();
-
-    this->resize(x,y,z); //изменяем размер подложки
-    this->clear();
-    this->dropRandom(count); //набрасываем в массив частицы
-}
-
-void PartArray::resize(double x, double y, double z){
-    this->size.x = x;
-    this->size.y = y;
-    this->size.z = z;
-    this->clear(); //чистим массив частиц
-}
-
-void PartArray::dropRandom(double maxDestiny) {
-
-    double surfVol = this->size.x * this->size.y;
-    if (config::Instance()->dimensions()==3) surfVol *= this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
-    Part* temp; //временная частица
-    int partCount = this->parts.size(); //количество сброшеных частиц
-    double destiny; //плотность заполнения образца
-
-    std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
-    bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
-    int dropErrorCount=0; //количество ошибочных сбросов подряд
-
-    do {
-
-        //std::cout <<"Drop "<<partCount<<endl;
-
-        temp = new Part();
-        dropErrorCount=0;
-        do {
-            regenerate = false;
-            //генерим координаты
-            temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
-            temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->dimensions()!=3) //если работаем в плоскости, то генерить третью координату не надо
-                temp->pos.z = 0;
-            else
-                temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
-
-            temp->pos.x = temp->pos.x / 100 + config::Instance()->partR;
-            temp->pos.y = temp->pos.y / 100 + config::Instance()->partR;
-            temp->pos.z = temp->pos.z / 100 + config::Instance()->partR;
-
-            //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
-            iterator1 = this->parts.begin();
-            while (iterator1 != this->parts.end()) {
-                if (temp->pos.radius((*iterator1)->pos).length()<=config::Instance()->partR*2){
-                    regenerate=true;
-
-                    //std::cout<<"Drop "<<partCount<<" particle error, repeat"<<endl;
-                    break;
-                }
-                ++iterator1;
-            }
-            dropErrorCount++;
-        } while (regenerate && dropErrorCount<50000);
-
-        if (dropErrorCount>=50000) break; //если частицы уже не кидаются, брэйк
-
-        //генерируем вектор частицы
-        double longitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2*M_PI;
-        double lattitude;
-        if (config::Instance()->dimensions()==2)
-            lattitude=0; // если частица 2-х мерная то угол отклонения должен быть 0
-        else
-            lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2-1;
-
-        temp->m.x = config::Instance()->m * cos(longitude)*sqrt(1-lattitude*lattitude);
-        temp->m.y = config::Instance()->m * sin(longitude)*sqrt(1-lattitude*lattitude);
-        temp->m.z = config::Instance()->m * lattitude;
-
-        //добавляем частицу на экземпляр
-        insert(temp);
-        partCount++;
-
-        //считаем плотность заполнения экземпляра
-        destiny = (config::Instance()->vol * partCount) / surfVol;
-    } while (destiny < maxDestiny);
-}
-
-void PartArray::dropRandom(int count) {
-    this->clear();
-    //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
-    Part* temp; //временная частица
-    int partCount = this->parts.size(); //количество сброшеных частиц
-    count+=partCount;
-
-    std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
-    bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
-    while (partCount < count) {
-        //std::cout <<"Drop "<<partCount<<endl;
-        temp = new Part();
-        do {
-            regenerate = false;
-            //генерим координаты
-            temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
-            temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->dimensions()==2) //если работаем в плоскости, то генерить третью координату не надо
-                temp->pos.z = 0;
-            else
-                temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
-
-            temp->pos.x = temp->pos.x / 100 + config::Instance()->partR;
-            temp->pos.y = temp->pos.y / 100 + config::Instance()->partR;
-            temp->pos.z = temp->pos.z / 100 + config::Instance()->partR;
-
-            //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
-            iterator1 = this->parts.begin();
-            while (iterator1 != this->parts.end()) {
-                if (temp->pos.radius((*iterator1)->pos).length()<=config::Instance()->partR*2){
-                    regenerate = true;
-                    //std::cout<<"Drop "<<partCount<<" particle error, repeat"<<endl;
-                    break;
-                }
-                ++iterator1;
-            }
-        } while (regenerate);
-
-        //генерируем вектор частицы
-        double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
-        double lattitude;
-        if (config::Instance()->dimensions()==2) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
-
-        temp->m.x = config::Instance()->m * cos(longitude) * sqrt(1-lattitude*lattitude);
-        temp->m.y = config::Instance()->m * sin(longitude) * sqrt(1-lattitude*lattitude);
-        temp->m.z = config::Instance()->m * lattitude;
-
-        //добавляем частицу на экземпляр
-        this->insert(temp);
-        partCount++;
-    }
-}
-
-void PartArray::dropChain(double distance){
-    this->clear();
-    double rad = config::Instance()->partR;
-    if (distance < 2.*rad)
-        distance = 2.*rad;
-    if (config::Instance()->dimensions()==2){
-        short int up = 1;
-        Part* temp;
-        double x = rad;
-        while (x <= this->size.x-rad) {
-            double y = rad;
-            while (y <= this->size.y-rad){
-                temp = new Part();
-                temp->m.y = config::Instance()->m * up;
-                temp->m.x = temp->m.z = 0;
-
-                temp->pos.x = x;
-                temp->pos.y = y;
-                temp->pos.z = 0;
-
-                y+=distance;
-                this->insert(temp);
-            }
-            up *= -1;
-            x+=distance;
-        }
-    } else {
-        short int up1=1, up2 = 1;
-        Part* temp;
-        double x = rad;
-        while (x <= this->size.x-rad) {
-            up2 = up1;
-            double z = rad;
-            while (z <= this->size.z-rad){
-                double y = rad;
-                while (y <= this->size.y-rad){
-                    temp = new Part();
-                    temp->m.y = config::Instance()->m * up2;
-                    temp->m.x = temp->m.z = 0;
-
-                    temp->pos.x = x;
-                    temp->pos.y = y;
-                    temp->pos.z = z;
-
-                    y+=distance;
-                    this->insert(temp);
-                }
-                up2 *= -1;
-                z+=distance;
-            }
-            up1 *= -1;
-            x+=distance;
-        }
-    }
-}
 
 //Вспомогательная функция генерирующая спины
 //Генерируется 4 спина (1 пирамида)
@@ -442,21 +233,7 @@ void PartArray::insert(Part part)
     insert(&part);
 }
 
-double PartArray::destiny(bool simple){
-    double surfVol = this->size.x * this->size.y;
-    if (config::Instance()->dimensions()==3) surfVol *= this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
-    if (simple)
-        return (config::Instance()->vol * this->parts.size()) / surfVol;
-    else{
-        double destiny=0;
-        std::vector < Part* >::iterator iterator1 = this->parts.begin();
-        while (iterator1!=this->parts.end()){
-            destiny+=(*iterator1)->volume()/surfVol;
-            iterator1++;
-        }
-        return destiny;
-    }
-}
+
 
 Vect PartArray::M(){
     return this->calcM1();
@@ -1041,9 +818,9 @@ void PartArray::save_v1(string file, bool showNotifications) {
     std::ofstream f(file.c_str());
 
     //сначала сохраняем xyz
-    f << this->size.x << endl;
-    f << this->size.y << endl;
-    f << this->size.z << endl;
+    f << 0 << endl;
+    f << 0 << endl;
+    f << 0 << endl;
 
     //строка заголовков
     f << "x\ty\tz\tMx\tMy\tMz\tr" << endl;
@@ -1157,8 +934,6 @@ void PartArray::savePVPython(string file, int thteta, int phi)
     f<<"\tShow()"<<endl;
     f<<"\ti+=1"<<endl;
     f<<endl;
-    f<<"SetActiveSource(Box( guiName=\"Box1\", XLength="<<size.x<<", YLength="<<size.y<<", ZLength="<<size.z<<
-       ", Center=["<<size.x/2.-delta.x<<", "<<size.y/2.-delta.y<<", "<<size.z/2.-delta.z<<"],  ))"<<endl;
     f<<"DataRepresentation12 = Show()"<<endl;
     f<<"DataRepresentation12.EdgeColor = [0.0, 0.0, 0.5]"<<endl;
     f<<"DataRepresentation12.SelectionPointFieldDataArrayName = 'Normals'"<<endl;
@@ -1244,8 +1019,6 @@ void PartArray::savePVPythonAnimation(PartArray* secondSystem, string file, int 
     f<<"\ti+=1"<<endl;
     f<<endl;
 
-    f<<"SetActiveSource(Box( guiName=\"Box1\", XLength="<<size.x<<", YLength="<<size.y<<", ZLength="<<size.z<<
-       ", Center=["<<size.x/2.-delta.x<<", "<<size.y/2.-delta.y<<", "<<size.z/2.-delta.z<<"],  ))"<<endl;
     f<<"DataRepresentation12 = Show()"<<endl;
     f<<"DataRepresentation12.EdgeColor = [0.0, 0.0, 0.5]"<<endl;
     f<<"DataRepresentation12.SelectionPointFieldDataArrayName = 'Normals'"<<endl;
@@ -1265,9 +1038,10 @@ void PartArray::load_v1(string file,bool showNotifications) {
     this->clear(); //удаляем все частицы
 
     //сначала сохраняем xyz
-    f >> this->size.x;
-    f >> this->size.y;
-    f >> this->size.z;
+    double ttt;
+    f >> ttt;
+    f >> ttt;
+    f >> ttt;
 
     int i=0;
 
@@ -1312,10 +1086,7 @@ void PartArray::load_v1(string file,bool showNotifications) {
 
     config::Instance()->partR = radius;
 
-    if (this->size.z == 0)
-        config::Instance()->set2D();
-    else
-        config::Instance()->set3D();
+    config::Instance()->set2D();
 
 }
 
@@ -1506,23 +1277,6 @@ void PartArray::setMBruteLines(double segmentSize){
         } else {
             (*iter)->m.y = -config::Instance()->m; //поворачиваем вниз
         }
-        iter++;
-    }
-}
-
-void PartArray::scaleSystem(double coff){
-    this->size.x *= coff;
-    this->size.y *= coff;
-    if (!config::Instance()->dimensions()==2)
-        this->size.z *= coff;
-
-    vector<Part*>::iterator iter;
-    iter = this->parts.begin();
-    while (iter!=this->parts.end()){
-        (*iter)->pos.x *= coff;
-        (*iter)->pos.y *= coff;
-        if (!config::Instance()->dimensions()==2)
-            (*iter)->pos.z *= coff;
         iter++;
     }
 }
@@ -1956,64 +1710,6 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
     return true;
 }
 
-
-void PartArray::dropAdaptive(int count){
-    this->clear();
-    //double surfVol = this->size.x * this->size.y * this->size.z; //считаем объем (площадь) поверхности, в которую кидаем частицы
-    Part* temp; //временная частица
-    int partCount = this->parts.size(); //количество сброшеных частиц
-
-    std::vector < Part* >::iterator iterator1; // итератор для обхода массива частиц
-    bool regenerate; //Флаг, нужен для проверки перекрещивания частиц
-    while (partCount < count) {
-        //std::cout <<"Drop "<<partCount<<endl;
-        temp = new Part();
-        do {
-            regenerate = false;
-            //генерим координаты
-            temp->pos.x = config::Instance()->rand() % ((int)(this->size.x-config::Instance()->partR*2)*100);
-            temp->pos.y = config::Instance()->rand() % ((int)(this->size.y-config::Instance()->partR*2)*100);
-            if (config::Instance()->dimensions()==2) //если работаем в плоскости, то генерить третью координату не надо
-                temp->pos.z = 0;
-            else
-                temp->pos.z = config::Instance()->rand() % ((int)(this->size.z-config::Instance()->partR*2)*100);
-
-            temp->pos.x = temp->pos.x / 100 + config::Instance()->partR;
-            temp->pos.y = temp->pos.y / 100 + config::Instance()->partR;
-            temp->pos.z = temp->pos.z / 100 + config::Instance()->partR;
-
-            //проверяем чтобы сгенная точка не пересекалась ни с какой другой (это значит что площади их сфер не пересекались)
-            iterator1 = this->parts.begin();
-            while (iterator1 != this->parts.end()) {
-                if (temp->pos.radius((*iterator1)->pos).length()<=config::Instance()->partR*2){
-                    regenerate = true;
-                    //std::cout<<"Drop "<<partCount<<" particle error, repeat"<<endl;
-                    break;
-                }
-                ++iterator1;
-            }
-        } while (regenerate);
-
-        //генерируем вектор частицы
-        double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
-        double lattitude;
-        if (config::Instance()->dimensions()==2) lattitude=0; else lattitude=(double)config::Instance()->rand() / (double)config::Instance()->rand_max * 2. - 1.; // если частица 2-х мерная то угол отклонения должен быть 0
-
-        if (partCount>0){
-            this->calcH(temp);
-            temp->m = temp->h;
-            temp->m.setUnitary();
-        } else {
-            temp->m.x = config::Instance()->m * cos(longitude)*sqrt(1-lattitude*lattitude);
-            temp->m.y = config::Instance()->m * sin(longitude)*sqrt(1-lattitude*lattitude);
-            temp->m.z = config::Instance()->m * lattitude;
-        }
-
-        //добавляем частицу на экземпляр
-        this->insert(temp);
-        partCount++;
-    }
-}
 void PartArray::turnUp(){
     this->turnToDirection(new Vect(0,1,0));
 }

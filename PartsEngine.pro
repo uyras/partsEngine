@@ -29,7 +29,8 @@ SOURCES += Vect.cpp \
     honeycombspinicearray.cpp \
     honeycombspinicecell.cpp \
     sysloader.cpp \
-    squarelattice.cpp
+    squarelattice.cpp \
+    amorphousarray.cpp
 
 HEADERS += \
     Vect.h \
@@ -49,7 +50,8 @@ HEADERS += \
     distributionLaw.h \
     wanglandau.h \
     wanglandauparallelwalker.h \
-    wanglandauparallel.h
+    wanglandauparallel.h \
+    amorphousarray.h
 
 
 CONFIG(debug,debug|release) {

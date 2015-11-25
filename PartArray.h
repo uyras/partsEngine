@@ -32,24 +32,6 @@ public:
     PartArray();
     virtual ~PartArray();
 
-    /**
-    * Создает пустой массив частиц с подложкой размером X,Y,Z (в нанометрах)
-    * @param x
-    * @param y
-    * @param z
-    */
-    PartArray(double x, double y, double z);
-
-    /**
-    * Создает подложку размером x,y,z и заполняет её случайным набором частиц до заданной плотности
-    */
-    PartArray(double x, double y, double z, double density);
-
-    /**
-    * Создает подложку размером x,y,z и заполняет её указанным количеством частиц
-    */
-    PartArray(double x, double y, double z, int count);
-
 	void operator=(const PartArray& a);
 
     virtual PartArray* copy();
@@ -59,38 +41,12 @@ public:
     //получить частицу по уникальному идентификатору
     Part* getById(unsigned id);
 
-    /**
-    * Изменяет размер подложки и чистит массив частиц
-    */
-    void resize(double x, double y, double z);
-
     void insert(Part* part); //Добавляет частицу на образец
     void insert(const Part part); //Добавляет копию частицы в образец
-
-    /**
-    * Бросает частицы на случайное место в пространстве с заданной частотой
-    */
-    virtual void dropRandom(double maxDestiny);
-
-    /**
-     * @brief dropChain Бросаем частицы в виде цепочки. Это состояние и будет Ground State
-     * @param distance Расстояние между центрами частиц системы. По умолчанию частицы стоят плотно друг к другу
-     */
-    virtual void dropChain(double distance = -1.);
 
     virtual void dropTetrahedron(int x, int y, int z, double R = 1, Part * tmp = 0);
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
-
-    /*рассчитывает плотность массива
-    если simple=true, то считать только исходя из количества частиц и объема одной частицы, иначе
-    рассчитывать плтность суммируя объемы всех частиц*/
-    double destiny(bool simple=true);
-
-    /**
-    * Бросает частицы на случайное место в пространстве с заданной частотой
-    */
-    virtual void dropRandom(int count);
 
     /**
      * @brief calcM1 считает общий магнитный момент системы
@@ -197,9 +153,6 @@ public:
     //возвращает количество частиц на объекте
     int count();
 
-    // изменить масштаб образца, не затрагивая радиусы и магнитные моменты
-    void scaleSystem(double coff);
-
     // возвращает вектор(массив) энергий каждой частицы
     std::vector<double> getEVector();
 
@@ -284,8 +237,6 @@ public:
     //рассчитываем относительный обменный интеграл (отношение |J| к J)
 	double calcJ12();
 
-	void dropAdaptive(int cout);//тестовый метод упорядоивания во время наброса
-
     /************************
      * Глобальные переменные *
      ***********************/
@@ -295,8 +246,6 @@ public:
 
     //сам массив частиц, над которым проводятся исследования
     std::vector < Part* > parts;
-    Vect size; //размер плоскости в относительных единицах
-    Vect absSize;  //размер плоскости в абсолютных единицах
 
     void _construct(); //стандартный конструктор.
 

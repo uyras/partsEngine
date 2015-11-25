@@ -25,12 +25,11 @@ int main(int argc, char *argv[])
 
     config::Instance()->set2D();
 
-    SquareLattice sys1;
-    sys1.dropSquareLattice(3,3);
-    sys1.save("square.dat");
-    SquareLattice *sys2 = (SquareLattice*)SysLoader::load("square.dat");
-    sys2->save("square2.dat");
-    delete sys2;
+    SquareSpinIceArray sys;
+    sys.dropSpinIce(1,1);
+    do {
+        cout<<sys.E()<<endl;
+    } while (sys.state->next());
 
     /*SquareSpinIceArray *sys = new SquareSpinIceArray();
     sys->dropSpinIce(10,5,1);
