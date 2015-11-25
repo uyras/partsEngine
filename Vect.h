@@ -1,11 +1,3 @@
-
-/*
-* File:   Vect.h
-* Author: uyras
-*
-* Created on 20 Ноябрь 2012 г., 15:55
-*/
-
 #ifndef VECT_H
 #define VECT_H
 

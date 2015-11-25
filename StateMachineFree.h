@@ -1,5 +1,6 @@
 #ifndef STATEMACHINEFREE_H
 #define STATEMACHINEFREE_H
+
 #include <vector>
 #include <string>
 #include "config.h"

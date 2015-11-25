@@ -1,18 +1,11 @@
-/*
- * File:   Part.h
- * Author: uyras
- * класс частицы
- * Created on 20 Ноябрь 2012 г., 15:50
- */
-
 #ifndef PART_H
 #define PART_H
 
 #include <vector>
 #include "Vect.h"
+#include "PartArray.h"
 
 class PartArray;
-
 class Part {
 public:
     friend PartArray;
@@ -32,10 +25,10 @@ public:
     double w1,h1; //высота и ширина частицы
 
     Part();
+    Part(const Part& obj); //конструктор копирования
     virtual ~Part();
     Vect interact(Part* elem); //считает поле взаимодействия частицы elem на текущую частиуц и возвращает вектор H
     void rotate(float angle=180.); //вращаем магнитный момент частицы и меняем ее состояние
-    Part* copy();
     double volume(); //Возвращает объем частицы в относительных единицах
 
     int Id();

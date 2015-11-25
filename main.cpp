@@ -9,6 +9,7 @@
 #include "StateMachine.h"
 #include "StateMachineFree.h"
 #include "squarespinicearray.h"
+#include "squarelattice.h"
 #include "sysloader.h"
 
 #include "random.h"
@@ -17,27 +18,19 @@
 
 using namespace std;
 
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
     config::Instance()->set2D();
 
-    config::Instance()->m = 1;
-
-    HoneycombSpinIceArray sys;
-    sys.dropHoneyComb(3,3,1);
-    sys.save("norm.dat");
-    sys.setToGroundState();
-    sys.save("gs.dat");
-    sys.setToMaximalState();
-    sys.save("max.dat");
-
-    PartArray* sys2 = SysLoader::load("max.dat");
-    sys2->setToGroundState();
-    int i=0;
-    sys2->save("new.dat");
-
+    SquareLattice sys1;
+    sys1.dropSquareLattice(3,3);
+    sys1.save("square.dat");
+    SquareLattice *sys2 = (SquareLattice*)SysLoader::load("square.dat");
+    sys2->save("square2.dat");
+    delete sys2;
 
     /*SquareSpinIceArray *sys = new SquareSpinIceArray();
     sys->dropSpinIce(10,5,1);

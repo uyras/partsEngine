@@ -3,6 +3,7 @@
 HoneycombSpinIceArray::HoneycombSpinIceArray()
 {
      _type = "honeycomb";
+     SysLoader::reg<HoneycombSpinIceArray>(type());
 }
 
 HoneycombSpinIceArray::~HoneycombSpinIceArray()
@@ -39,7 +40,7 @@ void HoneycombSpinIceArray::dropHoneyComb(int m, int n, double a, Part *tmp)
             //genHexPart start
             for(int k=0;k<6;k++)
             {
-                Part* temp = tmp->copy();
+                Part* temp = new Part(*tmp);
                 temp->pos.x = r*cos(2*M_PI*k/6)+x;
                 temp->pos.y = r*sin(2*M_PI*k/6)+y;
                 temp->m.x = cos(2*M_PI*k/6+M_PI/2)*mLength;
@@ -78,43 +79,34 @@ void HoneycombSpinIceArray::dropHoneyComb(int m, int n, double a, Part *tmp)
     }
 }
 
-double HoneycombSpinIceArray::setToGroundState()
+StateMachineFree HoneycombSpinIceArray::groundState()
 {
-    if (minstate->size()==0){
-        HoneycombSpinIceCell* temp;
-        for (int i=0;i<n;i++)
-            for (int j=0;j<m;j++){
-                temp = cells[i*m+j];
-                switch ((j+(i%2))%3){
-                case 0:
-                    temp->rotateClockWise();
-                    break;
-                case 1:
-                    temp->rotateAntiClockWise();
-                    break;
-                case 2:
-                    temp->rotateChaotic();
-                    break;
-                }
+    HoneycombSpinIceCell* temp;
+    for (int i=0;i<n;i++)
+        for (int j=0;j<m;j++){
+            temp = cells[i*m+j];
+            switch ((j+(i%2))%3){
+            case 0:
+                temp->rotateClockWise();
+                break;
+            case 1:
+                temp->rotateAntiClockWise();
+                break;
+            case 2:
+                temp->rotateChaotic();
+                break;
             }
-        *minstate = *state;
-        this->changeState();
-    } else
-        *state = *minstate;
-    return eMin=E();
+        }
+    return *state;
 }
 
-double HoneycombSpinIceArray::setToMaximalState()
+StateMachineFree HoneycombSpinIceArray::maximalState()
 {
-    if (maxstate->size()==0){
-        for (int i=0;i<m*n;i++){
-            cells[i]->rotateChaotic();
-        }
-        *maxstate = *state;
-        this->changeState();
-    } else
-        *state = *maxstate;
-    return eMax=E();
+    for (int i=0;i<m*n;i++){
+        cells[i]->rotateChaotic();
+    }
+    return *state;
+
 }
 
 void HoneycombSpinIceArray::clear()

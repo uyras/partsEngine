@@ -7,6 +7,7 @@
 
 using namespace std;
 
+class Part;
 
 struct oneCell{ //ячейка нужна для определения конфигураций
     Vect

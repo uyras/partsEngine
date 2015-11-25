@@ -35,24 +35,6 @@ private slots:
         QVERIFY(a->destiny(true)>0.35&&a->destiny(true)<0.45);
         delete a;
     }
-    void dropSpinIce(){
-        PartArray a(10,10,1);
-        a.dropSpinIce(1,2,3);
-
-        QCOMPARE(a.parts[0]->pos.x,2.);
-        QCOMPARE(a.parts[0]->pos.y,0.5);
-
-        QCOMPARE(a.parts[1]->pos.x,0.5);
-        QCOMPARE(a.parts[1]->pos.y,2.);
-
-        QCOMPARE(a.parts[2]->pos.x,5.);
-        QCOMPARE(a.parts[2]->pos.y,0.5);
-
-        QCOMPARE(a.parts[3]->pos.x,3.5);
-        QCOMPARE(a.parts[3]->pos.y,2.);
-
-        QCOMPARE(a.count(),18);
-    }
 
     void energy(){
         //тест вычисления энергии после создания системы

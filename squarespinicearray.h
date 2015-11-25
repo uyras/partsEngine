@@ -4,8 +4,10 @@
 #include "PartArray.h"
 #include "squarespinicecell.h"
 #include "Vect.h"
+#include "sysloader.h"
 #include <QtDebug>
 
+using namespace std;
 
 class SquareSpinIceArray : public PartArray
 {
@@ -24,8 +26,8 @@ public:
      */
     Part* findByPosition(const Vect& pos, double epsilon=1e-15);
 
-    double setToGroundState();
-    double setToMaximalState();
+    StateMachineFree groundState();
+    StateMachineFree maximalState();
 
     vector<SquareSpinIceCell*> cells;
 

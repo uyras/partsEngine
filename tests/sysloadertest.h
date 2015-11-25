@@ -41,6 +41,7 @@ private slots:
         }
 
         QCOMPARE(QString(sys.state->toString().c_str()), QString(sys2->state->toString().c_str()));
+        delete sys2;
     }
 
     void loadSquare(){
@@ -62,6 +63,7 @@ private slots:
         }
 
         QCOMPARE(QString(sys.state->toString().c_str()), QString(sys2->state->toString().c_str()));
+        delete sys2;
     }
 
     void loadHoneycomb(){
@@ -87,6 +89,7 @@ private slots:
         }
 
         QCOMPARE(QString(sys.state->toString().c_str()), QString(sys2->state->toString().c_str()));
+        delete sys2;
     }
 };
 

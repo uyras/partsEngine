@@ -13,11 +13,11 @@ SUBDIRS += tests
 QT       -= gui
 
 SOURCES += Vect.cpp \
-    PartArray.cpp \
+    config.cpp \
     Part.cpp \
     distributionLaw.cpp \
-    config.cpp \
     statemachinebase.cpp \
+    PartArray.cpp \
     StateMachine.cpp \
     StateMachineFree.cpp \
     squarespinicearray.cpp \
@@ -28,25 +28,28 @@ SOURCES += Vect.cpp \
     random.cpp \
     honeycombspinicearray.cpp \
     honeycombspinicecell.cpp \
-    sysloader.cpp
+    sysloader.cpp \
+    squarelattice.cpp
 
-HEADERS += Vect.h \
-    PartArray.h \
+HEADERS += \
+    Vect.h \
+    random.h \
     Part.h \
-    distributionLaw.h \
-    config.h \
+    PartArray.h \
+    sysloader.h \
     statemachinebase.h \
     StateMachine.h \
     StateMachineFree.h \
-    squarespinicearray.h \
+    config.h \
     squarespinicecell.h \
-    wanglandau.h \
-    wanglandauparallel.h \
-    wanglandauparallelwalker.h \
-    random.h \
-    honeycombspinicearray.h \
+    squarespinicearray.h \
     honeycombspinicecell.h \
-    sysloader.h
+    honeycombspinicearray.h \
+    squarelattice.h \
+    distributionLaw.h \
+    wanglandau.h \
+    wanglandauparallelwalker.h \
+    wanglandauparallel.h
 
 
 CONFIG(debug,debug|release) {

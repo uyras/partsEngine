@@ -6,16 +6,6 @@
 */
 
 #include "PartArray.h"
-#include "Part.h"
-#include "config.h"
-#include <cmath>
-#include <iostream>
-#include <fstream>
-#include <time.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdexcept>
-
 
 PartArray::PartArray() {
     this->_construct();
@@ -58,7 +48,7 @@ PartArray* PartArray::copy(){
     //копируем частицы
     vector<Part*>::iterator iter = this->parts.begin();
     while(iter!=this->parts.end()){
-        temp->insert((*iter)->copy());
+        temp->insert(new Part(*(*iter)));
         iter++;
     }
 
@@ -287,112 +277,6 @@ void PartArray::dropChain(double distance){
     }
 }
 
-void PartArray::dropSpinIce(double partW, double partH, double lattice)
-{
-    this->clear();
-    if (config::Instance()->dimensions()!=2)
-        return;
-
-    if (partW+partH>lattice) //если параметр решетки слишком маленький, увеличиваем до нужного
-        lattice=partH+partW;
-
-    double a = fmin(partW, partH); //которкая сторона овала
-    double b = fmax(partW, partH); //длиная сторона овала
-
-    double firstSpace = lattice/2.+a/2.;
-    Vect center = Vect(firstSpace,firstSpace,0);
-
-    Part *temp;
-    while (center.y < this->size.y + lattice) {
-        center.x = firstSpace;
-        while(center.x < this->size.x + lattice){
-            //добавляем горизонтальные
-            if (
-                    center.x + b/2. < this->size.x &&
-                    center.y - lattice/2. + a/2. < this->size.y
-                    ){
-                temp = new Part();
-                temp->shape = Part::ELLIPSE;
-                temp->pos = Vect(center.x, center.y-lattice/2.,0);
-                temp->m = Vect(config::Instance()->m,0,0);
-                temp->w1 = b; temp->h1 = a;
-                this->insert(temp);
-            }
-
-            //добавляем вертикальные
-            if (
-                    center.x - lattice/2. + a/2. < this->size.x &&
-                    center.y + b/2. < this->size.y
-                    ){
-                temp = new Part();
-                temp->shape = Part::ELLIPSE;
-                temp->pos = Vect(center.x-lattice/2.,center.y,0);
-                temp->m = Vect(0,config::Instance()->m,0);
-                temp->w1 = a; temp->h1 = b;
-                this->insert(temp);
-            }
-            center.x+=lattice;
-        }
-        center.y+=lattice;
-    }
-}
-
-void PartArray::dropHoneyComb(int m, int n, double a, Part *tmp)
-{
-    this->clear();
-    double mLength=0; //магнитный момент одной частицы
-    if (tmp==0){ //если шаблон частицы не был передан, делаем шаблон по умолчанию
-        tmp = new Part();
-        mLength = config::Instance()->m;
-    } else {
-        mLength = tmp->m.length();
-    }
-
-    double r=a*sqrt(3)/2;
-    for(int i=0;i<m;i++)
-    {
-        for(int j=0;j<n;j++)
-        {
-            double x=2*r*i+r*(pow(-1,j)+1)/2;
-            double y=sqrt(3*r*r)*j;
-            vector<Part*> hexPart;
-
-            //genHexPart start
-            for(int k=0;k<6;k++)
-            {
-                Part* temp = tmp->copy();
-                temp->pos.x = r*cos(2*M_PI*k/6)+x;
-                temp->pos.y = r*sin(2*M_PI*k/6)+y;
-                temp->m.x = cos(2*M_PI*k/6+M_PI/2)*mLength;
-                temp->m.y = sin(2*M_PI*k/6+M_PI/2)*mLength;
-                hexPart.push_back(temp);
-            }
-            //genHexPart end
-
-            vector<Part*>::iterator iter = hexPart.begin();
-            while (iter!=hexPart.end()){
-                bool add=true;
-                vector<Part*>::iterator iter2 = this->parts.begin();
-                while(iter2!=this->parts.end()){
-                    if (
-                            this->_double_equals((*iter2)->pos.x,(*iter)->pos.x) &&
-                            this->_double_equals((*iter2)->pos.y,(*iter)->pos.y)
-                            )
-                            add=false;
-                    iter2++;
-                }
-
-                if(add)
-                    this->insert(*iter);
-                else
-                    delete (*iter); //удаляем из памяти
-
-                iter++;
-            }
-        }
-    }
-}
-
 //Вспомогательная функция генерирующая спины
 //Генерируется 4 спина (1 пирамида)
 //Неуверен в правельности реализации функции и передачи самой системы
@@ -437,22 +321,22 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
     //слаб в указателях и ссылках
     vector<Part*> hexPart;
 
-    Part* temp1 = tmp->copy();
+    Part* temp1 = new Part(*tmp);
     temp1->pos.setXYZ(x0,y0,z0);
     temp1->m.setXYZ((cx-x0)/_o,(cy-y0)/_o,(cz-z0)/_o);
     hexPart.push_back(temp1);
 
-    Part* temp2 = tmp->copy();
+    Part* temp2 = new Part(*tmp);
     temp2->pos.setXYZ(x1,y1,z1);
     temp2->m.setXYZ((cx-x1)/_o,(cy-y1)/_o,(cz-z1)/_o);
     hexPart.push_back(temp2);
 
-    Part* temp3 = tmp->copy();
+    Part* temp3 = new Part(*tmp);
     temp3->pos.setXYZ(x2,y2,z2);
     temp3->m.setXYZ((cx-x2)/_o,(cy-y2)/_o,(cz-z2)/_o);
     hexPart.push_back(temp3);
 
-    Part* temp4 = tmp->copy();
+    Part* temp4 = new Part(*tmp);
     temp4->pos.setXYZ(x3,y3,z3);
     temp4->m.setXYZ((cx-x3)/_o,(cy-y3)/_o,(cz-z3)/_o);
     hexPart.push_back(temp4);
@@ -553,28 +437,9 @@ void PartArray::insert(Part * part){
         part->id = lastId++;
 }
 
-void PartArray::dropLattice(double distance){
-    this->clear();
-    Part* temp; //временная частица
-    for(double x=config::Instance()->partR; x<=this->size.x-config::Instance()->partR; x+=config::Instance()->partR*2+distance){
-        for(double y=config::Instance()->partR; y<=this->size.y-config::Instance()->partR; y+=config::Instance()->partR*2+distance){
-            temp = new Part();
-            //генерируем вектор частицы
-            double longitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2*M_PI;
-            double lattitude;
-            if (config::Instance()->dimensions()==2) lattitude=0; else lattitude=(double)config::Instance()->rand()/(double)config::Instance()->rand_max*2-1; // если частица 2-х мерная то угол отклонения должен быть 0
-
-            temp->m.x = config::Instance()->m * cos(longitude)*sqrt(1-lattitude*lattitude);
-            temp->m.y = config::Instance()->m * sin(longitude)*sqrt(1-lattitude*lattitude);
-            temp->m.z = config::Instance()->m * lattitude;
-            temp->pos.x = x;
-            temp->pos.y = y;
-            temp->pos.z = 0;
-
-            //добавляем частицу на экземпляр
-            this->insert(temp);
-        }
-    }
+void PartArray::insert(Part part)
+{
+    insert(&part);
 }
 
 double PartArray::destiny(bool simple){
@@ -1516,8 +1381,10 @@ void PartArray::load(QString file)
 void PartArray::clear(){
     this->beforeClear();
     vector<Part*>::iterator iter = this->parts.begin();
+    Part *temp;
     while (iter!=this->parts.end()){
-        delete (*iter); //удаляем все что по есть по ссылкам на частицы
+        temp = *iter;
+        delete temp; //удаляем все что по есть по ссылкам на частицы
         iter++;
     }
     this->lastId = 0;
@@ -1855,50 +1722,71 @@ double PartArray::calcJ12(){
 }
 
 double PartArray::setToGroundState(){
-    if (this->minstate->size()==0){
-        this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
-
-        bool first = true;
-        do {
-            if (first){
-                eMin = E();
-                (*minstate) = (*this->state);
-                first = false;
-            } else
-                if (E() < eMin) {
-                    eMin = E();
-                    (*minstate) = (*this->state);
-                }
-        } while (this->state->halfNext());
+    if (minstate->size()==0){ //если минимальное состояние не задано
+        *minstate = this->groundState();
     }
-
-    (*this->state) = (*minstate);
-
-    return E();
+    *state = *minstate;
+    this->changeState();
+    return eMin=E();
 }
 
 double PartArray::setToMaximalState(){
-    if (this->maxstate->size()==0){
-        this->state->reset(); //сбрасываем в начальное состояние, так как полный перебор предполагает все состояния
-
-        bool first = true;
-        do {
-            if (first){
-                eMax = E();
-                *maxstate = *this->state;
-                first = false;
-            }
-            else
-                if (eMax < E()) {
-                    eMax = E();
-                    *maxstate = *this->state;
-                }
-        } while (this->state->halfNext());
+    if (maxstate->size()==0){ //если минимальное состояние не задано
+        *maxstate = this->maximalState();
     }
+    *state = *maxstate;
+    this->changeState();
+    return eMax=E();
+}
 
-    *this->state = *maxstate;
+StateMachineFree PartArray::maximalState()
+{
+    StateMachineFree oldState = *(state);
+    this->state->reset();
 
-    return E();
+    StateMachineFree mstate;
+    double max;
+    bool first = true;
+    do {
+        if (first){
+            max = E();
+            mstate = *this->state;
+            first = false;
+        } else
+            if (E() > max) {
+                max = E();
+                mstate = *this->state;
+            }
+    } while (this->state->halfNext());
+
+    (*state) = oldState;
+
+    return mstate;
+}
+
+StateMachineFree PartArray::groundState()
+{
+    StateMachineFree oldState = *(state);
+    this->state->reset();
+
+    StateMachineFree mstate;
+    double min;
+    bool first = true;
+    do {
+        if (first){
+            min = E();
+            mstate = *this->state;
+            first = false;
+        } else
+            if (E() < min) {
+                min = E();
+                mstate = *this->state;
+            }
+    } while (this->state->halfNext());
+
+    (*state) = oldState;
+
+    return mstate;
 }
 
 

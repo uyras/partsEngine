@@ -10,8 +10,9 @@
 #include "statemachinebase.h"
 #include "StateMachineFree.h"
 
-class PartArray; //фикс, так как используется перекрестное объявление с этим классом
+
 class StateMachineFree;
+class PartArray;
 
 class StateMachine:
         public StateMachineBase

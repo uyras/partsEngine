@@ -1,11 +1,6 @@
-/*
- * File:   distributionLaw.h
- * Author: Отморозок
- *
- * Created on 4 Декабрь 2012 г., 15:29
- */
+#ifndef DISTRIBUTIONLAW_H
+#define DISTRIBUTIONLAW_H
 
-#pragma once
 #include <vector>
 #include <cmath>
 
@@ -26,4 +21,4 @@ private:
     double _min();
 };
 
-
+#endif //DISTRIBUTIONLAW_H

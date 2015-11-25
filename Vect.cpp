@@ -100,8 +100,7 @@ Vect Vect::operator=(const Vect& a) {
 	this->x = a.x;
 	this->y = a.y;
 	this->z = a.z;
-	Vect res(this->x,this->y,this->z);
-    return Vect(this->x,this->y,this->z);;
+    return Vect(this->x,this->y,this->z);
 }
 
 Vect Vect::operator+=(const Vect& a) {

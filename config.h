@@ -1,6 +1,6 @@
 
-#ifndef H_CONFIG
-#define H_CONFIG
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #define _USE_MATH_DEFINES true
 #include <math.h>
@@ -74,4 +74,4 @@ private:
     std::ifstream _randfile;
 };
 
-#endif
+#endif //CONFIG_H

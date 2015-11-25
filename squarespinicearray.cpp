@@ -3,6 +3,7 @@
 SquareSpinIceArray::SquareSpinIceArray()
 {
     this->_type = "squarespinice";
+    SysLoader::reg<SquareSpinIceArray>(type());
 }
 
 SquareSpinIceArray::~SquareSpinIceArray()
@@ -106,58 +107,48 @@ Part *SquareSpinIceArray::findByPosition(const Vect &pos, double epsilon)
     return 0;
 }
 
-double SquareSpinIceArray::setToGroundState()
+StateMachineFree SquareSpinIceArray::groundState()
 {
-    if (this->minstate->size()==0){
-        vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
-        SquareSpinIceCell *temp;
-        while (iter!=this->cells.end()){
-            temp = *iter;
-            int direction = (temp->row+temp->column)%2*2-1; //либо +1 либо -1, в шахматном порядке
+    vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
+    SquareSpinIceCell *temp;
+    while (iter!=this->cells.end()){
+        temp = *iter;
+        int direction = (temp->row+temp->column)%2*2-1; //либо +1 либо -1, в шахматном порядке
 
-            if (temp->top->m.scalar(Vect(direction,0,0))<0)
-                temp->top->rotate();
-            if (temp->bottom->m.scalar(Vect(direction*-1.,0,0))<0)
-                temp->bottom->rotate();
-            if (temp->left->m.scalar(Vect(0,direction,0))<0)
-                temp->left->rotate();
-            if (temp->right->m.scalar(Vect(0,direction*-1.,0))<0)
-                temp->right->rotate();
+        if (temp->top->m.scalar(Vect(direction,0,0))<0)
+            temp->top->rotate();
+        if (temp->bottom->m.scalar(Vect(direction*-1.,0,0))<0)
+            temp->bottom->rotate();
+        if (temp->left->m.scalar(Vect(0,direction,0))<0)
+            temp->left->rotate();
+        if (temp->right->m.scalar(Vect(0,direction*-1.,0))<0)
+            temp->right->rotate();
 
-            iter++;
-        }
-        *minstate = *state;
-        this->changeState();
-    } else
-        *state = *minstate;
-    return eMin=E();
+        iter++;
+    }
+    return *state;
 }
 
-double SquareSpinIceArray::setToMaximalState()
+StateMachineFree SquareSpinIceArray::maximalState()
 {
-    if (this->maxstate->size()==0){
-        vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
-        SquareSpinIceCell *temp;
-        while (iter!=this->cells.end()){
-            temp = *iter;
-            int direction = (temp->row+temp->column)%2*2-1;
+    vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
+    SquareSpinIceCell *temp;
+    while (iter!=this->cells.end()){
+        temp = *iter;
+        int direction = (temp->row+temp->column)%2*2-1;
 
-            if (temp->top->m.scalar(Vect(direction,0,0))<0)
-                temp->top->rotate();
-            if (temp->bottom->m.scalar(Vect(direction*-1.,0,0))<0)
-                temp->bottom->rotate();
-            if (temp->left->m.scalar(Vect(0,direction*-1.,0))<0)
-                temp->left->rotate();
-            if (temp->right->m.scalar(Vect(0,direction,0))<0)
-                temp->right->rotate();
+        if (temp->top->m.scalar(Vect(direction,0,0))<0)
+            temp->top->rotate();
+        if (temp->bottom->m.scalar(Vect(direction*-1.,0,0))<0)
+            temp->bottom->rotate();
+        if (temp->left->m.scalar(Vect(0,direction*-1.,0))<0)
+            temp->left->rotate();
+        if (temp->right->m.scalar(Vect(0,direction,0))<0)
+            temp->right->rotate();
 
-            iter++;
-        }
-        *maxstate = *state;
-        this->changeState();
-    } else
-        *state = *maxstate;
-    return eMax=E();
+        iter++;
+    }
+    return *state;
 }
 
 PartArray *SquareSpinIceArray::beforeCopy()

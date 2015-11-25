@@ -21,6 +21,19 @@ Part::Part() :
     this->id = -1; //значит что уникальный ИД не задан
 }
 
+Part::Part(const Part &obj)
+{
+    this->pos = obj.pos;
+    this->m = obj.m;
+    this->h = obj.h;
+    this->e = obj.e;
+    this->eArray=obj.eArray;
+    this->_vol = obj._vol;
+    this->sector = obj.sector;
+    this->state = obj.state;
+    this->id=-1;
+}
+
 Part::Part(unsigned int id) :
     state(false)
 {
@@ -63,21 +76,6 @@ void Part::rotate(float angle){
     angle = angle;
     this->m.rotate();
     this->state = !this->state;
-}
-
-Part* Part::copy(){
-    Part* temp = new Part();
-
-    temp->pos = this->pos;
-    temp->m = this->m;
-    temp->h = this->h;
-    temp->e = this->e;
-    temp->eArray=this->eArray;
-    temp->_vol = this->_vol;
-    temp->sector = this->sector;
-    temp->state = this->state;
-
-    return temp;
 }
 
 double Part::volume()

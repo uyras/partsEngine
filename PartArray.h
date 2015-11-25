@@ -16,10 +16,12 @@
 #include "Part.h"
 #include "StateMachine.h"
 #include "StateMachineFree.h"
+#include "sysloader.h"
 
 using namespace std;
 class StateMachine;
 class StateMachineFree;
+class Part;
 class SysLoader;
 
 class PartArray {
@@ -62,42 +64,19 @@ public:
     */
     void resize(double x, double y, double z);
 
-    /**
-     * @brief insert Добавляет частицу на образец
-     */
-    void insert(Part* part);
+    void insert(Part* part); //Добавляет частицу на образец
+    void insert(const Part part); //Добавляет копию частицы в образец
 
     /**
     * Бросает частицы на случайное место в пространстве с заданной частотой
     */
     virtual void dropRandom(double maxDestiny);
 
-    //заполняет объет в виде квадратной решетки
-    //distance - расстояние между двумя частицами
-    virtual void dropLattice(double distance=0.);
-
     /**
      * @brief dropChain Бросаем частицы в виде цепочки. Это состояние и будет Ground State
      * @param distance Расстояние между центрами частиц системы. По умолчанию частицы стоят плотно друг к другу
      */
     virtual void dropChain(double distance = -1.);
-
-    /**
-     * @brief dropSpinIce Создает структуру типа "спиновый лед"
-     * @param partW Высота частицы
-     * @param partH Ширина частицы
-     * @param lattice Расстояние между центрами соседних частиц (параметр решетки)
-     */
-    virtual void dropSpinIce(double partW, double partH, double lattice);
-
-    /**
-     * @brief dropHoneyComb Создать решетку гексагональной формы
-     * @param m Количество ячеек по горизонтали
-     * @param n Количество ячеек по вертикали
-     * @param a Расстояние между двумя соседними частицами honeycomb решетки
-     * @param tmp Шаблон добавляемой частицы. Будут перезаписываться координаты и направление магнитного момента (длина сохраняется)
-     */
-    virtual void dropHoneyComb(int m, int n, double a, Part * tmp = 0);
 
     virtual void dropTetrahedron(int x, int y, int z, double R = 1, Part * tmp = 0);
 
@@ -265,11 +244,14 @@ public:
 
 	//находит состояние минимума энергии системы и переводит её в это состояние.
     //возвращает энергию этого состояния
-    virtual double setToGroundState();
+    double setToGroundState();
 
     //находит состояние максимума энергии системы и переводит её в это состояние.
     //возвращает энергию этого состояния
-    virtual double setToMaximalState();
+    double setToMaximalState();
+
+    virtual StateMachineFree maximalState();
+    virtual StateMachineFree groundState();
 
 	//находит состояние минимума энергии системы и переводит её в это состояние методом монте-карло
     //steps - количество попыток
@@ -328,7 +310,7 @@ protected:
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
     void changeState(); //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
     void changeSystem(); //вызывается когда изменилась вся система целиком
+
     QString _type;
 };
-
 #endif // PARTARRAY_H

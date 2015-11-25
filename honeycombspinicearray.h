@@ -3,6 +3,7 @@
 
 #include "PartArray.h"
 #include "honeycombspinicecell.h"
+#include "sysloader.h"
 
 class HoneycombSpinIceArray : public PartArray
 {
@@ -19,8 +20,8 @@ public:
      */
     void dropHoneyComb(int m, int n, double a, Part * tmp = 0);
 
-    double setToGroundState();
-    double setToMaximalState();
+    StateMachineFree groundState();
+    StateMachineFree maximalState();
 
     virtual void clear();
 
