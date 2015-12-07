@@ -86,8 +86,3 @@ double Part::volume()
         return (4.0/3.0) * M_PI * this->r * this->r * this->r;
     }
 }
-
-int Part::Id()
-{
-    return this->id;
-}

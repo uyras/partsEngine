@@ -13,6 +13,7 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include <map>
 #include "Part.h"
 #include "StateMachine.h"
 #include "StateMachineFree.h"
@@ -33,6 +34,7 @@ public:
     virtual ~PartArray();
 
 	void operator=(const PartArray& a);
+    Part* operator[](const int num);
 
     virtual PartArray* copy();
     virtual PartArray* beforeCopy(); //Возвращает экземпляр чистой системы частиц
@@ -45,6 +47,15 @@ public:
     void insert(const Part part); //Добавляет копию частицы в образец
 
     virtual void dropTetrahedron(int x, int y, int z, double R = 1, Part * tmp = 0);
+
+    /**
+     * @brief setInteractionRange устанавливает радиус взаимодействия вокруг частицы.
+     * Две частицы являются соседями, если радиус между ними меньше или равен установленному.
+     * @param range Максимальный радиус. 0 - если взаимодействие "все со всеми"
+     */
+    void setInteractionRange(const double range);
+    bool isNeighbours(const Part* _a, const Part* _b) const;
+    void redefineNeightbours();
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
@@ -104,6 +115,7 @@ public:
     * @return энергия
     */
     double EComplete(Part *elem) const;
+    double ECompleteOld(Part *elem) const;
     double ECompleteFast();
 
 
@@ -111,6 +123,11 @@ public:
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
     double eIncrementalTemp; //энергия, нужна для инкремента. Используется только в 2-х функциях выше
 
+    double calcEnergy1FastIncremental2(double initEnergy); //state - новое состояние системы
+    double calcEnergy1FastIncrementalFirst2(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
+
+    double calcEnergy1FastIncremental3(double initEnergy); //state - новое состояние системы
+    double calcEnergy1FastIncrementalFirst3(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
 
 
     /**
@@ -253,12 +270,15 @@ public:
 
 protected:
     double eMin,eMax,eInit,eTemp;
+    std::map< Part*, map<Part*,double> > eArray; //массив парных взаимодействий энергий
     StateMachineFree *minstate,*maxstate;
     unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
     void changeState(); //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
     void changeSystem(); //вызывается когда изменилась вся система целиком
+
+    double _interactionRange; //длина взаимодействия
 
     QString _type;
 };

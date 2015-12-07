@@ -51,7 +51,7 @@ double Vect::scalar(Vect b) {
  * @param b
  * @return
  */
-double Vect::space(Vect b) {
+double Vect::space(const Vect &b) const {
     if (config::Instance()->dimensions()==2)
 		return sqrt(
 					(this->x - b.x)*(this->x - b.x) +
@@ -65,11 +65,11 @@ double Vect::space(Vect b) {
 					);
 }
 
-Vect Vect::radius(Vect b) {
+Vect Vect::radius(const Vect &b) const {
 	return Vect(b.x - this->x, b.y - this->y, b.z - this->z);
 }
 
-double Vect::length() {
+double Vect::length() const {
     if (config::Instance()->dimensions()==2)
 		return sqrt(
 					this->x * this->x +
@@ -198,7 +198,7 @@ void Vect::toRel(){
 	this->z /= config::Instance()->vol;
 }
 
-void Vect::draw(){
+void Vect::draw() const{
     cout<<"x="<<this->x<<"; y="<<this->y<<"; z="<<this->z<<"; l="<<this->length()<<endl;
 }
 

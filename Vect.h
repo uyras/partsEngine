@@ -10,16 +10,16 @@ public:
 
     double scalar(Vect); //Скалярное произведение двух векторов
 
-    double space(Vect b); //расстояние между векторами
-    Vect radius(Vect b); //возвращает радиус-вектор
-    double length(); //длина вектора
+    double space(const Vect &b) const; //расстояние между векторами
+    Vect radius(const Vect &b) const; //возвращает радиус-вектор
+    double length() const; //длина вектора
     void setXYZ(double x, double y, double z); //задать вектор
     void rotate(); //вращать вектор на 180 градусов
 
     void toAbs(); //переводит вектор в абсолютные величины из относительных
 
     void toRel(); //переводит вектор в относительные величины из абсолютных (не точно, что работает)
-    void draw(); //выводит вектор на экран
+    void draw() const; //выводит вектор на экран
 
     void setUnitary(); //делает вектор едииничной длины
     Vect normalize(); //возвращает нормализованный вектор

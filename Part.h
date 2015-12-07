@@ -31,9 +31,12 @@ public:
     void rotate(float angle=180.); //вращаем магнитный момент частицы и меняем ее состояние
     double volume(); //Возвращает объем частицы в относительных единицах
 
-    int Id();
+    inline long int Id(){
+        return this->id;
+    }
 
 protected:
+    std::vector<Part*> neighbours;
     long int id;
     Part(unsigned int id); //конструктор с установленным ИДом разрешен только для дружественных классов
 };

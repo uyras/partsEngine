@@ -14,6 +14,7 @@ class SquareSpinIceArray : public PartArray
 
 public:
     SquareSpinIceArray();
+    SquareSpinIceArray(const SquareSpinIceArray &sys);
     virtual ~SquareSpinIceArray();
 
     void dropSpinIce(int hCells, int vCells, double l=1);

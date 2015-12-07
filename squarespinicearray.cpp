@@ -6,6 +6,39 @@ SquareSpinIceArray::SquareSpinIceArray()
     SysLoader::reg<SquareSpinIceArray>(type());
 }
 
+SquareSpinIceArray::SquareSpinIceArray(const SquareSpinIceArray &sys)
+    :PartArray(sys)
+{
+    this->_type = "squarespinice";
+
+    //копируем содержание ячеек
+    vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
+    SquareSpinIceCell *tempCell, *oldCell;
+    while(iter!=this->cells.end()){
+        tempCell = new SquareSpinIceCell();
+        oldCell = *iter;
+        for (int i=0;i<this->count();i++){
+            if (oldCell->top==this->parts[i])
+                tempCell->top=this->parts[i];
+
+            if (oldCell->right==this->parts[i])
+                tempCell->right=this->parts[i];
+
+            if (oldCell->bottom==this->parts[i])
+                tempCell->bottom=this->parts[i];
+
+            if (oldCell->left==this->parts[i])
+                tempCell->left=this->parts[i];
+        }
+
+        tempCell->column = oldCell->column;
+        tempCell->row = oldCell->row;
+        tempCell->pos = oldCell->pos;
+        this->cells.push_back(tempCell);
+        iter++;
+    }
+}
+
 SquareSpinIceArray::~SquareSpinIceArray()
 {
     this->clearCells();

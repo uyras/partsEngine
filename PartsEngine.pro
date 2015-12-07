@@ -70,3 +70,5 @@ OTHER_FILES += \
     README.md \
     .gitignore
 
+CONFIG += c++14
+

@@ -22,6 +22,11 @@ void PartArray::operator= (const PartArray& a){
     this->state = a.state;
 }
 
+Part *PartArray::operator[](const int num)
+{
+    return parts[num];
+}
+
 PartArray* PartArray::copy(){
 
     PartArray *temp = this->beforeCopy();
@@ -168,6 +173,7 @@ void PartArray::changeState()
 void PartArray::changeSystem()
 {
     this->eMin = this->eMax = this->eInit = this->eTemp = 0;
+    this->eArray.clear();
     this->minstate->clear();this->maxstate->clear();
 }
 
@@ -211,6 +217,23 @@ void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
     }
 }
 
+void PartArray::setInteractionRange(const double range)
+{
+    _interactionRange = range;
+}
+
+bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
+{
+    if (_a==_b) return false;
+    if (_interactionRange==0) return true;
+    else return _a->pos.space(_b->pos)<=_interactionRange;
+}
+
+void PartArray::redefineNeightbours()
+{
+
+}
+
 //перемешать магнитные моменты частиц M
 void PartArray::shuffleM(){
     bool rotate;
@@ -226,6 +249,17 @@ void PartArray::insert(Part * part){
     this->parts.push_back(part);
     if (part->id==-1) //если ИД частицы не задан, назначаем новый ИД
         part->id = lastId++;
+
+    vector<Part*>::iterator iter = this->parts.begin();
+    Part* temp;
+    while(iter!=this->parts.end()){
+        temp = *iter;
+        if (isNeighbours(part,temp)){
+            temp->neighbours.push_back(part);
+            part->neighbours.push_back(temp);
+        }
+        iter++;
+    }
 }
 
 void PartArray::insert(Part part)
@@ -346,6 +380,27 @@ double PartArray::EComplete(Part* elem) const {
     std::vector < Part* >::const_iterator iterator1;
     double r, r2, r5, E = 0;
     Vect rij;
+    iterator1 = elem->neighbours.begin();
+    while (iterator1 != elem->neighbours.end()) {
+        if ((*iterator1)!=elem) { //не считать взаимодействие частицы на себя
+            rij = (*iterator1)->pos.radius(elem->pos);
+            r = rij.length();
+            r2 = r * r; //радиус в кубе
+            r5 = r2 * r * r * r; //радиус в пятой
+            E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
+                    (((*iterator1)->m.scalar(elem->m) * r2)
+                     -
+                     (3 * elem->m.scalar(rij) * (*iterator1)->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+        }
+        ++iterator1;
+    }
+    return E;
+}
+
+double PartArray::ECompleteOld(Part* elem) const {
+    std::vector < Part* >::const_iterator iterator1;
+    double r, r2, r5, E = 0;
+    Vect rij;
     iterator1 = this->parts.begin();
     while (iterator1 != this->parts.end()) {
         if (elem->pos.x != (*iterator1)->pos.x || elem->pos.y != (*iterator1)->pos.y || elem->pos.z != (*iterator1)->pos.z) { //не считать взаимодействие частицы на себя
@@ -396,8 +451,184 @@ double PartArray::ECompleteFast(){
     return E1 *= 0.5;
 }
 
+double PartArray::calcEnergy1FastIncrementalFirst(){
+    StateMachineFree tempstate = *state;
+    this->state->reset();//возращаем в начальное состояние
+    double eIncrementalTemp = 0;
+
+    std::vector < Part* >::iterator iterator1, iterator2;
+    double r, r2, r5, rijx, rijy, rijz, E;
+    Part *temp1, *temp2;
+
+    iterator2 = this->parts.begin();
+
+    while (iterator2 != this->parts.end()) {
+        temp2 = *iterator2;
+        temp2->eArray.clear();
+        iterator1 = temp2->neighbours.begin();
+        while (iterator1 != temp2->neighbours.end()) {
+            temp1 = (*iterator1);
+
+            rijx = temp2->pos.x - temp1->pos.x;
+            rijy = temp2->pos.y - temp1->pos.y;
+            rijz = temp2->pos.z - temp1->pos.z;
+            if (config::Instance()->dimensions()==2)
+                r2 = rijx*rijx+rijy*rijy;
+            else
+                r2 = rijx*rijx+rijy*rijy+rijz*rijz;
+            r = sqrt(r2); //трудное место, заменить бы
+            r5 = r2 * r2 * r; //радиус в пятой
+            if (config::Instance()->dimensions()==2)
+                E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                        (( (temp1->m.x * temp2->m.x + temp1->m.y * temp2->m.y) * r2)
+                         -
+                         (3 * (temp2->m.x * rijx + temp2->m.y * rijy) * (temp1->m.x * rijx + temp1->m.y * rijy)  )) / r5;
+            else
+                E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                        (( (temp1->m.x*temp2->m.x+temp1->m.y*temp2->m.y+temp1->m.z*temp2->m.z) * r2)
+                         -
+                         (3 * (temp2->m.x * rijx + temp2->m.y * rijy + temp2->m.z * rijz) * (temp1->m.x * rijx + temp1->m.y * rijy + temp1->m.z * rijz)  )) / r5;
+
+            temp2->eArray.push_back(E);
+            eIncrementalTemp += E;
+
+            ++iterator1;
+        }
+
+        iterator2++;
+    }
+
+    *state = tempstate;
+
+    return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
+}
 
 double PartArray::calcEnergy1FastIncremental(double initEnergy){
+
+
+    vector<Part*>::iterator iter1, iter2; //итератор обхода состояния
+    int i=0;
+
+    int rotated=0;
+    iter1 = parts.begin();
+    while (iter1!=parts.end()){
+        if ((*iter1)->state)
+            rotated++;
+        iter1++;
+    }
+    const bool flag = (rotated < (count()/2));
+
+    //рассчитываем энергию
+    double E=initEnergy;
+    iter1 = parts.begin();
+    while(iter1 != parts.end()){
+        if ( (*iter1)->state == flag){
+            iter2 = (*iter1)->neighbours.begin();
+            i=0;
+            while (iter2!=(*iter1)->neighbours.end()){
+                if ((*iter2)->state != flag){
+                    E -=  2. * (*iter1)->eArray[i];
+                }
+                iter2++; i++;
+            }
+        }
+        iter1++;
+    }
+
+    return E;
+}
+
+
+double PartArray::calcEnergy1FastIncrementalFirst3(){
+    StateMachineFree tempstate = *state;
+    this->state->reset();//возращаем в начальное состояние
+    double eIncrementalTemp = 0;
+
+    std::vector < Part* >::iterator iterator1, iterator2;
+    double r, r2, r5, rijx, rijy, rijz, E;
+    Part *temp1, *temp2;
+
+    iterator2 = this->parts.begin();
+
+    while (iterator2 != this->parts.end()) {
+        temp2 = *iterator2;
+        iterator1 = temp2->neighbours.begin();
+        while (iterator1 != temp2->neighbours.end()) {
+            temp1 = (*iterator1);
+
+            if (temp2 != temp1) { //не считать взаимодействие частицы на себя
+                rijx = temp2->pos.x - temp1->pos.x;
+                rijy = temp2->pos.y - temp1->pos.y;
+                rijz = temp2->pos.z - temp1->pos.z;
+                if (config::Instance()->dimensions()==2)
+                    r2 = rijx*rijx+rijy*rijy;
+                else
+                    r2 = rijx*rijx+rijy*rijy+rijz*rijz;
+                r = sqrt(r2); //трудное место, заменить бы
+                r5 = r2 * r2 * r; //радиус в пятой
+                if (config::Instance()->dimensions()==2)
+                    E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                            (( (temp1->m.x * temp2->m.x + temp1->m.y * temp2->m.y) * r2)
+                             -
+                             (3 * (temp2->m.x * rijx + temp2->m.y * rijy) * (temp1->m.x * rijx + temp1->m.y * rijy)  )) / r5;
+                else
+                    E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                            (( (temp1->m.x*temp2->m.x+temp1->m.y*temp2->m.y+temp1->m.z*temp2->m.z) * r2)
+                             -
+                             (3 * (temp2->m.x * rijx + temp2->m.y * rijy + temp2->m.z * rijz) * (temp1->m.x * rijx + temp1->m.y * rijy + temp1->m.z * rijz)  )) / r5;
+
+                eArray[temp2][temp1] = E;
+                eIncrementalTemp += E;
+            } else {
+                eArray[temp2][temp2] = 0;
+            }
+
+            ++iterator1;
+        }
+
+        iterator2++;
+    }
+
+    *state = tempstate;
+
+    return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
+}
+
+double PartArray::calcEnergy1FastIncremental3(double initEnergy){
+
+
+    vector<Part*>::iterator iter1, iter2; //итератор обхода состояния
+
+    int rotated=0;
+    iter1 = parts.begin();
+    while (iter1!=parts.end()){
+        if ((*iter1)->state)
+            rotated++;
+        iter1++;
+    }
+    const bool flag = (rotated < (count()/2));
+
+    //рассчитываем энергию
+    double E=initEnergy;
+    iter1 = parts.begin();
+    while(iter1 != parts.end()){
+        if ( (*iter1)->state == flag){
+            iter2 = (*iter1)->neighbours.begin();
+            while (iter2!=(*iter1)->neighbours.end()){
+                if ((*iter2)->state != flag){
+                    E -=  2. * eArray[*iter1][*iter2];
+                }
+                iter2++;
+            }
+        }
+        iter1++;
+    }
+
+    return E;
+}
+
+
+double PartArray::calcEnergy1FastIncremental2(double initEnergy){
     vector<Part*>::iterator iter; //итератор обхода состояния
 
     std::vector<int> zeros; //хранит инфу на каких позициях нули
@@ -432,7 +663,7 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy){
     return E;
 }
 
-double PartArray::calcEnergy1FastIncrementalFirst(){
+double PartArray::calcEnergy1FastIncrementalFirst2(){
     StateMachineFree tempstate = *state;
     this->state->reset();//возращаем в начальное состояние
     double eIncrementalTemp = 0;
@@ -1288,6 +1519,7 @@ void PartArray::_construct(){
     this->maxstate = new StateMachineFree();
     this->_type="standart";
     lastId=0;
+    _interactionRange = 0;
 }
 
 QString PartArray::type()
