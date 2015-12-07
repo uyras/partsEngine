@@ -44,7 +44,7 @@ public:
     Part* getById(unsigned id);
 
     void insert(Part* part); //Добавляет частицу на образец
-    void insert(const Part part); //Добавляет копию частицы в образец
+    void insert(const Part &part); //Добавляет копию частицы в образец
 
     virtual void dropTetrahedron(int x, int y, int z, double R = 1, Part * tmp = 0);
 
@@ -121,14 +121,6 @@ public:
 
     double calcEnergy1FastIncremental(double initEnergy); //state - новое состояние системы
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
-    double eIncrementalTemp; //энергия, нужна для инкремента. Используется только в 2-х функциях выше
-
-    double calcEnergy1FastIncremental2(double initEnergy); //state - новое состояние системы
-    double calcEnergy1FastIncrementalFirst2(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
-
-    double calcEnergy1FastIncremental3(double initEnergy); //state - новое состояние системы
-    double calcEnergy1FastIncrementalFirst3(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
-
 
     /**
     * выдает все парамеры частиц на экран
@@ -270,7 +262,6 @@ public:
 
 protected:
     double eMin,eMax,eInit,eTemp;
-    std::map< Part*, map<Part*,double> > eArray; //массив парных взаимодействий энергий
     StateMachineFree *minstate,*maxstate;
     unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double

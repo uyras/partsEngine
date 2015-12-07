@@ -15,7 +15,6 @@ public:
     Vect m; //магнитный момент (координаты вектора относительно центра частицы)
     Vect h; //поле взаимодействия
     double e; //энергия частицы (произведение HM)
-    std::vector<double> eArray;
     double r; //радиус частицы (для диполя минимальное расстояние, на которое может приближаться система
     double _vol; //объем частицы (для 2D - площадь)
     unsigned short int sector; //сектор образца, в котором расположена частица
@@ -37,6 +36,7 @@ public:
 
 protected:
     std::vector<Part*> neighbours;
+    std::vector<double> eArray;
     long int id;
     Part(unsigned int id); //конструктор с установленным ИДом разрешен только для дружественных классов
 };

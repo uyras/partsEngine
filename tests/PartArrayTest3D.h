@@ -19,23 +19,6 @@ private slots:
         config::Instance()->partR = 0.5;
         config::Instance()->m = 1;
     }
-    void dropRandomI()
-    {
-        PartArray *a = new PartArray(10,10,10);
-        a->dropRandom(10);
-        QCOMPARE(a->count(),10);
-        a->dropRandom(1);
-        QCOMPARE(a->count(),1);
-        delete a;
-    }
-    void dropRandomD(){
-        PartArray *a = new PartArray(10,10,10);
-        a->dropRandom(0.1);
-        QVERIFY(a->destiny(true)>0.09&&a->destiny(true)<0.11);
-        a->dropRandom(0.2);
-        QVERIFY(a->destiny(true)>0.19&&a->destiny(true)<0.21);
-        delete a;
-    }
 };
 
 #endif // PARTARRAYTEST3D_H

@@ -32,8 +32,9 @@ private slots:
     }
 
     void constructor3(){
-        PartArray sys(10,10,10);
-        sys.dropRandom(5);
+        PartArray sys;
+        for (int i=0; i<5; i++)
+            sys.insert(Part());
         sys.parts[3]->rotate();
         StateMachineFree s2(*sys.state);
 
