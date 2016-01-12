@@ -20,8 +20,6 @@
 #include "sysloader.h"
 
 using namespace std;
-class StateMachine;
-class StateMachineFree;
 class Part;
 class SysLoader;
 
@@ -31,14 +29,13 @@ class PartArray {
 public:
 
     PartArray();
+    PartArray(const PartArray &sys);
     virtual ~PartArray();
 
-	void operator=(const PartArray& a);
+    PartArray& operator= (const PartArray& sys);
     Part* operator[](const int num);
-
-    virtual PartArray* copy();
-    virtual PartArray* beforeCopy(); //Возвращает экземпляр чистой системы частиц
-    virtual void afterCopy(PartArray*);
+    virtual bool operator==(const PartArray& sys) const;
+    inline bool operator!=(const PartArray& sys) const{return !this->operator ==(sys);}
 
     //получить частицу по уникальному идентификатору
     Part* getById(unsigned id);
@@ -160,7 +157,7 @@ public:
     virtual void afterClear();
 
     //возвращает количество частиц на объекте
-    int count();
+    int count() const;
 
     // возвращает вектор(массив) энергий каждой частицы
     std::vector<double> getEVector();
@@ -251,18 +248,16 @@ public:
      ***********************/
 
      //номер состояния, нужен для алгоритма полного обхода состояний
-    StateMachine* state; //Указан как ссылка потому что в классах используется перекрестная инициализация
+    StateMachine state;
 
     //сам массив частиц, над которым проводятся исследования
     std::vector < Part* > parts;
 
-    void _construct(); //стандартный конструктор.
-
-    virtual QString type();
+    virtual QString type() const;
 
 protected:
     double eMin,eMax,eInit,eTemp;
-    StateMachineFree *minstate,*maxstate;
+    StateMachineFree minstate,maxstate;
     unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);

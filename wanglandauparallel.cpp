@@ -1,7 +1,7 @@
 #include "wanglandauparallel.h"
 
 WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals, unsigned int gaps, double overlap, unsigned int walkersByGap):
-    sys(system->copy()),
+    sys(new PartArray(*system)),
     eMin(0),
     eMax(0),
     intervals(intervals),
@@ -15,7 +15,7 @@ WangLandauParallel::WangLandauParallel(PartArray *system, unsigned int intervals
         for (unsigned int j=0;j<walkersByGap;j++){
             walkers.push_back(
                         WangLandauParallelWalker(
-                            sys->copy(),
+                            new PartArray(*sys),
                             this->intervals,
                             this->overlap,
                             this->gaps,
@@ -46,14 +46,14 @@ vector<double> WangLandauParallel::dos()
         this->setMinMaxEnergy(min,max);
     }
 
-    sys->state->reset();
+    sys->state.reset();
     this->eInit = sys->calcEnergy1FastIncrementalFirst();
 
     WangLandauParallelWalker *temp;
     for (unsigned i=0;i<walkers.size();i++){
         temp = &(walkers[i]);
 
-        temp->sys->state->reset();
+        temp->sys->state.reset();
         temp->eInit = temp->sys->calcEnergy1FastIncrementalFirst();
         temp->makeNormalInitState();
     }
@@ -175,9 +175,9 @@ bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLand
         StateMachineFree tempState;
         //qDebug()<<"swap "<<walker1->number<<" ("<<walker1->gapNumber<<")"<<" and "<<walker2->number<<" ("<<walker2->gapNumber<<")";
 
-        tempState = *(walker1->sys->state);
-        *(walker1->sys->state)=*(walker2->sys->state);
-        *(walker2->sys->state)=tempState;
+        tempState = walker1->sys->state;
+        walker1->sys->state=walker2->sys->state;
+        walker2->sys->state=tempState;
 
         walker1->updateGH(ey);
         walker2->updateGH(ex);

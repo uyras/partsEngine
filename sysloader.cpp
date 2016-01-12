@@ -1,7 +1,5 @@
 #include "sysloader.h"
 
-//SysLoader::reg(new PartArray());
-
 SysLoader::regmap SysLoader::_registered = regInit();
 
 SysLoader::SysLoader()
@@ -59,23 +57,23 @@ PartArray *SysLoader::load_v2(QString filename)
     }
 
     PartArray *sys = SysLoader::create(params["type"]);
-    if (sys!=0){
-        sys->load(filename);
-        //qFatal("System type %s is not supported",qUtf8Printable(params["type"]));
-        sys->eMin = params["emin"].toDouble();
-        sys->eMax = params["emax"].toDouble();
-        sys->minstate->fromString(qUtf8Printable(params["minstate"]));
-        sys->maxstate->fromString(qUtf8Printable(params["maxstate"]));
+    if (sys==0)
+        sys = new PartArray();
+    sys->load(filename);
+    //qFatal("System type %s is not supported",qUtf8Printable(params["type"]));
+    sys->eMin = params["emin"].toDouble();
+    sys->eMax = params["emax"].toDouble();
+    sys->minstate.fromString(qUtf8Printable(params["minstate"]));
+    sys->maxstate.fromString(qUtf8Printable(params["maxstate"]));
 
-        //check the state of the system
-        if (QString::fromStdString(sys->state->toString()) != params["state"]){
-            qFatal("Something gonna worng while reading system: system state and state in the header are not the same");
-        }
+    //check the state of the system
+    if (QString::fromStdString(sys->state.toString()) != params["state"]){
+        qFatal("Something gonna worng while reading system: system state and state in the header are not the same");
+    }
 
-        //check the system size
-        if (sys->count()!=params["size"].toInt()){
-            qFatal("Something gonna worng while reading system: system size and size in the header are not the same");
-        }
+    //check the system size
+    if (sys->count()!=params["size"].toInt()){
+        qFatal("Something gonna worng while reading system: system size and size in the header are not the same");
     }
     return sys;
 }

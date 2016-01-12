@@ -6,9 +6,61 @@ HoneycombSpinIceArray::HoneycombSpinIceArray()
      SysLoader::reg<HoneycombSpinIceArray>(type());
 }
 
+HoneycombSpinIceArray::HoneycombSpinIceArray(const HoneycombSpinIceArray &sys) :
+PartArray(sys)
+{
+    //копируем содержание ячеек
+    vector<HoneycombSpinIceCell*>::const_iterator iter = sys.cells.begin();
+    HoneycombSpinIceCell *tempCell, *oldCell;
+    while(iter!=sys.cells.end()){
+        tempCell = new HoneycombSpinIceCell();
+        oldCell = *iter;
+        for (int j=0;j<6;j++)
+            for (int i=0;i<this->count();i++){
+                if (*(oldCell->parts[j])==*(this->parts[i])){
+                    tempCell->parts.push_back(this->parts[i]);
+                    break;
+                }
+            }
+
+        tempCell->pos = oldCell->pos;
+        this->cells.push_back(tempCell);
+        iter++;
+    }
+    this->m = sys.m;
+    this->n = sys.n;
+}
+
 HoneycombSpinIceArray::~HoneycombSpinIceArray()
 {
+    this->clear();
+}
 
+HoneycombSpinIceArray &HoneycombSpinIceArray::operator =(const HoneycombSpinIceArray &sys)
+{
+    if (this == &sys) return *this;
+    this->PartArray::operator =((PartArray)sys);
+    //копируем содержание ячеек
+    vector<HoneycombSpinIceCell*>::const_iterator iter = sys.cells.begin();
+    HoneycombSpinIceCell *tempCell, *oldCell;
+    while(iter!=sys.cells.end()){
+        tempCell = new HoneycombSpinIceCell();
+        oldCell = *iter;
+        for (int j=0;j<6;j++)
+            for (int i=0;i<this->count();i++){
+                if (oldCell->parts[j]==this->parts[i]){
+                    tempCell->parts.push_back(this->parts[i]);
+                    break;
+                }
+            }
+
+        tempCell->pos = oldCell->pos;
+        this->cells.push_back(tempCell);
+        iter++;
+    }
+    this->m = sys.m;
+    this->n = sys.n;
+    return *this;
 }
 
 void HoneycombSpinIceArray::dropHoneyComb(int m, int n, double a, Part *tmp)
@@ -97,7 +149,7 @@ StateMachineFree HoneycombSpinIceArray::groundState()
                 break;
             }
         }
-    return *state;
+    return state;
 }
 
 StateMachineFree HoneycombSpinIceArray::maximalState()
@@ -105,7 +157,7 @@ StateMachineFree HoneycombSpinIceArray::maximalState()
     for (int i=0;i<m*n;i++){
         cells[i]->rotateChaotic();
     }
-    return *state;
+    return state;
 
 }
 
@@ -194,36 +246,6 @@ void HoneycombSpinIceArray::save(QString file)
 
     //close file
     outfile.close();
-}
-
-PartArray *HoneycombSpinIceArray::beforeCopy()
-{
-    return (PartArray*) new HoneycombSpinIceArray();
-}
-
-void HoneycombSpinIceArray::afterCopy(PartArray *temp2)
-{
-    HoneycombSpinIceArray* temp = (HoneycombSpinIceArray*) temp2;
-    //копируем содержание ячеек
-    vector<HoneycombSpinIceCell*>::iterator iter = this->cells.begin();
-    HoneycombSpinIceCell *tempCell, *oldCell;
-    while(iter!=this->cells.end()){
-        tempCell = new HoneycombSpinIceCell();
-        oldCell = *iter;
-        for (int j=0;j<6;j++)
-            for (int i=0;i<this->count();i++){
-                if (oldCell->parts[j]==this->parts[i]){
-                    tempCell->parts.push_back(temp->parts[i]);
-                    break;
-                }
-            }
-
-        tempCell->pos = oldCell->pos;
-        temp->cells.push_back(tempCell);
-        iter++;
-    }
-    temp->m = this->m;
-    temp->n = this->n;
 }
 
 void HoneycombSpinIceArray::clearCells()

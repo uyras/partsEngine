@@ -103,14 +103,16 @@ Vect Vect::operator=(const Vect& a) {
     return Vect(this->x,this->y,this->z);
 }
 
-Vect Vect::operator+=(const Vect& a) {
+Vect Vect::operator+=(const Vect& a)
+{
 	this->x += a.x;
 	this->y += a.y;
 	this->z += a.z;
     return *this;
 }
 
-Vect Vect::operator +(const Vect& a){
+Vect Vect::operator +(const Vect& a) const
+{
 	Vect res;
 	res.x = this->x+a.x;
 	res.y = this->y+a.y;
@@ -119,7 +121,7 @@ Vect Vect::operator +(const Vect& a){
     return res;
 }
 
-Vect Vect::operator-(const Vect & a)
+Vect Vect::operator-(const Vect & a) const
 {
     Vect res;
     res.x = this->x-a.x;
@@ -129,7 +131,7 @@ Vect Vect::operator-(const Vect & a)
     return res;
 }
 
-Vect Vect::operator*(const double num)
+Vect Vect::operator*(const double num) const
 {
     return Vect(
                 this->x*num,
@@ -146,7 +148,7 @@ Vect Vect::operator*=(const double num)
     return *this;
 }
 
-Vect Vect::operator/(const double num)
+Vect Vect::operator/(const double num) const
 {
     return Vect(
                 this->x/num,

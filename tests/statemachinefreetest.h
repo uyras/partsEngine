@@ -36,14 +36,14 @@ private slots:
         for (int i=0; i<5; i++)
             sys.insert(Part());
         sys.parts[3]->rotate();
-        StateMachineFree s2(*sys.state);
+        StateMachineFree s2(sys.state);
 
         QVERIFY(s2.size()==5);
 
         QCOMPARE(s2[0],false);
         QCOMPARE(s2[3],true);
 
-        StateMachineFree s3(sys.state);
+        StateMachineFree s3(&sys.state);
 
         QVERIFY(s3.size()==5);
         QCOMPARE(s3[0],false);

@@ -38,7 +38,7 @@ private slots:
         QCOMPARE(s1[5], false);
 
         QEXPECT_FAIL("", "Will fix in the next release", Continue);
-        QCOMPARE(&s1,sys1.state);
+        QCOMPARE(&s1,&sys1.state);
     }
 
     void constructor3(){
@@ -54,7 +54,7 @@ private slots:
         QCOMPARE((*s1)[5],false);
 
         QEXPECT_FAIL("", "Will fix in the next release", Continue);
-        QCOMPARE(s1,sys1.state);
+        QCOMPARE(s1,&sys1.state);
         delete s1;
     }
 
@@ -68,8 +68,8 @@ private slots:
             sys1.insert(test);
         }
 
-        (*sys1.state)=s1;
-        QVERIFY((*sys1.state).size()==3);
+        sys1.state=s1;
+        QVERIFY(sys1.state.size()==3);
         QVERIFY(sys1.parts[2]->state);
     }
 
@@ -79,9 +79,9 @@ private slots:
             Part test;
             sys1.insert(test);
         }
-        (*sys1.state)+=5;
-        sys1.state->reset();
-        QCOMPARE(sys1.state->isFirst(),true);
+        sys1.state+=5;
+        sys1.state.reset();
+        QCOMPARE(sys1.state.isFirst(),true);
     }
 
     void setLast(){
@@ -90,10 +90,10 @@ private slots:
             Part test;
             sys1.insert(test);
         }
-        sys1.state->setLast();
+        sys1.state.setLast();
 
-        QVERIFY((*sys1.state)[0]);
-        QVERIFY((*sys1.state)[1]);
+        QVERIFY(sys1.state[0]);
+        QVERIFY(sys1.state[1]);
     }
 
     void randonize(){
@@ -103,13 +103,13 @@ private slots:
             sys1.insert(test);
         }
 
-        QVERIFY(sys1.state->randomize()<100);
-        QVERIFY(!sys1.state->isFirst());
+        QVERIFY(sys1.state.randomize()<100);
+        QVERIFY(!sys1.state.isFirst());
 
-        sys1.state->reset();
+        sys1.state.reset();
 
-        QCOMPARE(sys1.state->randomize(2),2);
-        QVERIFY(!sys1.state->isFirst());
+        QCOMPARE(sys1.state.randomize(2),2);
+        QVERIFY(!sys1.state.isFirst());
     }
 
     void isFirst(){
@@ -118,10 +118,10 @@ private slots:
             Part test;
             sys1.insert(test);
         }
-        (*sys1.state)+=10;
-        QVERIFY(!sys1.state->isFirst());
-        sys1.state->reset();
-        QVERIFY(sys1.state->isFirst());
+        sys1.state+=10;
+        QVERIFY(!sys1.state.isFirst());
+        sys1.state.reset();
+        QVERIFY(sys1.state.isFirst());
     }
 
     void isLast(){
@@ -130,11 +130,11 @@ private slots:
             Part test;
             sys1.insert(test);
         }
-        QVERIFY(!sys1.state->isLast());
-        (*sys1.state)+=100;
-        QVERIFY(!sys1.state->isLast());
-        (*sys1.state)+=(1024-101);
-        QVERIFY(sys1.state->isLast());
+        QVERIFY(!sys1.state.isLast());
+        sys1.state+=100;
+        QVERIFY(!sys1.state.isLast());
+        sys1.state+=(1024-101);
+        QVERIFY(sys1.state.isLast());
     }
 
     void isHalfLast(){
@@ -143,11 +143,11 @@ private slots:
             Part test;
             sys1.insert(test);
         }
-        QVERIFY(!sys1.state->isHalfLast());
-        (*sys1.state)+=100;
-        QVERIFY(!sys1.state->isHalfLast());
-        (*sys1.state)+=(512-101);
-        QVERIFY(sys1.state->isHalfLast());
+        QVERIFY(!sys1.state.isHalfLast());
+        sys1.state+=100;
+        QVERIFY(!sys1.state.isHalfLast());
+        sys1.state+=(512-101);
+        QVERIFY(sys1.state.isHalfLast());
     }
 
     void next(){
@@ -157,26 +157,26 @@ private slots:
             sys1.insert(test);
         }
 
-        QCOMPARE(sys1.state->next(),true);
-        QCOMPARE((*sys1.state)[0],true);
-        QCOMPARE((*sys1.state)[1],false);
-        QCOMPARE((*sys1.state)[2],false);
+        QCOMPARE(sys1.state.next(),true);
+        QCOMPARE(sys1.state[0],true);
+        QCOMPARE(sys1.state[1],false);
+        QCOMPARE(sys1.state[2],false);
 
 
-        QCOMPARE((*sys1.state).next(),true);
-        QCOMPARE((*sys1.state)[0],false);
-        QCOMPARE((*sys1.state)[1],true);
-        QCOMPARE((*sys1.state)[2],false);
+        QCOMPARE(sys1.state.next(),true);
+        QCOMPARE(sys1.state[0],false);
+        QCOMPARE(sys1.state[1],true);
+        QCOMPARE(sys1.state[2],false);
 
 
         int i=2;
-        while ((*sys1.state).next()) i++;
+        while (sys1.state.next()) i++;
 
         QCOMPARE(i,7);
-        QVERIFY((*sys1.state).isFirst());
+        QVERIFY(sys1.state.isFirst());
 
         PartArray sys2;
-        QVERIFY(!sys2.state->next());
+        QVERIFY(!sys2.state.next());
     }
 
     void halfNext(){
@@ -186,23 +186,23 @@ private slots:
             sys1.insert(test);
         }
 
-        QCOMPARE(sys1.state->halfNext(),true);
-        QCOMPARE((*sys1.state)[0],true);
-        QCOMPARE((*sys1.state)[1],false);
-        QCOMPARE((*sys1.state)[2],false);
+        QCOMPARE(sys1.state.halfNext(),true);
+        QCOMPARE(sys1.state[0],true);
+        QCOMPARE(sys1.state[1],false);
+        QCOMPARE(sys1.state[2],false);
 
 
-        QCOMPARE((*sys1.state).halfNext(),true);
-        QCOMPARE((*sys1.state)[0],false);
-        QCOMPARE((*sys1.state)[1],true);
-        QCOMPARE((*sys1.state)[2],false);
+        QCOMPARE(sys1.state.halfNext(),true);
+        QCOMPARE(sys1.state[0],false);
+        QCOMPARE(sys1.state[1],true);
+        QCOMPARE(sys1.state[2],false);
 
 
         int i=2;
-        while ((*sys1.state).halfNext()) i++;
+        while (sys1.state.halfNext()) i++;
 
         QCOMPARE(i,3);
-        QVERIFY((*sys1.state).isFirst());
+        QVERIFY(sys1.state.isFirst());
     }
 
     void prev(){
@@ -212,23 +212,23 @@ private slots:
             sys1.insert(test);
         }
 
-        QVERIFY(!sys1.state->prev());
-        QCOMPARE((*sys1.state)[0],true);
-        QCOMPARE((*sys1.state)[1],true);
-        QCOMPARE((*sys1.state)[2],true);
+        QVERIFY(!sys1.state.prev());
+        QCOMPARE(sys1.state[0],true);
+        QCOMPARE(sys1.state[1],true);
+        QCOMPARE(sys1.state[2],true);
 
-        QVERIFY(sys1.state->prev());
-        QCOMPARE((*sys1.state)[0],false);
-        QCOMPARE((*sys1.state)[1],true);
-        QCOMPARE((*sys1.state)[2],true);
+        QVERIFY(sys1.state.prev());
+        QCOMPARE(sys1.state[0],false);
+        QCOMPARE(sys1.state[1],true);
+        QCOMPARE(sys1.state[2],true);
 
         int i=2;
-        while (sys1.state->prev()) i++;
+        while (sys1.state.prev()) i++;
         QCOMPARE(i,8);
-        QVERIFY(sys1.state->isLast());
+        QVERIFY(sys1.state.isLast());
 
         PartArray sys2;
-        QVERIFY(!sys2.state->prev());
+        QVERIFY(!sys2.state.prev());
     }
 
     void halfPrev(){
@@ -238,20 +238,20 @@ private slots:
             sys1.insert(test);
         }
 
-        QVERIFY(!sys1.state->halfPrev());
-        QCOMPARE((*sys1.state)[0],true);
-        QCOMPARE((*sys1.state)[1],true);
-        QCOMPARE((*sys1.state)[2],false);
+        QVERIFY(!sys1.state.halfPrev());
+        QCOMPARE(sys1.state[0],true);
+        QCOMPARE(sys1.state[1],true);
+        QCOMPARE(sys1.state[2],false);
 
-        QVERIFY((*sys1.state).halfPrev());
-        QCOMPARE((*sys1.state)[0],false);
-        QCOMPARE((*sys1.state)[1],true);
-        QCOMPARE((*sys1.state)[2],false);
+        QVERIFY(sys1.state.halfPrev());
+        QCOMPARE(sys1.state[0],false);
+        QCOMPARE(sys1.state[1],true);
+        QCOMPARE(sys1.state[2],false);
 
         int i=2;
-        while ((*sys1.state).halfPrev()) i++;
+        while (sys1.state.halfPrev()) i++;
         QCOMPARE(i,4);
-        QVERIFY((*sys1.state).isHalfLast());
+        QVERIFY(sys1.state.isHalfLast());
     }
 
     void plusplus(){
@@ -399,24 +399,24 @@ private slots:
         }
         sys3.insert(Part());
         StateMachine s1(&sys2),s2(&sys2);
-        QVERIFY(*sys1.state==*sys2.state);
+        QVERIFY(sys1.state==sys2.state);
         s1.connect(&sys2);
-        QVERIFY(*sys1.state==s1);
+        QVERIFY(sys1.state==s1);
 
         sys1.parts[0]->rotate();
-        QVERIFY(!(*sys1.state==*sys2.state));
-        QVERIFY(!(*sys1.state==s1));
+        QVERIFY(!(sys1.state==sys2.state));
+        QVERIFY(!(sys1.state==s1));
 
         s2.connect(&sys3);
-        QVERIFY(!(*sys2.state==*sys3.state));
-        QVERIFY(!(*sys2.state==s2));
+        QVERIFY(!(sys2.state==sys3.state));
+        QVERIFY(!(sys2.state==s2));
         QVERIFY(!(s1==s2));
 
         sys2.parts[1]->rotate();
         sys2.parts[2]->rotate();
-        QVERIFY(*sys1.state==*sys2.state);
+        QVERIFY(sys1.state==sys2.state);
         s2.connect(&sys2);
-        QVERIFY(*sys1.state==s2);
+        QVERIFY(sys1.state==s2);
         s1.connect(&sys1);
         QVERIFY(s1==s2);
 
@@ -429,32 +429,32 @@ private slots:
             sys2.insert(Part());
         }
         StateMachine s1(&sys2),s2(&sys2);
-        QVERIFY(*sys1.state==*sys2.state);
-        QVERIFY(*sys1.state==s2);
-        QVERIFY(s1==*sys2.state);
+        QVERIFY(sys1.state==sys2.state);
+        QVERIFY(sys1.state==s2);
+        QVERIFY(s1==sys2.state);
         QVERIFY(s1==s2);
 
         sys1.clear(); sys1.insert(Part());
         s1.connect(&sys1);
-        QVERIFY(!(*sys1.state==*sys2.state));
-        QVERIFY(!(*sys1.state==s2));
-        QVERIFY(!(s1==*sys2.state));
+        QVERIFY(!(sys1.state==sys2.state));
+        QVERIFY(!(sys1.state==s2));
+        QVERIFY(!(s1==sys2.state));
         QVERIFY(!(s1==s2));
 
 
         sys2.clear(); sys2.insert(Part());
         s2.connect(&sys2);
-        QVERIFY(*sys1.state==*sys2.state);
-        QVERIFY(*sys1.state==s2);
-        QVERIFY(s1==*sys2.state);
+        QVERIFY(sys1.state==sys2.state);
+        QVERIFY(sys1.state==s2);
+        QVERIFY(s1==sys2.state);
         QVERIFY(s1==s2);
 
 
         sys2.clear(); sys2.insert(Part()); sys2.insert(Part());
         s2.connect(&sys2);
-        QVERIFY(!(*sys1.state==*sys2.state));
-        QVERIFY(!(*sys1.state==s2));
-        QVERIFY(!(s1==*sys2.state));
+        QVERIFY(!(sys1.state==sys2.state));
+        QVERIFY(!(sys1.state==s2));
+        QVERIFY(!(s1==sys2.state));
         QVERIFY(!(s1==s2));
     }
 
@@ -465,13 +465,13 @@ private slots:
         for (int i=0; i<10; i++)
             a->insert(Part());
 
-        QVERIFY(a->state->randomize()>=0);
-        a->state->reset();
-        QCOMPARE(a->state->randomize(11),11);
-        a->state->reset();
-        QCOMPARE(a->state->randomize(2),2);
-        a->state->reset();
-        int reallyTurned = a->state->randomize(1);
+        QVERIFY(a->state.randomize()>=0);
+        a->state.reset();
+        QCOMPARE(a->state.randomize(11),11);
+        a->state.reset();
+        QCOMPARE(a->state.randomize(2),2);
+        a->state.reset();
+        int reallyTurned = a->state.randomize(1);
 
         int num=0, turned=-1;
         for (int i=0;i<10;i++){

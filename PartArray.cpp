@@ -7,18 +7,66 @@
 
 #include "PartArray.h"
 
-PartArray::PartArray() {
-    this->_construct();
+PartArray::PartArray():
+    state(this),
+    minstate(),
+    maxstate()
+{
+    eMin = eMax = eInit = eTemp = 0;
+    this->_type="standart";
+    lastId=0;
+    _interactionRange = 0;
+}
+
+PartArray::PartArray(const PartArray &sys)
+{
+    this->lastId = 0;
+    this->state.connect(this);
+    this->_interactionRange = sys._interactionRange;
+
+    //копируем частицы
+    vector<Part*>::const_iterator iter = sys.parts.begin();
+    while(iter!=sys.parts.end()){
+        this->insert(new Part(*(*iter)));
+        iter++;
+    }
+
+    this->eMin = sys.eMin;
+    this->eMax = sys.eMax;
+    this->eInit = sys.eInit;
+    this->eTemp = sys.eTemp;
+    this->_type = sys._type;
+    this->minstate = sys.minstate;
+    this->maxstate = sys.maxstate;
 }
 
 PartArray::~PartArray(){
     this->clear();
-    delete this->state;
 }
 
-void PartArray::operator= (const PartArray& a){
-    this->parts = a.parts;
-    this->state = a.state;
+PartArray& PartArray::operator= (const PartArray& sys){
+    if (this == &sys) return *this;
+
+    this->clear();
+
+    //копируем частицы
+    vector<Part*>::const_iterator iter = sys.parts.begin();
+    while(iter!=sys.parts.end()){
+        this->insert(new Part(*(*iter)));
+        iter++;
+    }
+
+    this->state = sys.state;
+    this->eMin = sys.eMin;
+    this->eMax = sys.eMax;
+    this->eInit = sys.eInit;
+    this->eTemp = sys.eTemp;
+    this->minstate = sys.minstate;
+    this->maxstate = sys.maxstate;
+    this->_interactionRange = sys._interactionRange;
+    this->_type = sys._type;
+
+    return *this;
 }
 
 Part *PartArray::operator[](const int num)
@@ -26,36 +74,36 @@ Part *PartArray::operator[](const int num)
     return parts[num];
 }
 
-PartArray* PartArray::copy(){
+bool PartArray::operator==(const PartArray &sys) const
+{
+    //сопоставляем число частиц
+    if (this->count() != sys.count())
+        return false;
 
-    PartArray *temp = this->beforeCopy();
-
-    temp->eMin = this->eMin;
-    temp->eMax = this->eMax;
-    temp->eInit = this->eInit;
-    temp->eTemp = this->eTemp;
-    temp->lastId = this->lastId;
-    temp->_type = this->_type;
-    temp->minstate = this->minstate;
-    temp->maxstate = this->maxstate;
-
-    //копируем частицы
-    vector<Part*>::iterator iter = this->parts.begin();
-    while(iter!=this->parts.end()){
-        temp->insert(new Part(*(*iter)));
-        iter++;
+    //сопоставление каждой частице
+    vector<Part*>::const_iterator iter1, iter2;
+    iter1= this->parts.begin();
+    while (iter1!=this->parts.end()){
+        bool foundFlag = false;
+        iter2 = sys.parts.begin();
+        while (iter2!=sys.parts.end()){
+            if (*(*iter1)==*(*iter2)){
+                foundFlag=true;
+                break;
+            }
+            iter2++;
+        }
+        if (!foundFlag)
+            return false;
+        iter1++;
     }
 
-    this->afterCopy(temp);
+    //сопоставляем тип
+    if (this->type() != sys.type())
+        return false;
 
-    return temp;
+    return true;
 }
-
-PartArray *PartArray::beforeCopy(){
-    return new PartArray();
-}
-
-void PartArray::afterCopy(PartArray * ){}
 
 Part *PartArray::getById(unsigned id)
 {
@@ -171,7 +219,7 @@ void PartArray::changeState()
 void PartArray::changeSystem()
 {
     this->eMin = this->eMax = this->eInit = this->eTemp = 0;
-    this->minstate->clear();this->maxstate->clear();
+    this->minstate.clear();this->maxstate.clear();
 }
 
 void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
@@ -449,8 +497,8 @@ double PartArray::ECompleteFast(){
 }
 
 double PartArray::calcEnergy1FastIncrementalFirst(){
-    StateMachineFree tempstate = *state;
-    this->state->reset();//возращаем в начальное состояние
+    StateMachineFree tempstate = state;
+    this->state.reset();//возращаем в начальное состояние
     double eIncrementalTemp = 0;
 
     std::vector < Part* >::iterator iterator1, iterator2;
@@ -495,7 +543,7 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
         iterator2++;
     }
 
-    *state = tempstate;
+    state = tempstate;
 
     return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
 }
@@ -921,9 +969,9 @@ void PartArray::save_v2(QString file)
     f<<"size="<<this->count()<<endl;
     f<<"emin="<<this->eMin<<endl;
     f<<"emax="<<this->eMax<<endl;
-    f<<"state="<<QString::fromStdString(this->state->toString())<<endl;
-    f<<"minstate="<<QString::fromStdString(this->minstate->toString())<<endl;
-    f<<"maxstate="<<QString::fromStdString(this->maxstate->toString())<<endl;
+    f<<"state="<<QString::fromStdString(this->state.toString())<<endl;
+    f<<"minstate="<<QString::fromStdString(this->minstate.toString())<<endl;
+    f<<"maxstate="<<QString::fromStdString(this->maxstate.toString())<<endl;
     f<<"sizescale=1"<<endl;
     f<<"magnetizationscale=1"<<endl;
 
@@ -1283,7 +1331,7 @@ void PartArray::saveEachMagnetization(string file) {
     f.close();
 }
 
-int PartArray::count(){
+int PartArray::count() const{
     return this->parts.size();
 }
 
@@ -1326,17 +1374,7 @@ void PartArray::setMBruteLines(double segmentSize){
     }
 }
 
-void PartArray::_construct(){
-    this->state = new StateMachine(this);
-    eMin = eMax = eInit = eTemp = 0;
-    this->minstate = new StateMachineFree();
-    this->maxstate = new StateMachineFree();
-    this->_type="standart";
-    lastId=0;
-    _interactionRange = 0;
-}
-
-QString PartArray::type()
+QString PartArray::type() const
 {
     return this->_type;
 }
@@ -1522,27 +1560,27 @@ double PartArray::calcJ12(){
 }
 
 double PartArray::setToGroundState(){
-    if (minstate->size()==0){ //если минимальное состояние не задано
-        *minstate = this->groundState();
+    if (minstate.size()==0){ //если минимальное состояние не задано
+        minstate = this->groundState();
     }
-    *state = *minstate;
+    state = minstate;
     this->changeState();
     return eMin=E();
 }
 
 double PartArray::setToMaximalState(){
-    if (maxstate->size()==0){ //если минимальное состояние не задано
-        *maxstate = this->maximalState();
+    if (maxstate.size()==0){ //если минимальное состояние не задано
+        maxstate = this->maximalState();
     }
-    *state = *maxstate;
+    state = maxstate;
     this->changeState();
     return eMax=E();
 }
 
 StateMachineFree PartArray::maximalState()
 {
-    StateMachineFree oldState = *(state);
-    this->state->reset();
+    StateMachineFree oldState = state;
+    this->state.reset();
 
     StateMachineFree mstate;
     double max;
@@ -1550,24 +1588,24 @@ StateMachineFree PartArray::maximalState()
     do {
         if (first){
             max = E();
-            mstate = *this->state;
+            mstate = this->state;
             first = false;
         } else
             if (E() > max) {
                 max = E();
-                mstate = *this->state;
+                mstate = this->state;
             }
-    } while (this->state->halfNext());
+    } while (this->state.halfNext());
 
-    (*state) = oldState;
+    state = oldState;
 
     return mstate;
 }
 
 StateMachineFree PartArray::groundState()
 {
-    StateMachineFree oldState = *(state);
-    this->state->reset();
+    StateMachineFree oldState = state;
+    this->state.reset();
 
     StateMachineFree mstate;
     double min;
@@ -1575,16 +1613,16 @@ StateMachineFree PartArray::groundState()
     do {
         if (first){
             min = E();
-            mstate = *this->state;
+            mstate = this->state;
             first = false;
         } else
             if (E() < min) {
                 min = E();
-                mstate = *this->state;
+                mstate = this->state;
             }
-    } while (this->state->halfNext());
+    } while (this->state.halfNext());
 
-    (*state) = oldState;
+    state = oldState;
 
     return mstate;
 }
@@ -1604,7 +1642,7 @@ bool PartArray::setToMonteCarloGroundState(const double t, int steps){
 
 bool PartArray::processMonteCarloStep(const double t){
     const double Eold = this->E();
-    const int num = this->state->randomize();
+    const int num = this->state.randomize();
 
     //если переворот привел к увеличению энергии, либо повлияла температура, возвращаем всё обратно
     const double
@@ -1668,7 +1706,7 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 
     //плодим системы - копии оригинала и раздаём температуры
     for (int i=0;i<replicas;i++){
-        systems.push_back(this->copy());
+        systems.push_back(new PartArray(*this));
 
         //раздаём температуры
         t.push_back(tMin+tempInterval*i);
@@ -1726,7 +1764,7 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
 
         //случай когда найден минимум
         if (systems[0]->E()<=eMin){
-            minState = *(systems[0]->state);
+            minState = systems[0]->state;
             eMin = systems[0]->E();
             //std::cout << "E=" << minSystem->E1 <<endl;
         }
@@ -1751,7 +1789,7 @@ bool PartArray::setToPTGroundState(int replicas, int totalSteps, double tMin, do
     systems.clear();
     t.clear();
 
-    *this->state = minState;
+    this->state = minState;
 
     return true;
 }

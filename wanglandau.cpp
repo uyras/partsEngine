@@ -21,7 +21,7 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
     sys.setToMaximalState();
     const double eMax = sys.EComplete();
     const double dE = (eMax-eMin)/(intervals-1);
-    sys.state->reset();
+    sys.state.reset();
 
     const double eInit = sys.calcEnergy1FastIncrementalFirst();
 
@@ -79,7 +79,7 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
     qDebug()<<"Total steps: "<<totalSteps;
 
 
-    (*sys.state) = initState;
+    sys.state = initState;
     return g;
 }
 
@@ -95,7 +95,7 @@ vector<double> WangLandau::scale(PartArray &sys, const int intervals)
     for (int i=0;i<intervals;i++){
         scale.push_back(eMin+((double)i * dE));
     }
-    (*sys.state) = initState;
+    sys.state = initState;
     return scale;
 }
 

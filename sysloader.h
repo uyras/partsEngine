@@ -30,7 +30,6 @@ public:
 class SysLoader
 {
 public:
-    SysLoader();
 
     static PartArray* load(QString filename);
 
@@ -43,6 +42,7 @@ public:
     }
 
 private:
+    SysLoader();
     static PartArray* load_v2(QString filename);
     static PartArray* load_v1(QString filename);
 
@@ -62,6 +62,7 @@ private:
         some_map["standart"] = new PartArrayCreator<PartArray>();
         return some_map;
     }
+
 
 };
 

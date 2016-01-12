@@ -25,6 +25,9 @@ public:
 
     Part();
     Part(const Part& obj); //конструктор копирования
+    bool operator==(const Part& one) const;
+    inline bool operator!=(const Part& one) const{ return !this->operator ==(one); }
+
     virtual ~Part();
     Vect interact(Part* elem); //считает поле взаимодействия частицы elem на текущую частиуц и возвращает вектор H
     void rotate(float angle=180.); //вращаем магнитный момент частицы и меняем ее состояние

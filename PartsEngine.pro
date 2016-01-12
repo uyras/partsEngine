@@ -36,11 +36,11 @@ HEADERS += \
     Vect.h \
     random.h \
     Part.h \
-    PartArray.h \
-    sysloader.h \
     statemachinebase.h \
     StateMachine.h \
     StateMachineFree.h \
+    PartArray.h \
+    sysloader.h \
     config.h \
     squarespinicecell.h \
     squarespinicearray.h \

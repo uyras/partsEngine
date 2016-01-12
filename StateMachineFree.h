@@ -5,7 +5,8 @@
 #include <string>
 #include "config.h"
 #include "statemachinebase.h"
-#include "StateMachine.h"
+
+using namespace std;
 
 class StateMachine;
 /**

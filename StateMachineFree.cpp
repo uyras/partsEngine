@@ -1,4 +1,5 @@
 #include "StateMachineFree.h"
+#include "StateMachine.h"
 
 StateMachineFree::StateMachineFree()
 {
@@ -19,15 +20,6 @@ StateMachineFree::StateMachineFree(const StateMachine *state)
 {
     this->_construct(state);
 }
-
-/*
-StateMachineFree::StateMachineFree(StateMachine* state){
-    this->_state.clear();
-    for (int i=0;i<state->size();i++){
-        this->_state.push_back(state[i]);
-    }
-}
-*/
 
 void StateMachineFree::reset(){
     vector<bool>::iterator iter = this->_state.begin();

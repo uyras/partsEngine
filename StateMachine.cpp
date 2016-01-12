@@ -1,5 +1,6 @@
 #include "StateMachine.h"
-
+#include "StateMachineFree.h"
+#include "PartArray.h"
 
 StateMachine::StateMachine():_system(0)
 {

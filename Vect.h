@@ -29,13 +29,14 @@ public:
 
     Vect operator=(const Vect&); //присваивание вектора
     Vect operator+=(const Vect&); //оператор сложения
-    Vect operator+(const Vect&);
-    Vect operator-(const Vect&);
-    Vect operator*(const double num);
+    Vect operator+(const Vect&) const;
+    Vect operator-(const Vect&) const;
+    Vect operator*(const double num) const;
     Vect operator*=(const double num);
-    Vect operator/(const double num);
+    Vect operator/(const double num) const;
     Vect operator/=(const double num);
     bool operator==(const Vect&) const;
+    inline bool operator!=(const Vect& a) const {return !this->operator ==(a);}
     static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
 };

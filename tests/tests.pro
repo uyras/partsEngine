@@ -18,15 +18,15 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 HEADERS += \
-    PartArrayTest3D.h \
-    PartArrayTest2D.h \
     VectTest2D.h \
     StateMachineTest.h \
     statemachinefreetest.h \
     squarespinicetest.h \
     randomtest.h \
     honeycombspinicetest.h \
-    sysloadertest.h
+    sysloadertest.h \
+    PartArrayTest.h \
+    parttest.h
 
 INCLUDEPATH += ../
 LIBS += -L$$PWD/../ -lPartsEngine

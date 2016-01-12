@@ -35,7 +35,7 @@ private slots:
         HoneycombSpinIceArray *sys1,*sys2;
         sys1 = new HoneycombSpinIceArray();
         sys1->dropHoneyComb(2,2,1);
-        sys2 = (HoneycombSpinIceArray*)sys1->copy();
+        sys2 = new HoneycombSpinIceArray(*sys1);
         QCOMPARE(sys2->count(),sys1->count());
         QCOMPARE(sys2->cells.size(),sys1->cells.size());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
@@ -45,6 +45,9 @@ private slots:
 
         sys1->setToMaximalState(); sys2->setToMaximalState();
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
+
+        delete sys1;
+        delete sys2;
     }
 };
 

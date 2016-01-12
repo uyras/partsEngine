@@ -47,15 +47,17 @@ private slots:
         SquareSpinIceArray *sys1,*sys2;
         sys1 = new SquareSpinIceArray();
         sys1->dropSpinIce(3,3);
-        sys2 = (SquareSpinIceArray*)sys1->copy();
+        sys2 = new SquareSpinIceArray(*sys1);
         QCOMPARE(sys2->count(),sys1->count());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
-        sys1->setToGroundState(); sys2->setToGroundState();
+        sys1->setToGroundState();
+        sys2->setToGroundState();
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
         sys1->setToMaximalState(); sys2->setToMaximalState();
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
+        delete sys1; delete sys2;
     }
 
     void dropSpinIce(){

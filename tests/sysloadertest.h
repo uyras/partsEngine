@@ -26,7 +26,7 @@ private slots:
                 temp->rotate();
             sys.insert(temp);
         }
-        sys.state->randomize(5);
+        sys.state.randomize(5);
         sys.save("sys.sys");
 
         PartArray *sys2 = SysLoader::load("sys.sys");
@@ -40,7 +40,7 @@ private slots:
             QCOMPARE(temp->Id(), temp2->Id());
         }
 
-        QCOMPARE(QString(sys.state->toString().c_str()), QString(sys2->state->toString().c_str()));
+        QCOMPARE(QString(sys.state.toString().c_str()), QString(sys2->state.toString().c_str()));
         delete sys2;
     }
 
@@ -48,7 +48,7 @@ private slots:
         SquareSpinIceArray sys;
         Part *temp, *temp2;
         sys.dropSpinIce(3,3);
-        sys.state->randomize(5);
+        sys.state.randomize(5);
         sys.save("sys.sys");
 
         PartArray *sys2 = SysLoader::load("sys.sys");
@@ -62,7 +62,7 @@ private slots:
             QCOMPARE(temp->Id(), temp2->Id());
         }
 
-        QCOMPARE(QString(sys.state->toString().c_str()), QString(sys2->state->toString().c_str()));
+        QCOMPARE(QString(sys.state.toString().c_str()), QString(sys2->state.toString().c_str()));
         delete sys2;
     }
 
@@ -70,7 +70,7 @@ private slots:
         HoneycombSpinIceArray sys;
         Part *temp, *temp2;
         sys.dropHoneyComb(3,3,1);
-        sys.state->randomize(5);
+        sys.state.randomize(5);
         sys.save("sys.sys");
 
         PartArray *sys2 = SysLoader::load("sys.sys");
@@ -88,7 +88,7 @@ private slots:
             QCOMPARE(temp->Id(), temp2->Id());
         }
 
-        QCOMPARE(QString(sys.state->toString().c_str()), QString(sys2->state->toString().c_str()));
+        QCOMPARE(QString(sys.state.toString().c_str()), QString(sys2->state.toString().c_str()));
         delete sys2;
     }
 };

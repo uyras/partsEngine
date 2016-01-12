@@ -10,7 +10,10 @@
 #include "config.h"
 
 Part::Part() :
-    state(false)
+    pos(),
+    m(),
+    state(false),
+    id(-1) //значит что уникальный ИД не задан
 {
     //по умолчанию на частицу ничего не действует
     this->h.x = this->h.y = this->h.z = 0;
@@ -18,7 +21,6 @@ Part::Part() :
     this->r = config::Instance()->partR; //по умолчанию радиус задается в конфигах
     this->e = 0;
     this->w1 = this->h1 = 0;
-    this->id = -1; //значит что уникальный ИД не задан
 }
 
 Part::Part(const Part &obj)
@@ -32,6 +34,18 @@ Part::Part(const Part &obj)
     this->sector = obj.sector;
     this->state = obj.state;
     this->id=-1;
+}
+
+bool Part::operator==(const Part &one) const
+{
+    if (this->pos != one.pos)
+        return false;
+
+    if (this->state == one.state){
+        return this->m == one.m;
+    } else {
+        return this->m == (one.m * (-1.));
+    }
 }
 
 Part::Part(unsigned int id) :

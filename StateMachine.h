@@ -3,13 +3,9 @@
 
 #include <vector>
 
-#include "PartArray.h"
-#include "Part.h"
 #include "config.h"
 #include "random.h"
 #include "statemachinebase.h"
-#include "StateMachineFree.h"
-
 
 class StateMachineFree;
 class PartArray;

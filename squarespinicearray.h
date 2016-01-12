@@ -17,6 +17,8 @@ public:
     SquareSpinIceArray(const SquareSpinIceArray &sys);
     virtual ~SquareSpinIceArray();
 
+    SquareSpinIceArray &operator = (const SquareSpinIceArray &sys);
+
     void dropSpinIce(int hCells, int vCells, double l=1);
 
     /**
@@ -31,9 +33,6 @@ public:
     StateMachineFree maximalState();
 
     vector<SquareSpinIceCell*> cells;
-
-    PartArray* beforeCopy();
-    void afterCopy(PartArray *temp2);
 
     virtual void clear();
 

@@ -35,7 +35,7 @@ void SquareLattice::dropSquareLattice(int m, int n, double l, double len, Part *
 
 StateMachineFree SquareLattice::groundState()
 {
-    StateMachineFree oldState = (*state), newState; //сохраняем текущее состояние
+    StateMachineFree oldState = state, newState; //сохраняем текущее состояние
 
     Part* temp; //временная частица
 
@@ -52,15 +52,15 @@ StateMachineFree SquareLattice::groundState()
         iter++;
     }
 
-    newState = (*state); //сохраняем состояние минимума
-    (*state) = oldState; //возвращаем начальное состояние
+    newState = state; //сохраняем состояние минимума
+    state = oldState; //возвращаем начальное состояние
 
     return newState;
 }
 
 StateMachineFree SquareLattice::maximalState()
 {
-    StateMachineFree oldState = (*state), newState;
+    StateMachineFree oldState = state, newState;
     Part* temp; //временная частица
 
     vector<Part*>::iterator iter = parts.begin();
@@ -76,8 +76,8 @@ StateMachineFree SquareLattice::maximalState()
         iter++;
     }
 
-    newState = (*state);
-    (*state) = oldState;
+    newState = state;
+    state = oldState;
 
     return newState;
 }

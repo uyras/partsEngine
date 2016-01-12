@@ -9,7 +9,10 @@ class HoneycombSpinIceArray : public PartArray
 {
 public:
     HoneycombSpinIceArray();
+    HoneycombSpinIceArray(const HoneycombSpinIceArray& sys);
     ~HoneycombSpinIceArray();
+
+    HoneycombSpinIceArray& operator = (const HoneycombSpinIceArray& sys);
 
     /**
      * @brief dropHoneyComb Создать решетку гексагональной формы
@@ -27,9 +30,6 @@ public:
 
     virtual void load(QString file);
     virtual void save(QString file);
-
-    PartArray* beforeCopy();
-    void afterCopy(PartArray* temp2);
 
     vector<HoneycombSpinIceCell*> cells;
 

@@ -56,7 +56,7 @@ void WangLandauParallelWalker::walk(unsigned stepsPerWalk)
     //повторяем алгоритм сколько-то шагов 10000
     for (unsigned i=1;i<=stepsPerWalk;i++){
 
-        int partNum = sys->state->randomize(); totalRotations++;
+        int partNum = sys->state.randomize(); totalRotations++;
 
         eNew = sys->calcEnergy1FastIncremental(eInit);
 
@@ -126,7 +126,7 @@ void WangLandauParallelWalker::makeNormalInitState()
     unsigned long int i=0;
     double eTemp=0;
     while (!inRange(eTemp=sys->calcEnergy1FastIncremental(eInit))){
-        this->sys->state->randomize();
+        this->sys->state.randomize();
         i++;
     }
     qDebug()<<this->number<<": normalize init state takes "<<i<<" steps";
