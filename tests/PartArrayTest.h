@@ -90,6 +90,23 @@ private slots:
         }
     }
 
+    void energy3(){
+        PartArray sys;
+        Part p1, p2, p3;
+        p1.m = p3.m = Vect(0,1,0);
+        p2.m = Vect(0,-1,0);
+        p1.pos.setXYZ(0,0,0);
+        p2.pos.setXYZ(1,0,0);
+        p3.pos.setXYZ(2,0,0);
+        sys.insert(p1);
+        sys.insert(p2);
+        sys.insert(p3);
+        QCOMPARE(int(floor(sys.E()*1000)),-1875);
+        int eOld = int(floor(sys.E()*1000));
+        sys.parts[0]->rotate();
+        QVERIFY(int(floor(sys.E()*1000)) != eOld);
+    }
+
     void constructor1(){
         for (int i=0;i<1000000;i++){
             PartArray sys1;

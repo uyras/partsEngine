@@ -28,9 +28,10 @@ SOURCES += Vect.cpp \
     random.cpp \
     honeycombspinicearray.cpp \
     honeycombspinicecell.cpp \
-    sysloader.cpp \
     squarelattice.cpp \
-    amorphousarray.cpp
+    amorphousarray.cpp \
+    loadhelper.cpp \
+    savehelper.cpp
 
 HEADERS += \
     Vect.h \
@@ -40,7 +41,6 @@ HEADERS += \
     StateMachine.h \
     StateMachineFree.h \
     PartArray.h \
-    sysloader.h \
     config.h \
     squarespinicecell.h \
     squarespinicearray.h \
@@ -51,7 +51,9 @@ HEADERS += \
     wanglandau.h \
     wanglandauparallelwalker.h \
     wanglandauparallel.h \
-    amorphousarray.h
+    amorphousarray.h \
+    loadhelper.h \
+    savehelper.h
 
 
 CONFIG(debug,debug|release) {

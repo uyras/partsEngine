@@ -17,15 +17,18 @@
 #include "Part.h"
 #include "StateMachine.h"
 #include "StateMachineFree.h"
-#include "sysloader.h"
+#include "loadhelper.h"
+#include "savehelper.h"
 
 using namespace std;
 class Part;
 class SysLoader;
 
 class PartArray {
-    friend SysLoader;
-    friend StateMachine;
+    friend class SysLoader;
+    friend class StateMachine;
+    friend void LoadHelper::readHeader(PartArray *, bool);
+    friend void SaveHelper::writeHeader(PartArray *);
 public:
 
     PartArray();
@@ -126,6 +129,7 @@ public:
 
     void save_v1(string file, bool showNotifications = false);
     void save_v2(QString file);
+    void saveV2New(QString file);
     virtual void save(QString file);
 
     /**
@@ -148,6 +152,7 @@ public:
 
     void load_v1(string file, bool showNotifications = false);
     void load_v2(QString file);
+    void loadV2New(QString file);
     virtual void load(QString file);
 
     //чистим массив частиц
@@ -254,6 +259,7 @@ public:
     std::vector < Part* > parts;
 
     virtual QString type() const;
+    void setType(QString type);
 
 protected:
     double eMin,eMax,eInit,eTemp;
@@ -267,5 +273,8 @@ protected:
     double _interactionRange; //длина взаимодействия
 
     QString _type;
+
+private:
+    QMap<QString,QString> _unusedFileContent;
 };
 #endif // PARTARRAY_H

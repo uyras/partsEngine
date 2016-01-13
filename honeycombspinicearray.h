@@ -3,7 +3,8 @@
 
 #include "PartArray.h"
 #include "honeycombspinicecell.h"
-#include "sysloader.h"
+#include "savehelper.h"
+#include "loadhelper.h"
 
 class HoneycombSpinIceArray : public PartArray
 {

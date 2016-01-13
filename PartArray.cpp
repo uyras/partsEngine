@@ -995,9 +995,33 @@ void PartArray::save_v2(QString file)
     outfile.close();
 }
 
+void PartArray::saveV2New(QString file)
+{
+    SaveHelper helper(file,true);
+    helper.writeDumped(this->_unusedFileContent);
+    helper.writeHeader(this);
+    helper.go("parts");
+
+    vector<Part*>::iterator iter = this->parts.begin();
+    while (iter != this->parts.end()) {
+        helper << (*iter)->id;
+        helper << (*iter)->pos.x;
+        helper << (*iter)->pos.y;
+        helper << (*iter)->pos.z;
+        helper << (*iter)->m.x;
+        helper << (*iter)->m.y;
+        helper << (*iter)->m.z;
+        helper << (*iter)->state;
+        helper.line();
+        iter++;
+    }
+
+    helper.close();
+}
+
 void PartArray::save(QString file)
 {
-    this->save_v2(file);
+    this->saveV2New(file);
 }
 
 void PartArray::savePVPython(string file, int thteta, int phi)
@@ -1237,9 +1261,47 @@ void PartArray::load_v2(QString file)
     infile.close();
 }
 
+void PartArray::loadV2New(QString file)
+{
+    this->clear();
+    Part *temp;
+    LoadHelper helper(file);
+    if (helper.validate()){
+        helper.go("parts");
+        while (!helper.end()){
+            unsigned int id;
+            helper>>id;
+            temp = new Part(id);
+
+            if (this->lastId<id){
+                lastId = id;
+            }
+            helper >> temp->pos.x;
+            helper >> temp->pos.y;
+            helper >> temp->pos.z;
+            helper >> temp->m.x;
+            helper >> temp->m.y;
+            helper >> temp->m.z;
+            helper >> temp->state;
+
+            this->insert(temp);
+            helper.line();
+        }
+
+        helper.readHeader(this, true);
+
+        _unusedFileContent = helper.dumpFileContent();
+    }
+
+    helper.close();
+}
+
 void PartArray::load(QString file)
 {
-    this->load_v2(file);
+    switch(LoadHelper::version(file)){
+        case 1: this->load_v1(qUtf8Printable(file)); break;
+        case 2: this->loadV2New(file); break;
+    }
 }
 
 void PartArray::clear(){
@@ -1377,6 +1439,11 @@ void PartArray::setMBruteLines(double segmentSize){
 QString PartArray::type() const
 {
     return this->_type;
+}
+
+void PartArray::setType(QString type)
+{
+    this->_type = type;
 }
 
 bool PartArray::_double_equals(double a, double b)

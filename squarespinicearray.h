@@ -4,7 +4,8 @@
 #include "PartArray.h"
 #include "squarespinicecell.h"
 #include "Vect.h"
-#include "sysloader.h"
+#include "savehelper.h"
+#include "loadhelper.h"
 #include <QtDebug>
 
 using namespace std;

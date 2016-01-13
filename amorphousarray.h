@@ -2,6 +2,7 @@
 #define AMORPHOUSARRAY_H
 
 #include "PartArray.h"
+#include "savehelper.h"
 
 class AmorphousArray : public PartArray
 {

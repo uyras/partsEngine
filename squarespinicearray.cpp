@@ -3,7 +3,6 @@
 SquareSpinIceArray::SquareSpinIceArray()
 {
     this->_type = "squarespinice";
-    SysLoader::reg<SquareSpinIceArray>(type());
 }
 
 SquareSpinIceArray::SquareSpinIceArray(const SquareSpinIceArray &sys)
@@ -230,6 +229,7 @@ void SquareSpinIceArray::load(QString file)
     this->clear();
     //load base part of file
     PartArray::load(file);
+    LoadHelper helper(file);
 
     //open file
     QFile infile(file);
@@ -237,75 +237,63 @@ void SquareSpinIceArray::load(QString file)
     QTextStream f(&infile);
 
     //skip to cells section
-    QString s;
-    while (s!="[cells]"){
-        s = f.readLine();
-    }
-
+    helper.go("cells");
 
     //read cells data
-    s=f.readLine();
-
-    QStringList params;
     SquareSpinIceCell *tempCell;
-    while (! (
-               (s[0]=='[' && s[s.length()-1]==']') ||
-               (s.isEmpty())
-               )){ //read due to the next section or end of file
-        params = s.split('\t');
-        tempCell = new SquareSpinIceCell();
-        tempCell->pos = Vect(
-                    params[0].toDouble(),
-                    params[1].toDouble(),
-                    1
-                    );
-        tempCell->row = params[2].toInt();
-        tempCell->column = params[3].toInt();
-        tempCell->top = this->getById(params[4].toInt());
-        tempCell->bottom = this->getById(params[5].toInt());
-        tempCell->left = this->getById(params[6].toInt());
-        tempCell->right = this->getById(params[7].toInt());
+    int id;
+    while(!helper.end()){
+        helper>>tempCell->pos.x;
+        helper>>tempCell->pos.y;
+        tempCell->pos.z = 1;
+        helper>>tempCell->row;
+        helper>>tempCell->column;
+
+        helper>>id;
+        tempCell->top = this->getById(id);
+
+        helper>>id;
+        tempCell->bottom = this->getById(id);
+
+        helper>>id;
+        tempCell->left = this->getById(id);
+
+        helper>>id;
+        tempCell->right = this->getById(id);
+
 
         this->cells.push_back(tempCell);
-
-        s=f.readLine();
+        helper.line();
     }
 
-    //close file
-    infile.close();
+    helper.close();
 }
 
 void SquareSpinIceArray::save(QString file)
 {
     //save base part of file
     PartArray::save(file);
-
-    //open file in append mode
-    QFile outfile(file);
-    outfile.open(QFile::WriteOnly | QFile::Append);
-    QTextStream f(&outfile);
+    SaveHelper helper(file);
 
     //write header
-    f<<"[cells]"<<endl;
+    helper.go("cells");
 
     //write particles
     vector<SquareSpinIceCell*>::iterator iter = this->cells.begin();
     while (iter != this->cells.end()) {
-        f<<(*iter)->pos.x<<"\t";
-        f<<(*iter)->pos.y<<"\t";
-        f<<(*iter)->row<<"\t";
-        f<<(*iter)->column<<"\t";
-        f<<(*iter)->top->Id()<<"\t";
-        f<<(*iter)->bottom->Id()<<"\t";
-        f<<(*iter)->left->Id()<<"\t";
-        f<<(*iter)->right->Id();
+        helper<<(*iter)->pos.x;
+        helper<<(*iter)->pos.y;
+        helper<<(*iter)->row;
+        helper<<(*iter)->column;
+        helper<<(*iter)->top->Id();
+        helper<<(*iter)->bottom->Id();
+        helper<<(*iter)->left->Id();
+        helper<<(*iter)->right->Id();
 
-        f << endl;
+        helper.line();
         iter++;
     }
-
-    //close file
-    outfile.close();
+    helper.close();
 }
 
 void SquareSpinIceArray::clearCells()

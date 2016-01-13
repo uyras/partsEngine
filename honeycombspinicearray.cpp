@@ -3,7 +3,6 @@
 HoneycombSpinIceArray::HoneycombSpinIceArray()
 {
      _type = "honeycomb";
-     SysLoader::reg<HoneycombSpinIceArray>(type());
 }
 
 HoneycombSpinIceArray::HoneycombSpinIceArray(const HoneycombSpinIceArray &sys) :
@@ -174,46 +173,30 @@ void HoneycombSpinIceArray::load(QString file)
     //load base part of file
     PartArray::load(file);
 
-    //open file
-    QFile infile(file);
-    infile.open(QFile::ReadOnly);
-    QTextStream f(&infile);
+    LoadHelper helper(file);
 
-    //skip to cells section
-    QString s;
-    while (s!="[cells]"){
-        s = f.readLine();
-    }
+    helper.go("cells");
 
-
-    //read particles data
-    s=f.readLine();
-
-    QStringList params;
     HoneycombSpinIceCell *tempCell;
-    while (! (
-               (s[0]=='[' && s[s.length()-1]==']') ||
-               (s.isEmpty())
-               )){ //read due to the next section or end of file
-        params = s.split('\t');
+    while (!helper.end()){ //read due to the next section or end of file
         tempCell = new HoneycombSpinIceCell();
-        tempCell->pos = Vect(
-                    params[0].toDouble(),
-                    params[1].toDouble(),
-                    1
-                    );
+        helper>>tempCell->pos.x;
+        helper>>tempCell->pos.y;
+        tempCell->pos.z = 1;
+
         if (tempCell->pos.y==0)
             m++;
-        for (int i=2;i<8;i++)
-            tempCell->parts.push_back(this->getById(i));
+        for (int i=0;i<6;i++){
+            int id;
+            helper>>id;
+            tempCell->parts.push_back(this->getById(id));
+        }
 
         this->cells.push_back(tempCell);
-
-        s=f.readLine();
+        helper.line();
     }
 
-    //close file
-    infile.close();
+    helper.close();
 
     n = this->cells.size()/m;
 }
@@ -222,30 +205,24 @@ void HoneycombSpinIceArray::save(QString file)
 {
     //save base part of file
     PartArray::save(file);
+    SaveHelper helper(file);
 
-    //open file in append mode
-    QFile outfile(file);
-    outfile.open(QFile::WriteOnly | QFile::Append);
-    QTextStream f(&outfile);
-
-    //write header
-    f<<"[cells]"<<endl;
+    helper.go("cells");
 
     //write particles
     vector<HoneycombSpinIceCell*>::iterator iter = this->cells.begin();
     while (iter != this->cells.end()) {
         vector<Part*>::iterator iter2 = (*iter)->parts.begin();
-        f<<(*iter)->pos.x<<"\t"<<(*iter)->pos.y;
+        helper<<(*iter)->pos.x;
+        helper<<(*iter)->pos.y;
         while (iter2 != (*iter)->parts.end()){
-            f<<"\t"<<(*iter2)->Id();
+            helper<<(*iter2)->Id();
             iter2++;
         }
-        f << endl;
+        helper.line();
         iter++;
     }
-
-    //close file
-    outfile.close();
+    helper.close();
 }
 
 void HoneycombSpinIceArray::clearCells()

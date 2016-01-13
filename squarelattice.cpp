@@ -6,7 +6,6 @@ SquareLattice::SquareLattice():
     l(1)
 {
     _type = "squarelattice";
-    SysLoader::reg<SquareLattice>(type());
 }
 
 void SquareLattice::dropSquareLattice(int m, int n, double l, double len, Part *example)
@@ -84,48 +83,38 @@ StateMachineFree SquareLattice::maximalState()
 
 void SquareLattice::load(QString file)
 {
-    this->clear(); //чистим систему
-
     //грузим основной набор частиц
     PartArray::load(file);
 
-    //читаем файл
-    QFile infile(file);
-    infile.open(QFile::ReadOnly);
-    QTextStream f(&infile);
+    LoadHelper helper(file);
 
     //пропускаем до своей секции
-    QString s;
-    while (s!="[square]"){
-        s = f.readLine();
-    }
+    helper.go("square");
 
     //читаем три своих поля
-    f>>this->m;
-    f>>this->n;
-    f>>this->l;
+    helper>>this->m;
+    helper>>this->n;
+    helper>>this->l;
 
     //закрываем файл
-    infile.close();
+    helper.close();
 }
 
 void SquareLattice::save(QString file)
 {
     //Сохраняем основную часть файла
     PartArray::save(file);
-
-    //Открываем в режиме добавления
-    ofstream f(file.toStdString().c_str(), ios_base::app | ios_base::out);
+    SaveHelper helper(file);
 
     //пишем секцию
-    f<<"[square]"<<endl;
+    helper.go("square");
 
     //пишем свои данные
-    f<<this->m<<endl;
-    f<<this->n<<endl;
-    f<<this->l<<endl;
+    helper<<this->m;
+    helper<<this->n;
+    helper<<this->l;
 
     //закрываем файл
-    f.close();
+    helper.close();
 }
 

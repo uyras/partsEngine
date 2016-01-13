@@ -24,7 +24,6 @@ HEADERS += \
     squarespinicetest.h \
     randomtest.h \
     honeycombspinicetest.h \
-    sysloadertest.h \
     PartArrayTest.h \
     parttest.h
 

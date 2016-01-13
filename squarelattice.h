@@ -3,7 +3,8 @@
 
 #include "PartArray.h"
 #include "Part.h"
-#include "sysloader.h"
+#include "savehelper.h"
+#include "loadhelper.h"
 
 
 class SquareLattice : public PartArray

@@ -26,13 +26,20 @@ int main(int argc, char *argv[])
 
     config::Instance()->set2D();
 
-    PartArray *backupSys = SysLoader::load("1.dat");
+    HoneycombSpinIceArray sys;
+    sys.dropHoneyComb(3,3,1);
+    sys.setToGroundState();
+    sys.setToMaximalState();
+    sys.state.randomize(10);
+    sys.save("10.mfsys");
+    sys.load("10.mfsys");
+    sys.save("11.mfsys");
 
-    backupSys->state.next();
-
-    backupSys->save("4.dat");
-
-    delete backupSys;
+    PartArray sys2;
+    sys2.load("11.mfsys");
+    sys2.save("12.mfsys");
+    sys2.state.randomize(10);
+    sys2.save("13.mfsys");
 
     cout<<"finish"<<endl;
     return 0;
