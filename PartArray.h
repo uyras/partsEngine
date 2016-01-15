@@ -10,10 +10,12 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <QString>
 #include <QFile>
 #include <QTextStream>
 #include <map>
+#include <QtDebug>
 #include "Part.h"
 #include "StateMachine.h"
 #include "StateMachineFree.h"
@@ -261,20 +263,21 @@ public:
     virtual QString type() const;
     void setType(QString type);
 
+    inline void changeState(){this->eTemp=0;} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
+    void changeSystem(); //вызывается когда изменилась вся система целиком
+
 protected:
     double eMin,eMax,eInit,eTemp;
     StateMachineFree minstate,maxstate;
     unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
-    void changeState(); //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
-    void changeSystem(); //вызывается когда изменилась вся система целиком
 
     double _interactionRange; //длина взаимодействия
 
     QString _type;
 
 private:
-    QMap<QString,QString> _unusedFileContent;
+    QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
 };
 #endif // PARTARRAY_H

@@ -129,6 +129,7 @@ int LoadHelper::version(QString file)
     } else {
         qFatal("file %s not found", qUtf8Printable(file));
     }
+    return 0;
 }
 
 void LoadHelper::readHeader(PartArray *sys, bool readAnyWay)

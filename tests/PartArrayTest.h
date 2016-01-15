@@ -25,10 +25,14 @@ private slots:
         sys->setInteractionRange(0.);
         for (int i=0;i<4;i++){
             for (int j=0;j<4;j++){
-            Part temp;
-            temp.pos.setXYZ(i,j,0);
-            temp.m.setXYZ(0,1,0);
-            sys->insert(temp);
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                try{
+                    sys->insert(temp);
+                } catch(const string c){
+                    cout<<c<<endl;
+                }
             }
         }
 
@@ -46,7 +50,7 @@ private slots:
         //после полного обнуления конфигурации
         sys->state.hardReset();
         QCOMPARE(sys->E(), sys->EComplete());
-
+        delete sys;
     }
 
 

@@ -103,7 +103,6 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
 
             if ((temp = this->findByPosition(partPos)) == 0){
                 temp = new Part();
-                temp->shape = Part::ELLIPSE;
                 temp->pos = partPos;
                 temp->m = Vect(config::Instance()->m,0,0);
                 this->insert(temp);
@@ -116,7 +115,6 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
 
             if ((temp = this->findByPosition(partPos)) == 0){
                 temp = new Part();
-                temp->shape = Part::ELLIPSE;
                 temp->pos = partPos;
                 temp->m = Vect(config::Instance()->m,0,0);
                 this->insert(temp);
@@ -129,7 +127,6 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
 
             if ((temp = this->findByPosition(partPos)) == 0){
                 temp = new Part();
-                temp->shape = Part::ELLIPSE;
                 temp->pos = partPos;
                 temp->m = Vect(0,config::Instance()->m,0);
                 this->insert(temp);
@@ -142,7 +139,6 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
 
             if ((temp = this->findByPosition(partPos)) == 0){
                 temp = new Part();
-                temp->shape = Part::ELLIPSE;
                 temp->pos = partPos;
                 temp->m = Vect(0,config::Instance()->m,0);
                 this->insert(temp);

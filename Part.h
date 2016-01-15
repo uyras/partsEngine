@@ -8,8 +8,7 @@
 class PartArray;
 class Part {
 public:
-    friend PartArray;
-    enum form{CIRCLE,ELLIPSE,SQUARE};
+    friend class PartArray;
 
     Vect pos; //координаты, для удобства в относительных величинах
     Vect m; //магнитный момент (координаты вектора относительно центра частицы)
@@ -20,7 +19,6 @@ public:
     unsigned short int sector; //сектор образца, в котором расположена частица
 
     bool state; //состояние частицы. Если 0 то состояние начальное
-    form shape; //форма частицы
     double w1,h1; //высота и ширина частицы
 
     Part();
@@ -38,6 +36,7 @@ public:
     }
 
 protected:
+    PartArray *parent;
     std::vector<Part*> neighbours;
     std::vector<double> eArray;
     long int id;

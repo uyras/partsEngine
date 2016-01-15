@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <ctime>
+#include <sstream>
 
 #include "config.h"
 #include "StateMachine.h"
@@ -10,7 +11,6 @@
 
 #include "squarespinicearray.h"
 #include "squarelattice.h"
-#include "sysloader.h"
 
 #include "random.h"
 #include <cmath>
@@ -26,20 +26,26 @@ int main(int argc, char *argv[])
 
     config::Instance()->set2D();
 
-    HoneycombSpinIceArray sys;
-    sys.dropHoneyComb(3,3,1);
-    sys.setToGroundState();
-    sys.setToMaximalState();
-    sys.state.randomize(10);
-    sys.save("10.mfsys");
-    sys.load("10.mfsys");
-    sys.save("11.mfsys");
+    ostringstream oss;
 
-    PartArray sys2;
-    sys2.load("11.mfsys");
-    sys2.save("12.mfsys");
-    sys2.state.randomize(10);
-    sys2.save("13.mfsys");
+
+
+
+    PartArray *sys = new PartArray();
+    oss<<sys;
+
+    cout<<oss.str();
+    sys->setInteractionRange(0.);
+    for (int i=0;i<4;i++){
+        for (int j=0;j<4;j++){
+        Part temp;
+        temp.pos.setXYZ(i,j,0);
+        temp.m.setXYZ(0,1,0);
+        sys->insert(temp);
+        }
+    }
+
+    delete sys;
 
     cout<<"finish"<<endl;
     return 0;

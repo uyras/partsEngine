@@ -211,11 +211,6 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
     }
 }
 
-void PartArray::changeState()
-{
-    this->eTemp=0;
-}
-
 void PartArray::changeSystem()
 {
     this->eMin = this->eMax = this->eInit = this->eTemp = 0;
@@ -291,10 +286,21 @@ void PartArray::shuffleM(){
 
 void PartArray::insert(Part * part){
     this->changeSystem();
+    if (part->parent!=0){
+        std::ostringstream s;
+        s<<"part is already attached to system "<<part->parent<<". Declined to attach it to "<<this;
+        throw s.str();
+    }
+
+    //прописываем родителя
+    part->parent = this;
+
     this->parts.push_back(part);
+
     if (part->id==-1) //если ИД частицы не задан, назначаем новый ИД
         part->id = lastId++;
 
+    //определяем соседей частицы
     vector<Part*>::iterator iter = this->parts.begin();
     Part* temp;
     while(iter!=this->parts.end()){
@@ -923,15 +929,7 @@ void PartArray::save_v1(string file, bool showNotifications) {
 
     string shape;
     if (iter!=this->parts.end())
-        switch (((Part*)*iter)->shape) {
-        case Part::CIRCLE:
             shape="CIRCLE";
-            break;
-        case Part::ELLIPSE:
-            shape="ELLIPSE";
-        case Part::SQUARE:
-            shape="SQUARE";
-        };
 
     while (iter != this->parts.end()) {
         f << (*iter)->pos.x << "\t";// << endl;
@@ -1185,10 +1183,6 @@ void PartArray::load_v1(string file,bool showNotifications) {
         f >> temp->r;
 
         f >> shape;
-        if (shape.compare("CIRCLE")==0)
-            temp->shape = Part::CIRCLE;
-        if (shape.compare("ELLIPSE")==0)
-            temp->shape = Part::ELLIPSE;
 
 
         this->insert(temp);
@@ -1631,7 +1625,6 @@ double PartArray::setToGroundState(){
         minstate = this->groundState();
     }
     state = minstate;
-    this->changeState();
     return eMin=E();
 }
 
@@ -1640,7 +1633,6 @@ double PartArray::setToMaximalState(){
         maxstate = this->maximalState();
     }
     state = maxstate;
-    this->changeState();
     return eMax=E();
 }
 
@@ -1870,12 +1862,11 @@ void PartArray::turnRight(){
 }
 
 void PartArray::turnToDirection(Vect *v){
-    this->changeState();
     vector<Part*>::iterator iter = this->parts.begin();
     iter = this->parts.begin();
     while(iter!=this->parts.end()){
         if ((*iter)->m.scalar(*v)<0){
-            (*iter)->m.rotate();
+            (*iter)->rotate();
         }
         iter++;
     }

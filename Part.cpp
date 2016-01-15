@@ -13,6 +13,7 @@ Part::Part() :
     pos(),
     m(),
     state(false),
+    parent(0),
     id(-1) //значит что уникальный ИД не задан
 {
     //по умолчанию на частицу ничего не действует
@@ -23,17 +24,18 @@ Part::Part() :
     this->w1 = this->h1 = 0;
 }
 
-Part::Part(const Part &obj)
+Part::Part(const Part &obj):
+    pos(obj.pos),
+    m(obj.m),
+    h(obj.h),
+    e(obj.e),
+    parent(0),
+    id(-1)
 {
-    this->pos = obj.pos;
-    this->m = obj.m;
-    this->h = obj.h;
-    this->e = obj.e;
     this->eArray=obj.eArray;
     this->_vol = obj._vol;
     this->sector = obj.sector;
     this->state = obj.state;
-    this->id=-1;
 }
 
 bool Part::operator==(const Part &one) const
@@ -49,7 +51,8 @@ bool Part::operator==(const Part &one) const
 }
 
 Part::Part(unsigned int id) :
-    state(false)
+    state(false),
+    parent(0)
 {
     this->id = id;
     //по умолчанию на частицу ничего не действует
@@ -90,6 +93,7 @@ void Part::rotate(float angle){
     angle = angle;
     this->m.rotate();
     this->state = !this->state;
+    parent->changeState();
 }
 
 double Part::volume()

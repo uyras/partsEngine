@@ -15,7 +15,27 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../savehelper.cpp \
+    ../squarelattice.cpp \
+    ../squarespinicearray.cpp \
+    ../squarespinicecell.cpp \
+    ../StateMachine.cpp \
+    ../statemachinebase.cpp \
+    ../StateMachineFree.cpp \
+    ../Vect.cpp \
+    ../wanglandau.cpp \
+    ../wanglandauparallel.cpp \
+    ../wanglandauparallelwalker.cpp \
+    ../random.cpp \
+    ../Part.cpp \
+    ../PartArray.cpp \
+    ../amorphousarray.cpp \
+    ../config.cpp \
+    ../distributionLaw.cpp \
+    ../honeycombspinicearray.cpp \
+    ../honeycombspinicecell.cpp \
+    ../loadhelper.cpp
 
 HEADERS += \
     VectTest2D.h \
@@ -25,7 +45,26 @@ HEADERS += \
     randomtest.h \
     honeycombspinicetest.h \
     PartArrayTest.h \
-    parttest.h
+    parttest.h \
+    ../savehelper.h \
+    ../squarelattice.h \
+    ../squarespinicearray.h \
+    ../squarespinicecell.h \
+    ../StateMachine.h \
+    ../statemachinebase.h \
+    ../StateMachineFree.h \
+    ../Vect.h \
+    ../wanglandau.h \
+    ../wanglandauparallel.h \
+    ../wanglandauparallelwalker.h \
+    ../random.h \
+    ../Part.h \
+    ../PartArray.h \
+    ../amorphousarray.h \
+    ../config.h \
+    ../distributionLaw.h \
+    ../honeycombspinicearray.h \
+    ../honeycombspinicecell.h \
+    ../loadhelper.h
 
 INCLUDEPATH += ../
-LIBS += -L$$PWD/../ -lPartsEngine
