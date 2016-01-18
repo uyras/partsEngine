@@ -260,6 +260,24 @@ void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
 void PartArray::setInteractionRange(const double range)
 {
     _interactionRange = range;
+    Part *part, *temp;
+
+    //определяем соседей частицы
+    for (int i=0; i<size(); i++){
+        part = (*this)[i];
+        part->neighbours.clear();
+        unsigned nNum=0;
+        vector<Part*>::iterator iter = this->parts.begin();
+        while(iter!=this->parts.end()){
+            temp = *iter;
+            if (isNeighbours(part,temp)){
+                part->neighbours.push_back(Part::neighbour{temp,nNum});
+            }
+            iter++; nNum++;
+        }
+    }
+
+    changeSystem();
 }
 
 bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
@@ -267,11 +285,6 @@ bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
     if (_a==_b) return false;
     if (_interactionRange==0) return true;
     else return _a->pos.space(_b->pos)<=_interactionRange;
-}
-
-void PartArray::redefineNeightbours()
-{
-
 }
 
 //перемешать магнитные моменты частиц M

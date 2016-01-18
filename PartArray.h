@@ -56,8 +56,8 @@ public:
      * @param range Максимальный радиус. 0 - если взаимодействие "все со всеми"
      */
     void setInteractionRange(const double range);
+    inline double interactionRange() const { return _interactionRange; }
     bool isNeighbours(const Part* _a, const Part* _b) const;
-    void redefineNeightbours();
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 
@@ -161,6 +161,7 @@ public:
 
     //возвращает количество частиц на объекте
     int count() const;
+    inline int size() const{return this->parts.size();}
 
     // возвращает вектор(массив) энергий каждой частицы
     std::vector<double> getEVector();

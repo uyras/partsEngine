@@ -176,6 +176,28 @@ private slots:
         }
     }
 
+    void ENearestNeighbourChangeOnFly(){
+        double nums[10] = {
+            -12, -10, -6, -12, -6,
+            -4, -8, -14, -10, -8
+        };
+
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<3;i++)
+            for (int j=0; j<3; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+        sys.setInteractionRange(1.1);
+        for (int i=0;i<10;i++){
+            qFuzzyCompare(sys.E(), nums[i]);
+            sys.state.next();
+        }
+    }
+
     void ENearestNeighbourFromState(){
         double nums[10] = {
             -12, -10, -6, -12, -6,
