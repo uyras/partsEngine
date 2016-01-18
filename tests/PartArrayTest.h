@@ -194,6 +194,84 @@ private slots:
         QCOMPARE(sys1.E(),sys2.E());
     }
 
+    void minstatetest(){
+        PartArray sys1;
+        for (int i=0;i<5;i++){
+            Part temp;
+            temp.pos.setXYZ(i,0,0);
+            if (i%2==0)
+                temp.m.y = 1;
+            else
+                temp.m.y = -1;
+            sys1.insert(temp);
+        }
+        //проверяем наличие минимального состояния
+        QCOMPARE((int)sys1.Minstate().size(),0);
+
+        //проверяем правильно ли устанавливается
+        StateMachineFree mstate = StateMachineFree();
+        mstate.fromString("01010");
+        sys1.setMinstate(mstate);
+        QVERIFY(sys1.Minstate() == mstate);
+
+        //сравниваем с настоящим GS
+        sys1.setMinstate(StateMachineFree());
+        sys1.setToGroundState();
+        mstate.fromString("11111");
+        QVERIFY(sys1.Minstate() == mstate);
+    }
+
+    void maxstatetest(){
+        PartArray sys1;
+        for (int i=0;i<5;i++){
+            Part temp;
+            temp.pos.setXYZ(i,0,0);
+            if (i%2==0)
+                temp.m.y = 1;
+            else
+                temp.m.y = -1;
+            sys1.insert(temp);
+        }
+
+        //проверяем наличие минимального состояния
+        QCOMPARE((int)sys1.Maxstate().size(),0);
+
+        //проверяем правильно ли устанавливается
+        StateMachineFree mstate = StateMachineFree();
+        mstate.fromString("10101");
+        sys1.setMaxstate(mstate);
+        QVERIFY(sys1.Maxstate() == mstate);
+
+        //сравниваем с настоящим GS
+        sys1.setMaxstate(StateMachineFree());
+        sys1.setToMaximalState();
+        QVERIFY(sys1.Maxstate() == mstate);
+    }
+
+    void statetest(){
+        PartArray sys1;
+        for (int i=0;i<5;i++){
+            Part temp;
+            temp.pos.setXYZ(i,0,0);
+            if (i%2==0)
+                temp.m.y = 1;
+            else
+                temp.m.y = -1;
+            sys1.insert(temp);
+        }
+
+        StateMachineFree mstate = StateMachineFree();
+        QCOMPARE((int)sys1.State().size(),5);
+        mstate.fromString("11111");
+        QVERIFY(sys1.State()==mstate);
+        mstate.fromString("01111");
+        sys1[0]->rotate();
+        QVERIFY(sys1.State()==mstate);
+        sys1.setToMaximalState();
+        mstate.fromString("10101");
+        QVERIFY(sys1.State()==mstate);
+    }
+
 };
 
 #endif // PARTARRAYTEST_H

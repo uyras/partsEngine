@@ -266,6 +266,15 @@ public:
     inline void changeState(){this->eTemp=0;} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
     void changeSystem(); //вызывается когда изменилась вся система целиком
 
+    inline const StateMachineFree & Minstate() const { return minstate; }
+    inline void setMinstate(const StateMachineBase &s) { minstate = s; }
+
+    inline const StateMachineFree & Maxstate() const { return maxstate; }
+    inline void setMaxstate(const StateMachineBase &s) { maxstate = s; }
+
+    inline const StateMachine & State() const { return state; }
+    inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }
+
 protected:
     double eMin,eMax,eInit,eTemp;
     StateMachineFree minstate,maxstate;

@@ -59,8 +59,12 @@ public:
     virtual bool fromString(const std::string&)=0;
 
     virtual bool operator[](const unsigned long int) const=0;
+    virtual bool at(const unsigned long int) const;
 
     virtual unsigned long int size() const=0;
+
+    virtual bool operator==(const StateMachineBase &one) const;
+    virtual bool operator!=(const StateMachineBase &one) const;
 };
 
 #endif // STATEMACHINEBASE_H

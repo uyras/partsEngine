@@ -206,11 +206,6 @@ bool StateMachineFree::operator [](const unsigned long int num) const{
     return this->_state[num];
 }
 
-bool StateMachineFree::at(const unsigned long num) const
-{
-    return this->operator [](num);
-}
-
 unsigned long int StateMachineFree::size() const{
     return this->_state.size();
 }
@@ -224,26 +219,14 @@ StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
     return *this;
 }
 
-bool StateMachineFree::operator==(const StateMachineFree &one) const
+StateMachineFree &StateMachineFree::operator=(const StateMachineBase &one)
 {
-    if (one._state.size()!=this->_state.size()) return false;
-    if (one._state.size()==this->_state.size() && (one._state.size()==0 || one._state.size()==1)) return true;
+    this->_state.clear();
 
-    vector<bool>::const_iterator iter1 = one._state.begin();
-    vector<bool>::const_iterator iter2 = this->_state.begin();
+    for (unsigned int i=0;i<one.size();i++)
+        this->_state.push_back(one[i]);
 
-    //вычисляем, прямое или обратное совпадение считать
-    bool compEquals=true;
-    if ((*iter2) != (*iter1))
-        compEquals = false;
-
-    while(iter2!=this->_state.end()){
-        if ( ((*iter2) == (*iter1)) != compEquals)
-            return false;
-        iter1++; iter2++;
-    }
-
-    return true;
+    return *this;
 }
 
 StateMachineFree &StateMachineFree::operator+=(int val)

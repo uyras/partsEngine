@@ -48,6 +48,22 @@ StateMachine &StateMachine::operator=(const StateMachine &state)
     return *this;
 }
 
+StateMachine &StateMachine::operator=(const StateMachineBase &state)
+{
+    long unsigned int s;
+    if (this->size() < state.size())
+        s = this->size();
+    else
+        s=state.size();
+
+    for (unsigned int i=0;i<s;i++){
+        if (this->operator [](i) != state[i]){
+            this->_system->parts[i]->rotate();
+        }
+    }
+    return *this;
+}
+
 void StateMachine::connect(PartArray *system)
 {
     this->_system=system;
@@ -295,31 +311,4 @@ unsigned long StateMachine::size() const{
         return this->_system->parts.size();
     else
         return 0;
-}
-
-bool StateMachine::operator==(const StateMachine &one) const
-{
-    //если системы разных размеров, априори считаем их разными
-    if (one._system->parts.size()!=this->_system->parts.size()) return false;
-
-    //если система из 0 иди 1 частицы, считать их одинаковыми
-    if (
-            one._system->parts.size()==this->_system->parts.size() &&
-            (one._system->parts.size()==0 || one._system->parts.size()==1)
-            ) return true;
-
-    vector<Part*>::const_iterator iter1 = one._system->parts.begin();
-    vector<Part*>::iterator iter2 = this->_system->parts.begin();
-
-    //вычисляем, прямое или обратное совпадение считать
-    //то есть системы могут быть равными или обратными
-    bool compEquals = (*iter2)->state == (*iter1)->state;
-
-    while(iter2 != this->_system->parts.end()){
-        if ( ((*iter2)->state == (*iter1)->state) != compEquals)
-            return false;
-        iter1++; iter2++;
-    }
-
-    return true;
 }

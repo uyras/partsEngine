@@ -42,12 +42,10 @@ public:
     virtual std::string toString() const;
     virtual bool fromString(const std::string&);
     virtual bool operator [](const unsigned long int) const;
-    virtual bool at(const unsigned long int num) const;
     virtual unsigned long int size() const;
 
     StateMachineFree & operator= (const StateMachineFree & one);
-
-    bool operator==(const StateMachineFree & one) const;
+    StateMachineFree & operator= (const StateMachineBase & one);
 
     StateMachineFree &  operator+=(int val);
 

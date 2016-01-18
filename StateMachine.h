@@ -49,11 +49,10 @@ public:
     void hardReset();
 
     StateMachine &  operator+=(const unsigned long int val);
-    bool operator==(const StateMachine &one) const;
-
 
     StateMachine& operator=(const StateMachineFree &state);
     StateMachine& operator=(const StateMachine & state);
+    StateMachine& operator=(const StateMachineBase& state);
 
 private:
     PartArray* _system;
