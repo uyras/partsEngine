@@ -26,23 +26,24 @@ int main(int argc, char *argv[])
 
     config::Instance()->set2D();
 
-    ostringstream oss;
-
 
 
 
     PartArray *sys = new PartArray();
-    oss<<sys;
 
-    cout<<oss.str();
-    sys->setInteractionRange(0.);
+    sys->setInteractionRange(1.1);
     for (int i=0;i<4;i++){
         for (int j=0;j<4;j++){
-        Part temp;
-        temp.pos.setXYZ(i,j,0);
-        temp.m.setXYZ(0,1,0);
-        sys->insert(temp);
+            Part temp;
+            temp.pos.setXYZ(i,j,0);
+            temp.m.setXYZ(0,1,0);
+            sys->insert(temp);
         }
+    }
+
+    for (int i=0;i<10;i++){
+        cout<<sys->EComplete()<<", ";
+        sys->state.next();
     }
 
     delete sys;

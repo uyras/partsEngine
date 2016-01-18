@@ -48,7 +48,7 @@ void WangLandauParallelWalker::walk(unsigned stepsPerWalk)
 
     ofstream ffile(QString("e_%1.txt").arg(number).toStdString().c_str(),ios_base::out|ios_base::app);
 
-    double eOld = sys->calcEnergy1FastIncremental(eInit);
+    double eOld = sys->E();
     double eNew;
 
     unsigned long int totalRotations=0; //всего вращений системы
@@ -58,7 +58,7 @@ void WangLandauParallelWalker::walk(unsigned stepsPerWalk)
 
         int partNum = sys->state.randomize(); totalRotations++;
 
-        eNew = sys->calcEnergy1FastIncremental(eInit);
+        eNew = sys->E();
 
         if (saveToFile) ffile<<eNew<<endl;
 
@@ -125,7 +125,7 @@ void WangLandauParallelWalker::makeNormalInitState()
 {
     unsigned long int i=0;
     double eTemp=0;
-    while (!inRange(eTemp=sys->calcEnergy1FastIncremental(eInit))){
+    while (!inRange(eTemp=sys->E())){
         this->sys->state.randomize();
         i++;
     }
@@ -136,7 +136,7 @@ void WangLandauParallelWalker::makeNormalInitState()
 void WangLandauParallelWalker::updateGH(double E)
 {
     if (E==0.){
-        E = this->sys->calcEnergy1FastIncremental(this->eInit);
+        E = this->sys->E();
     }
 
     g[this->getIntervalNumber(E)]+=log(f);

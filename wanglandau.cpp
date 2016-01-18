@@ -23,7 +23,7 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
     const double dE = (eMax-eMin)/(intervals-1);
     sys.state.reset();
 
-    const double eInit = sys.calcEnergy1FastIncrementalFirst();
+    const double eInit = sys.E();
 
     qDebug()<<"eMin="<<eMin;
     qDebug()<<"eMax="<<eMax;
@@ -50,7 +50,7 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
             double rand = (double)config::Instance()->rand()/(double)config::Instance()->rand_max;
             int partNum = (int)floor(rand*(double)count);
             sys.parts[partNum]->rotate();
-            eNew = sys.calcEnergy1FastIncremental(eInit);
+            eNew = sys.E();
 
             if (
                     (double)config::Instance()->rand()/(double)config::Instance()->rand_max <=

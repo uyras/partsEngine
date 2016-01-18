@@ -102,7 +102,7 @@ public:
      * @brief E Считает энергию системы. Метод подбирается автоматически исходя из конфигурации и свойств системы
      * @return
      */
-    virtual double E();
+    virtual double E(const StateMachineBase &s = StateMachineFree());
 
     /**
     * рассчитывает внутреннюю энергию во всей системе частиц (метод подсчета через магнитные моменты)
@@ -119,10 +119,6 @@ public:
     double EComplete(Part *elem) const;
     double ECompleteOld(Part *elem) const;
     double ECompleteFast();
-
-
-    double calcEnergy1FastIncremental(double initEnergy); //state - новое состояние системы
-    double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
 
     /**
     * выдает все парамеры частиц на экран
@@ -276,6 +272,9 @@ public:
     inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }
 
 protected:
+    double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы
+    double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
+
     double eMin,eMax,eInit,eTemp;
     StateMachineFree minstate,maxstate;
     unsigned int lastId;

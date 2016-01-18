@@ -202,14 +202,6 @@ bool StateMachineFree::fromString(const std::string &s)
     return true;
 }
 
-bool StateMachineFree::operator [](const unsigned long int num) const{
-    return this->_state[num];
-}
-
-unsigned long int StateMachineFree::size() const{
-    return this->_state.size();
-}
-
 StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
     this->_state.clear();
 

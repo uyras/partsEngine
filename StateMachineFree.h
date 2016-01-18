@@ -41,8 +41,8 @@ public:
     virtual bool operator--(int);
     virtual std::string toString() const;
     virtual bool fromString(const std::string&);
-    virtual bool operator [](const unsigned long int) const;
-    virtual unsigned long int size() const;
+    inline virtual bool operator [](const unsigned long int num) const { return this->_state[num]; }
+    inline virtual unsigned long int size() const {return this->_state.size();}
 
     StateMachineFree & operator= (const StateMachineFree & one);
     StateMachineFree & operator= (const StateMachineBase & one);

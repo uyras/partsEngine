@@ -19,7 +19,7 @@ private slots:
         Random::Instance();
     }
 
-    void energy(){
+    void EVsEComplete(){
         //тест вычисления энергии после создания системы
         PartArray *sys = new PartArray();
         sys->setInteractionRange(0.);
@@ -54,7 +54,7 @@ private slots:
     }
 
 
-    void energy2(){
+    void E(){
         int nums[100] = {
             -820, -537, -188, -706, -537,
             -354, -706, -1323, -649, 34,
@@ -94,7 +94,7 @@ private slots:
         }
     }
 
-    void energy3(){
+    void EPartRotate(){
         PartArray sys;
         Part p1, p2, p3;
         p1.m = p3.m = Vect(0,1,0);
@@ -109,6 +109,171 @@ private slots:
         int eOld = int(floor(sys.E()*1000));
         sys.parts[0]->rotate();
         QVERIFY(int(floor(sys.E()*1000)) != eOld);
+    }
+
+    void EByState(){
+        int nums[100] = {
+            -820, -537, -188, -706, -537,
+            -354, -706, -1323, -649, 34,
+            -88, -205, -416, 166, -656,
+            -873, -278, -66, 753, 165,
+            -66, 46, 165, -523, -907,
+            -295, 53, -135, -746, -234,
+            -585, -873, -649, -416, -88,
+            -656, 34, 166, -205, -873,
+            -578, 55, -88, -255, 55,
+            587, -255, -523, -907, -746,
+            53, -585, -295, -234, -135,
+            -873, -1637, -1075, -747, -985,
+            -1075, -613, -985, -1323, -537,
+            -204, 109, -359, -263, -30,
+            -417, -985, 34, 767, 609,
+            542, 258, 890, 33, -135,
+            -66, 196, 979, 441, 137,
+            299, 383, -255, -295, 367,
+            680, 542, -142, 420, 33,
+            -205, -416, -134, 159, -359
+        };
+
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<3;i++)
+            for (int j=0; j<3; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+
+        sys.state.next();
+        sys.state.next();
+        StateMachineFree s(sys.count());
+        for (int i=0;i<100;i++){
+            QCOMPARE(int(floor(sys.E(s)*100)),nums[i]);
+            s.next();
+        }
+    }
+
+    void ENearestNeighbour(){
+        double nums[10] = {
+            -12, -10, -6, -12, -6,
+            -4, -8, -14, -10, -8
+        };
+
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<3;i++)
+            for (int j=0; j<3; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+
+        for (int i=0;i<10;i++){
+            qFuzzyCompare(sys.E(), nums[i]);
+            sys.state.next();
+        }
+    }
+
+    void ENearestNeighbourFromState(){
+        double nums[10] = {
+            -12, -10, -6, -12, -6,
+            -4, -8, -14, -10, -8
+        };
+
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<3;i++)
+            for (int j=0; j<3; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+
+        sys.state.next();
+        sys.state.next();
+        StateMachineFree s(sys.count());
+        for (int i=0;i<10;i++){
+            qFuzzyCompare(sys.E(s), nums[i]);
+            s.next();
+        }
+    }
+
+    void energyBenchmark1(){
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<4;i++)
+            for (int j=0; j<4; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+        sys.state.fromString("0000000011111111");
+        QBENCHMARK{sys.EComplete();}
+    }
+
+    void energyBenchmark2(){
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<4;i++)
+            for (int j=0; j<4; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+        sys.state.fromString("0000000011111111");
+        QBENCHMARK{sys.ECompleteFast();}
+    }
+
+    void energyBenchmark3(){
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<4;i++)
+            for (int j=0; j<4; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+        sys.state.fromString("0000000011111111");
+        QBENCHMARK{
+            double E=0;
+            for (int i=0; i<sys.count(); i++)
+                E+=sys.ECompleteOld(sys[i]);
+        }
+    }
+
+    void energyBenchmark4(){
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<4;i++)
+            for (int j=0; j<4; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+        sys.state.fromString("0000000011111111");
+        QBENCHMARK{sys.E(); sys.changeState();}
+    }
+
+    void energyBenchmark5(){
+        PartArray sys;
+        sys.setInteractionRange(0.);
+        for (int i=0;i<4;i++)
+            for (int j=0; j<4; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+        sys.state.fromString("0000000011111111");
+        StateMachineFree s; s.fromString("0000000011111111");
+        QBENCHMARK{sys.E(s); sys.changeState();}
     }
 
     void constructor1(){
@@ -270,6 +435,13 @@ private slots:
         sys1.setToMaximalState();
         mstate.fromString("10101");
         QVERIFY(sys1.State()==mstate);
+    }
+
+    void inserttest(){
+        PartArray sys1,sys2;
+        Part *p = new Part();
+        sys1.insert(p);
+        QVERIFY_EXCEPTION_THROWN(sys2.insert(p), string);
     }
 
 };

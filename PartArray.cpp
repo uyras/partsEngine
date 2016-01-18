@@ -301,15 +301,16 @@ void PartArray::insert(Part * part){
         part->id = lastId++;
 
     //определяем соседей частицы
+    unsigned curNum = count()-1, nNum=0;
     vector<Part*>::iterator iter = this->parts.begin();
     Part* temp;
     while(iter!=this->parts.end()){
         temp = *iter;
         if (isNeighbours(part,temp)){
-            temp->neighbours.push_back(part);
-            part->neighbours.push_back(temp);
+            temp->neighbours.push_back(Part::neighbour{part,curNum});
+            part->neighbours.push_back(Part::neighbour{temp,nNum});
         }
-        iter++;
+        iter++; nNum++;
     }
 }
 
@@ -398,15 +399,17 @@ void PartArray::calcH() {
     }
 }
 
-double PartArray::E()
+double PartArray::E(const StateMachineBase &s)
 {
-    if (this->eTemp==0){
         if (this->eInit==0){
             this->eInit = this->calcEnergy1FastIncrementalFirst();
         }
-        this->eTemp = this->calcEnergy1FastIncremental(this->eInit);
-    }
-    return this->eTemp;
+        if (s.size()==0){
+            if (this->eTemp==0){
+                return this->eTemp = this->calcEnergy1FastIncremental(this->eInit, this->state);
+            } else { return this->eTemp;}
+        } else
+            return this->calcEnergy1FastIncremental(this->eInit, s);
 }
 
 
@@ -428,20 +431,20 @@ double PartArray::EComplete() const{
 }
 
 double PartArray::EComplete(Part* elem) const {
-    std::vector < Part* >::const_iterator iterator1;
+    std::vector < Part::neighbour >::const_iterator iterator1;
     double r, r2, r5, E = 0;
     Vect rij;
     iterator1 = elem->neighbours.begin();
     while (iterator1 != elem->neighbours.end()) {
-        if ((*iterator1)!=elem) { //не считать взаимодействие частицы на себя
-            rij = (*iterator1)->pos.radius(elem->pos);
+        if ((*iterator1).item != elem) { //не считать взаимодействие частицы на себя
+            rij = (*iterator1).item->pos.radius(elem->pos);
             r = rij.length();
             r2 = r * r; //радиус в кубе
             r5 = r2 * r * r * r; //радиус в пятой
             E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                    (((*iterator1)->m.scalar(elem->m) * r2)
+                    (((*iterator1).item->m.scalar(elem->m) * r2)
                      -
-                     (3 * elem->m.scalar(rij) * (*iterator1)->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                     (3 * elem->m.scalar(rij) * (*iterator1).item->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
         }
         ++iterator1;
     }
@@ -507,7 +510,8 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     this->state.reset();//возращаем в начальное состояние
     double eIncrementalTemp = 0;
 
-    std::vector < Part* >::iterator iterator1, iterator2;
+    std::vector<Part::neighbour>::iterator iterator1;
+    std::vector < Part* >::iterator iterator2;
     double r, r2, r5, rijx, rijy, rijz, E;
     Part *temp1, *temp2;
 
@@ -518,7 +522,7 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
         temp2->eArray.clear();
         iterator1 = temp2->neighbours.begin();
         while (iterator1 != temp2->neighbours.end()) {
-            temp1 = (*iterator1);
+            temp1 = (*iterator1).item;
 
             rijx = temp2->pos.x - temp1->pos.x;
             rijy = temp2->pos.y - temp1->pos.y;
@@ -554,35 +558,32 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
 }
 
-double PartArray::calcEnergy1FastIncremental(double initEnergy)
+double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state)
 {
-    vector<Part*>::iterator iter1, iter2; //итератор обхода состояния
-    int i=0;
+    vector<Part::neighbour>::iterator iter; //итератор обхода состояния
+    int j=0;
 
+    //считаем число перевернутых спинов. Если перевернутых более половины, учитываем только неперевернутые.
     int rotated=0;
-    iter1 = parts.begin();
-    while (iter1!=parts.end()){
-        if ((*iter1)->state)
+    for (unsigned i=0; i<state.size(); i++){
+        if (state[i])
             rotated++;
-        iter1++;
     }
     const bool flag = (rotated < (count()/2));
 
     //рассчитываем энергию
     double E=initEnergy;
-    iter1 = parts.begin();
-    while(iter1 != parts.end()){
-        if ( (*iter1)->state == flag){
-            iter2 = (*iter1)->neighbours.begin();
-            i=0;
-            while (iter2!=(*iter1)->neighbours.end()){
-                if ((*iter2)->state != flag){
-                    E -=  2. * (*iter1)->eArray[i];
+    for (unsigned i=0; i<state.size(); i++){
+        if ( state[i] == flag){
+            iter = (*this)[i]->neighbours.begin();
+            j=0;
+            while (iter!=(*this)[i]->neighbours.end()){
+                if (state[(*iter).num] != flag){
+                    E -=  2. * (*this)[i]->eArray[j];
                 }
-                iter2++; i++;
+                iter++; j++;
             }
         }
-        iter1++;
     }
 
     return E;

@@ -47,14 +47,14 @@ vector<double> WangLandauParallel::dos()
     }
 
     sys->state.reset();
-    this->eInit = sys->calcEnergy1FastIncrementalFirst();
+    this->eInit = sys->E();
 
     WangLandauParallelWalker *temp;
     for (unsigned i=0;i<walkers.size();i++){
         temp = &(walkers[i]);
 
         temp->sys->state.reset();
-        temp->eInit = temp->sys->calcEnergy1FastIncrementalFirst();
+        temp->eInit = temp->sys->E();
         temp->makeNormalInitState();
     }
 
@@ -157,7 +157,7 @@ void WangLandauParallel::setMinMaxEnergy(double eMin, double eMax)
 
 bool WangLandauParallel::swapWalkers(WangLandauParallelWalker *walker1, WangLandauParallelWalker *walker2)
 {
-    double ex = walker1->sys->calcEnergy1FastIncremental(walker1->eInit), ey = walker2->sys->calcEnergy1FastIncremental(walker2->eInit);
+    double ex = walker1->sys->E(), ey = walker2->sys->E();
     //double ex = walker1->sys->calcEnergy1(), ey = walker2->sys->calcEnergy1();
 
     if (!walker1->inRange(ey) || !walker2->inRange(ex)) //если энергия блуждателя за границей, отменять обмен
