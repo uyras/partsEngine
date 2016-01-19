@@ -100,6 +100,7 @@ void config::srand(int num){
 }
 
 void config::randmode_file(const char *file, int srand){
+    (void)srand;
     this->rand_file_close(); //закрываем старый файл
     this->_randmode = 1;
     this->rand_file_open(file);
@@ -108,6 +109,7 @@ void config::randmode_file(const char *file, int srand){
 }
 
 void config::randmode_standart(int srand){
+    (void)srand;
     this->rand_file_close();
     this->_randmode = 0;
     //this->srand(srand);

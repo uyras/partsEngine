@@ -98,6 +98,8 @@ public:
     */
     Vect calcInteractionNeighb(Part* elem);
 
+
+    //энергии системы
     /**
      * @brief E Считает энергию системы. Метод подбирается автоматически исходя из конфигурации и свойств системы
      * @return
@@ -119,6 +121,24 @@ public:
     double EComplete(Part *elem) const;
     double ECompleteOld(Part *elem) const;
     double ECompleteFast();
+
+    inline double EMin() const {return this->eMin;}
+    inline double EMax() const {return this->eMax;}
+
+    virtual StateMachineFree maximalState(); //находит состояние максимума энергии системы
+    virtual StateMachineFree groundState(); //находит состояние минимума энергии
+
+    inline const StateMachineFree & Minstate() const { return minstate; }
+    inline void setMinstate(const StateMachineBase &s) { minstate = s; eMin = E(minstate); }
+
+    inline const StateMachineFree & Maxstate() const { return maxstate; }
+    inline void setMaxstate(const StateMachineBase &s) { maxstate = s; eMax = E(maxstate); }
+
+    inline const StateMachine & State() const { return state; }
+    inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }
+
+    inline void changeState(){this->eTemp=0;} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
+    void changeSystem(); //вызывается когда изменилась вся система целиком
 
     /**
     * выдает все парамеры частиц на экран
@@ -205,17 +225,6 @@ public:
     ******временные функции, in process, deprecated and trash******
     **************************************************************/
 
-	//находит состояние минимума энергии системы и переводит её в это состояние.
-    //возвращает энергию этого состояния
-    double setToGroundState();
-
-    //находит состояние максимума энергии системы и переводит её в это состояние.
-    //возвращает энергию этого состояния
-    double setToMaximalState();
-
-    virtual StateMachineFree maximalState();
-    virtual StateMachineFree groundState();
-
 	//находит состояние минимума энергии системы и переводит её в это состояние методом монте-карло
     //steps - количество попыток
     bool setToMonteCarloGroundState(const double t = 0, int steps=1000);
@@ -251,26 +260,12 @@ public:
      * Глобальные переменные *
      ***********************/
 
-     //номер состояния, нужен для алгоритма полного обхода состояний
-    StateMachine state;
-
     //сам массив частиц, над которым проводятся исследования
     std::vector < Part* > parts;
+    StateMachine state;
 
     virtual QString type() const;
     void setType(QString type);
-
-    inline void changeState(){this->eTemp=0;} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
-    void changeSystem(); //вызывается когда изменилась вся система целиком
-
-    inline const StateMachineFree & Minstate() const { return minstate; }
-    inline void setMinstate(const StateMachineBase &s) { minstate = s; }
-
-    inline const StateMachineFree & Maxstate() const { return maxstate; }
-    inline void setMaxstate(const StateMachineBase &s) { maxstate = s; }
-
-    inline const StateMachine & State() const { return state; }
-    inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }
 
 protected:
     double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы
@@ -278,7 +273,6 @@ protected:
 
     double eMin,eMax,eInit,eTemp;
     StateMachineFree minstate,maxstate;
-    unsigned int lastId;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
 
@@ -288,5 +282,6 @@ protected:
 
 private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
+    unsigned int lastId;
 };
 #endif // PARTARRAY_H

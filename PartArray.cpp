@@ -125,6 +125,7 @@ Part *PartArray::getById(unsigned id)
 void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double vect, double rot, double r){
 
     double mLength=0;
+    (void)mLength;//заглушка чтоб компиллятор не ругался
     if (tmp==0){
         tmp = new Part();
         mLength = config::Instance()->m;
@@ -1632,22 +1633,6 @@ double PartArray::calcJ12(){
     //J1 *= (1./this->count());
     //J2 *= (1./this->count());
     return J1/J2;
-}
-
-double PartArray::setToGroundState(){
-    if (minstate.size()==0){ //если минимальное состояние не задано
-        minstate = this->groundState();
-    }
-    state = minstate;
-    return eMin=E();
-}
-
-double PartArray::setToMaximalState(){
-    if (maxstate.size()==0){ //если минимальное состояние не задано
-        maxstate = this->maximalState();
-    }
-    state = maxstate;
-    return eMax=E();
 }
 
 StateMachineFree PartArray::maximalState()

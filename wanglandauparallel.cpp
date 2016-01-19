@@ -34,20 +34,14 @@ WangLandauParallel::~WangLandauParallel()
 
 vector<double> WangLandauParallel::dos()
 {
+    if (sys->Minstate().size()==0 || sys->Maxstate().size()==0)
+        qFatal("Min or max state is unknown. DOS calculation is impossible.");
+
     if (this->eMin==0 && this->eMax==0){
-        qDebug()<< "(init) calculating maximal state";
-        this->sys->setToMaximalState();
-        double min = sys->EComplete();
-
-        qDebug()<<"(init) calculating ground state";
-        this->sys->setToGroundState();
-        double max = sys->EComplete();
-
-        this->setMinMaxEnergy(min,max);
+        this->setMinMaxEnergy(sys->EMin(),sys->EMax());
     }
 
     sys->state.reset();
-    this->eInit = sys->E();
 
     WangLandauParallelWalker *temp;
     for (unsigned i=0;i<walkers.size();i++){

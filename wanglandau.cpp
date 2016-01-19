@@ -16,14 +16,13 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
 
     unsigned long long int totalSteps=0;
 
-    sys.setToGroundState();
-    const double eMin=sys.EComplete();
-    sys.setToMaximalState();
-    const double eMax = sys.EComplete();
+    if (sys.Minstate().size()==0 || sys.Maxstate().size()==0)
+        qFatal("Min or max state is unknown. DOS calculation is impossible.");
+
+    const double eMin=sys.EMin();
+    const double eMax = sys.EMax();
     const double dE = (eMax-eMin)/(intervals-1);
     sys.state.reset();
-
-    const double eInit = sys.E();
 
     qDebug()<<"eMin="<<eMin;
     qDebug()<<"eMax="<<eMax;
@@ -40,7 +39,7 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
 
     const double fMin=1.000001;
     double f = exp(1);
-    double eOld = eInit,eNew=eInit;
+    double eOld = sys.E(),eNew=sys.E();
     const int count = sys.count();
 
     while (f>fMin){
@@ -85,17 +84,15 @@ vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int step
 
 vector<double> WangLandau::scale(PartArray &sys, const int intervals)
 {
-    const StateMachineFree initState = sys.state;
-    sys.setToGroundState();
-    const double eMin=sys.EComplete();
-    sys.setToMaximalState();
-    const double eMax = sys.EComplete();
+    const StateMachineFree initState = sys.State();
+    const double eMin=sys.EMin();
+    const double eMax = sys.EMax();
     const double dE = (eMax-eMin)/(intervals-1);
     vector<double> scale;
     for (int i=0;i<intervals;i++){
         scale.push_back(eMin+((double)i * dE));
     }
-    sys.state = initState;
+    sys.setState(initState);
     return scale;
 }
 

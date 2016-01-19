@@ -2,7 +2,7 @@
 
 
 SquareSpinIceCell::SquareSpinIceCell()
-    :types(
+    :types
 {
 {//#1
 {1,0,0,0},
@@ -102,7 +102,6 @@ SquareSpinIceCell::SquareSpinIceCell()
 {0,-1,0,3}
          }
          }
-         )
 {
 }
 

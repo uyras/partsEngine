@@ -44,7 +44,6 @@ private:
     PartArray *sys;
     vector<WangLandauParallelWalker> walkers;
     double eMin,eMax;
-    double eInit;
     unsigned int intervals, gaps, walkersByGap;
     double overlap;
 };
