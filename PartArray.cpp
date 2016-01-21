@@ -114,7 +114,7 @@ Part *PartArray::getById(unsigned id)
     Part* temp = 0;
     while (iter!=this->parts.end()){
         temp = *iter;
-        if (temp->id == id)
+        if ((unsigned)temp->id == id)
             return temp;
         iter++;
     }
