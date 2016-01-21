@@ -370,15 +370,17 @@ private slots:
                 temp.m.setXYZ(0,1,0);
                 sys1.insert(temp);
             }
-        sys1.setToGroundState();
-        sys1.setToMaximalState();
+        sys1.setMinstate(sys1.groundState());
+        sys1.setMaxstate(sys1.maximalState());
         sys1.state.next();
         sys1.E();
+        sys1.setInteractionRange(1.1);
 
         PartArray sys2 = PartArray(sys1);
         QVERIFY(sys1==sys2);
         QVERIFY(sys1.state == sys2.state);
         QCOMPARE(sys1.E(),sys2.E());
+        QCOMPARE(sys1.interactionRange(), sys2.interactionRange());
     }
 
     void minstatetest(){
@@ -402,8 +404,7 @@ private slots:
         QVERIFY(sys1.Minstate() == mstate);
 
         //сравниваем с настоящим GS
-        sys1.setMinstate(StateMachineFree());
-        sys1.setToGroundState();
+        sys1.setMinstate(sys1.groundState());
         mstate.fromString("11111");
         QVERIFY(sys1.Minstate() == mstate);
     }
@@ -430,8 +431,7 @@ private slots:
         QVERIFY(sys1.Maxstate() == mstate);
 
         //сравниваем с настоящим GS
-        sys1.setMaxstate(StateMachineFree());
-        sys1.setToMaximalState();
+        sys1.setMaxstate(sys1.maximalState());
         QVERIFY(sys1.Maxstate() == mstate);
     }
 
@@ -454,7 +454,7 @@ private slots:
         mstate.fromString("01111");
         sys1[0]->rotate();
         QVERIFY(sys1.State()==mstate);
-        sys1.setToMaximalState();
+        sys1.setState(sys1.maximalState());
         mstate.fromString("10101");
         QVERIFY(sys1.State()==mstate);
     }
@@ -464,6 +464,31 @@ private slots:
         Part *p = new Part();
         sys1.insert(p);
         QVERIFY_EXCEPTION_THROWN(sys2.insert(p), string);
+    }
+
+    void saveload(){
+        PartArray sys1, sys2;
+
+        sys1.setInteractionRange(1.1);
+        for (int i=0;i<3;i++)
+            for (int j=0;j<3;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys1.insert(temp);
+            }
+        sys1.setMinstate(sys1.groundState());
+        sys1.setMaxstate(sys1.maximalState());
+        sys1.state.next();
+        sys1.state.next();
+        sys1.state.next();
+        sys1.save("saveload.dat");
+
+        sys2.load("saveload.dat");
+        QVERIFY(sys1==sys2);
+        QVERIFY(sys1.Minstate()==sys2.Minstate());
+        QVERIFY(sys1.Maxstate()==sys2.Maxstate());
+        QVERIFY(sys1.State()==sys2.State());
     }
 
 };

@@ -129,6 +129,7 @@ void SaveHelper::writeHeader(PartArray *sys)
     line(QString("state=%1").arg(QString::fromStdString(sys->state.toString())));
     line(QString("minstate=%1").arg(QString::fromStdString(sys->minstate.toString())));
     line(QString("maxstate=%1").arg(QString::fromStdString(sys->maxstate.toString())));
+    line(QString("interactionrange=%1").arg(sys->interactionRange()));
     line(QString("sizescale=1"));
     line(QString("magnetizationscale=1"));
 }

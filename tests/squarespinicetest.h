@@ -30,7 +30,7 @@ private slots:
         sys1->dropSpinIce(2,2);
         QCOMPARE((int)sys1->cells.size(),4);
 
-        sys1->setToMaximalState();
+        sys1->setMaxstate(sys1->maximalState());
         for (int i=0;i<4;i++)
             QCOMPARE(sys1->cells[i]->type(),3);
 
@@ -38,7 +38,7 @@ private slots:
         QCOMPARE(sys1->cells[0]->type(),2);
 
 
-        sys1->setToGroundState();
+        sys1->setMinstate(sys1->groundState());
         for (int i=0;i<4;i++)
             QCOMPARE(sys1->cells[i]->type(),0);
     }
@@ -51,11 +51,12 @@ private slots:
         QCOMPARE(sys2->count(),sys1->count());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
-        sys1->setToGroundState();
-        sys2->setToGroundState();
+        sys1->setMinstate(sys1->groundState());
+        sys2->setMinstate(sys2->groundState());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
-        sys1->setToMaximalState(); sys2->setToMaximalState();
+        sys1->setMaxstate(sys1->maximalState());
+        sys2->setMaxstate(sys2->maximalState());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
         delete sys1; delete sys2;
     }

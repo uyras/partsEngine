@@ -40,10 +40,12 @@ private slots:
         QCOMPARE(sys2->cells.size(),sys1->cells.size());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
-        sys1->setToGroundState(); sys2->setToGroundState();
+        sys1->setMinstate(sys1->groundState());
+        sys2->setMinstate(sys2->groundState());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
-        sys1->setToMaximalState(); sys2->setToMaximalState();
+        sys1->setMaxstate(sys1->maximalState());
+        sys2->setMaxstate(sys2->maximalState());
         QCOMPARE(sys1->EComplete(),sys2->EComplete());
 
         delete sys1;

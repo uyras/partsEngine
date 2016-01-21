@@ -167,6 +167,8 @@ void LoadHelper::readHeader(PartArray *sys, bool readAnyWay)
             qFatal("Dimensions in file %s are setted as %s, which is wrong!",qUtf8Printable(f.fileName()),qUtf8Printable(params["dimensions"]));
         }
 
+        sys->setInteractionRange(params["interactionrange"].toDouble());
+
         sys->eMin = params["emin"].toDouble();
         sys->eMax = params["emax"].toDouble();
         sys->minstate.fromString(qUtf8Printable(params["minstate"]));

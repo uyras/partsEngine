@@ -10,7 +10,7 @@ class HoneycombSpinIceArray;
 using namespace std;
 class HoneycombSpinIceCell
 {
-    friend HoneycombSpinIceArray; //сделать недоступным класс из других кусков кода
+    friend class HoneycombSpinIceArray; //сделать недоступным класс из других кусков кода
 private:
     HoneycombSpinIceCell();
     ~HoneycombSpinIceCell();

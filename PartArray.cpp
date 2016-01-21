@@ -102,6 +102,9 @@ bool PartArray::operator==(const PartArray &sys) const
     if (this->type() != sys.type())
         return false;
 
+    if (this->interactionRange()!=sys.interactionRange())
+        return false;
+
     return true;
 }
 
