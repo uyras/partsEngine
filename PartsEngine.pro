@@ -33,7 +33,8 @@ SOURCES += Vect.cpp \
     loadhelper.cpp \
     savehelper.cpp \
     dos.cpp \
-    squareisinglattice.cpp
+    squareisinglattice.cpp \
+    clustermachine.cpp
 
 HEADERS += \
     Vect.h \
@@ -57,20 +58,13 @@ HEADERS += \
     loadhelper.h \
     savehelper.h \
     dos.h \
-    squareisinglattice.h
+    squareisinglattice.h \
+    clustermachine.h
 
 
-CONFIG(debug,debug|release) {
-    SOURCES += main.cpp
-    TEMPLATE = app
-    CONFIG += console
-}
-
-CONFIG(release,debug|release){
-    TEMPLATE = lib
-    CONFIG += staticlib
-    DESTDIR = $$PWD
-}
+TEMPLATE = lib
+CONFIG += staticlib
+DESTDIR = $$PWD
 
 OTHER_FILES += \
     README.md \

@@ -28,21 +28,10 @@ int main(int argc, char *argv[])
     config::Instance()->set2D();
 
     SquareSpinIceArray sys;
-    sys.setInteractionRange(0.8);
-    sys.dropSpinIce(2,2);
-    sys.state.randomize(100);
-    vector< vector<Part*> > clusters = sys.clusters();
-
-    int i=1;
-    for (vector<Part*> cluster : clusters){
-        ofstream f(QString("cluster%1.dat").arg(i).toStdString().c_str());
-        for (Part* temp : cluster){
-            f<<temp->pos.x-temp->m.x*0.5<<"\t"<<temp->pos.y-temp->m.y*0.5<<"\t";
-            f<<temp->m.x<<"\t"<<temp->m.y<<endl;
-        }
-        f.close();
-        i++;
-    }
+    sys.dropSpinIce(40,40);
+    sys.setMinstate(sys.groundState());
+    sys.setMaxstate(sys.maximalState());
+    sys.save("SSI_40x40.mfsys");
 
 
     cout<<"finish"<<endl;

@@ -302,14 +302,5 @@ private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
     unsigned int lastId;
     double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы
-
-
-//-------алгоритмы кластеризации-------
-public:
-    vector < vector <Part*> > clusters();
-    vector <Part*> maxCluster();
-private:
-    void walkNeighbours(Part *part, vector<Part*> &currentCluster, unordered_set<unsigned> &unWalked);
-    bool isConnected(Part* p1, Part* p2);
 };
 #endif // PARTARRAY_H

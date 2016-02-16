@@ -19,8 +19,12 @@ public:
     string toString();
     void reg(double a, double b=0.);
 
-    int& operator[](double a);
-    int& operator[](std::pair<double,double> a);
+    //добавить значение к DOS
+    void add (double a, double c);
+    void add (double a, double b, double c);
+
+    int operator[](double a);
+    int operator[](std::pair<double,double> a);
 
 private:
     inline unsigned num(double a){
@@ -32,7 +36,7 @@ private:
     }
     double min, max;
     unsigned intervals;
-    vector< unordered_map<double,int> > data;
+    vector< unordered_map<double,double> > data;
 };
 
 #endif // DOS_H

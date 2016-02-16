@@ -35,7 +35,7 @@ public:
     void rotate(float angle=180.); //вращаем магнитный момент частицы и меняем ее состояние
     double volume(); //Возвращает объем частицы в относительных единицах
 
-    inline long int Id(){
+    inline long int Id() const{
         return this->id;
     }
 

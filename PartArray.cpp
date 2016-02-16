@@ -217,66 +217,6 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
     }
 }
 
-vector<vector<Part *> > PartArray::clusters()
-{
-    unordered_set<unsigned> unWalked; //флаг,учавствует (или учавствовала) ли частица в кластере
-
-    vector< vector<Part*> > allCLusters;
-    for (Part* temp : parts){
-        unWalked.insert(temp->Id());
-    }
-
-    Part* temp;
-
-    temp = getById(*unWalked.begin());
-    while (temp !=0){
-        vector<Part*> currentCluster;
-        currentCluster.push_back(temp);
-        unWalked.erase(temp->Id());//помечаем как пройденную
-
-        walkNeighbours(temp,currentCluster, unWalked);
-
-        allCLusters.push_back(currentCluster);
-
-        //получаем еще не пройденную частицу
-        if (unWalked.size()>0)
-            temp = getById(*unWalked.begin());
-        else
-            temp=0;
-    }
-    return allCLusters;
-}
-
-vector<Part *> PartArray::maxCluster()
-{
-    vector< vector<Part*> > allCLusters = clusters();
-    vector<Part*> maxCluster; unsigned max=0;
-    for (const vector<Part*>& cluster : allCLusters){
-        if (cluster.size()>max)
-            maxCluster = cluster;
-    }
-    return maxCluster;
-}
-
-void PartArray::walkNeighbours(Part *part, vector<Part *> &currentCluster, unordered_set<unsigned> &unWalked)
-{
-    Part* temp;
-    for(const neighbour & neigh: neighbours.at(part->Id())){
-        temp = neigh.item;
-        bool walked = (unWalked.find(temp->Id())==unWalked.end());
-        if (!walked && isConnected(part,temp)){
-            unWalked.erase(temp->Id());
-            currentCluster.push_back(temp);
-            this->walkNeighbours(temp,currentCluster, unWalked);
-        }
-    }
-}
-
-bool PartArray::isConnected(Part *p1, Part *p2)
-{
-    return p2->interact(p1->pos).scalar(p1->m)>0;
-}
-
 void PartArray::changeSystem()
 {
     this->eMin = this->eMax = this->eInit = this->eTemp = 0;

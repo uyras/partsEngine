@@ -37,12 +37,22 @@ void Dos::reg(double a, double b)
     data[num(a)][b]+=1;
 }
 
-int& Dos::operator[](double a)
+void Dos::add(double a, double c)
+{
+    this->add(a,0.,c);
+}
+
+void Dos::add(double a, double b, double c)
+{
+    data[num(a)][b]+=c;
+}
+
+int Dos::operator[](double a)
 {
     return data[a][0.];
 }
 
-int &Dos::operator[](pair<double,double> a)
+int Dos::operator[](pair<double,double> a)
 {
     return data[a.first][a.second];
 }
