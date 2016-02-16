@@ -32,7 +32,8 @@ SOURCES += Vect.cpp \
     amorphousarray.cpp \
     loadhelper.cpp \
     savehelper.cpp \
-    dos.cpp
+    dos.cpp \
+    squareisinglattice.cpp
 
 HEADERS += \
     Vect.h \
@@ -55,7 +56,8 @@ HEADERS += \
     amorphousarray.h \
     loadhelper.h \
     savehelper.h \
-    dos.h
+    dos.h \
+    squareisinglattice.h
 
 
 CONFIG(debug,debug|release) {
