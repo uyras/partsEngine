@@ -239,6 +239,7 @@ void SquareSpinIceArray::load(QString file)
     SquareSpinIceCell *tempCell;
     int id;
     while(!helper.end()){
+        tempCell = new SquareSpinIceCell();
         helper>>tempCell->pos.x;
         helper>>tempCell->pos.y;
         tempCell->pos.z = 1;

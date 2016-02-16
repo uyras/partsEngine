@@ -27,13 +27,22 @@ int main(int argc, char *argv[])
 
     config::Instance()->set2D();
 
-    Dos dos(0,5,5);
-    dos.reg(0,1);
-    dos.reg(0,2);
-    dos.reg(5);
-    dos.reg(4.99999);
+    SquareSpinIceArray sys;
+    sys.setInteractionRange(0.8);
+    sys.dropSpinIce(2,2);
+    sys.state.randomize(100);
+    vector< vector<Part*> > clusters = sys.clusters();
 
-    cout<<dos.toString();
+    int i=1;
+    for (vector<Part*> cluster : clusters){
+        ofstream f(QString("cluster%1.dat").arg(i).toStdString().c_str());
+        for (Part* temp : cluster){
+            f<<temp->pos.x-temp->m.x*0.5<<"\t"<<temp->pos.y-temp->m.y*0.5<<"\t";
+            f<<temp->m.x<<"\t"<<temp->m.y<<endl;
+        }
+        f.close();
+        i++;
+    }
 
 
     cout<<"finish"<<endl;

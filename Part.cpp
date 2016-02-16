@@ -67,22 +67,21 @@ Part::~Part(){
     this->eArray.clear();
 }
 
-Vect Part::interact(Part* elem){
+Vect Part::interact(const Vect &p) const{
     Vect h;
     double r, r2, r5, part, dx, dy, dz;
 
-    Vect rvect = elem->pos.radius(this->pos);
-    r = rvect.length();
+    r = p.radius(this->pos).length();
     r2 = r * r; //радиус в квадрате
-    r5 = r2 * r * r * r; //радиус в пятой
-    dx = this->pos.x - elem->pos.x;
-    dy = this->pos.y - elem->pos.y;
-    dz = this->pos.z - elem->pos.z;
-    part = elem->m.x * dx + elem->m.y * dy + elem->m.z * dz;
+    r5 = r2 * r2 * r; //радиус в пятой
+    dx = this->pos.x - p.x;
+    dy = this->pos.y - p.y;
+    dz = this->pos.z - p.z;
+    part = this->m.x * dx + this->m.y * dy + this->m.z * dz;
     //степени отличаются от формулы потому что обе дроби внесены под общий знаменатель
-    h.x = ((3 * part * dx) - elem->m.x * r2) / r5;
-    h.y = ((3 * part * dy) - elem->m.y * r2) / r5;
-    h.z = ((3 * part * dz) - elem->m.z * r2) / r5;
+    h.x = ((3 * part * dx) - this->m.x * r2) / r5;
+    h.y = ((3 * part * dy) - this->m.y * r2) / r5;
+    h.z = ((3 * part * dz) - this->m.z * r2) / r5;
 
     //h.absK = config::Instance()->ergGauss/pow(config::Instance()->santiMeter,3.);
 

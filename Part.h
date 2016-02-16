@@ -31,7 +31,7 @@ public:
     inline bool operator!=(const Part& one) const{ return !this->operator ==(one); }
 
     virtual ~Part();
-    Vect interact(Part* elem); //считает поле взаимодействия частицы elem на текущую частиуц и возвращает вектор H
+    Vect interact(const Vect &p) const; //считает поле взаимодействия текущей частицы в точке p и возвращает вектор H
     void rotate(float angle=180.); //вращаем магнитный момент частицы и меняем ее состояние
     double volume(); //Возвращает объем частицы в относительных единицах
 
