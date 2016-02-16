@@ -31,7 +31,8 @@ SOURCES += Vect.cpp \
     squarelattice.cpp \
     amorphousarray.cpp \
     loadhelper.cpp \
-    savehelper.cpp
+    savehelper.cpp \
+    dos.cpp
 
 HEADERS += \
     Vect.h \
@@ -53,7 +54,8 @@ HEADERS += \
     wanglandauparallel.h \
     amorphousarray.h \
     loadhelper.h \
-    savehelper.h
+    savehelper.h \
+    dos.h
 
 
 CONFIG(debug,debug|release) {
@@ -72,5 +74,5 @@ OTHER_FILES += \
     README.md \
     .gitignore
 
-CONFIG += c++14
+CONFIG += c++11
 

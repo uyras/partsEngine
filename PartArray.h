@@ -9,6 +9,8 @@
 #define PARTARRAY_H
 
 #include <vector>
+#include <unordered_map>
+#include <forward_list>
 #include <string>
 #include <sstream>
 #include <QString>
@@ -267,6 +269,10 @@ public:
     virtual QString type() const;
     void setType(QString type);
 
+    //Гамильтонианы
+    void hamiltonianDipolar();
+    void hamiltonianIsing();
+
 protected:
     double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
@@ -277,11 +283,19 @@ protected:
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
 
     double _interactionRange; //длина взаимодействия
+    bool _closeEdges; //замыкание краев
 
     QString _type;
+
+    struct neighbour{
+        Part* item;
+        unsigned num;
+    };
+    unordered_map<unsigned,forward_list<neighbour>> neighbours; //соседи, упорядоченные по id частицы
 
 private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
     unsigned int lastId;
+    double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы
 };
 #endif // PARTARRAY_H

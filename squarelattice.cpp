@@ -118,3 +118,8 @@ void SquareLattice::save(QString file)
     helper.close();
 }
 
+Part *SquareLattice::at(int i, int j)
+{
+    return this->operator [](i*n+j);
+}
+

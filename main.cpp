@@ -11,6 +11,7 @@
 
 #include "squarespinicearray.h"
 #include "squarelattice.h"
+#include "dos.h"
 
 #include "random.h"
 #include <cmath>
@@ -26,27 +27,14 @@ int main(int argc, char *argv[])
 
     config::Instance()->set2D();
 
+    Dos dos(0,5,5);
+    dos.reg(0,1);
+    dos.reg(0,2);
+    dos.reg(5);
+    dos.reg(4.99999);
 
+    cout<<dos.toString();
 
-
-    PartArray *sys = new PartArray();
-
-    sys->setInteractionRange(1.1);
-    for (int i=0;i<4;i++){
-        for (int j=0;j<4;j++){
-            Part temp;
-            temp.pos.setXYZ(i,j,0);
-            temp.m.setXYZ(0,1,0);
-            sys->insert(temp);
-        }
-    }
-
-    for (int i=0;i<10;i++){
-        cout<<sys->EComplete()<<", ";
-        sys->state.next();
-    }
-
-    delete sys;
 
     cout<<"finish"<<endl;
     return 0;

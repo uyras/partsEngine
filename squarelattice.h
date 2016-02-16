@@ -28,8 +28,11 @@ public:
     virtual void load(QString file);
     virtual void save(QString file);
 
-private:
+    Part* at(int i, int j);
+
     int m,n;
+
+private:
     double l;
 };
 

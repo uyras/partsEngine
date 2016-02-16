@@ -223,6 +223,13 @@ private slots:
         }
     }
 
+    void eEmptySystem(){
+        PartArray sys;
+        qFuzzyIsNull(sys.E());
+        sys.insert(Part());
+        qFuzzyIsNull(sys.E());
+    }
+
     void energyBenchmark1(){
         PartArray sys;
         sys.setInteractionRange(0.);

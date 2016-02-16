@@ -68,3 +68,5 @@ HEADERS += \
     ../loadhelper.h
 
 INCLUDEPATH += ../
+
+CONFIG += c++11

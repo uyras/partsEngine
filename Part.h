@@ -10,11 +10,6 @@ class Part {
 public:
     friend class PartArray;
 
-    struct neighbour{
-        Part* item;
-        unsigned num;
-    };
-
     Vect pos; //координаты, для удобства в относительных величинах
     Vect m; //магнитный момент (координаты вектора относительно центра частицы)
     Vect h; //поле взаимодействия
@@ -42,7 +37,6 @@ public:
 
 protected:
     PartArray *parent;
-    std::vector<neighbour> neighbours;
     std::vector<double> eArray;
     long int id;
     Part(unsigned int id); //конструктор с установленным ИДом разрешен только для дружественных классов

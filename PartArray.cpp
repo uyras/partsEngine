@@ -16,6 +16,7 @@ PartArray::PartArray():
     this->_type="standart";
     lastId=0;
     _interactionRange = 0;
+    hamiltonianDipolar();
 }
 
 PartArray::PartArray(const PartArray &sys)
@@ -23,6 +24,7 @@ PartArray::PartArray(const PartArray &sys)
     this->lastId = 0;
     this->state.connect(this);
     this->_interactionRange = sys._interactionRange;
+    this->_hamiltonian = sys._hamiltonian;
 
     //копируем частицы
     vector<Part*>::const_iterator iter = sys.parts.begin();
@@ -265,17 +267,17 @@ void PartArray::setInteractionRange(const double range)
 {
     _interactionRange = range;
     Part *part, *temp;
+    neighbours.clear();
 
     //определяем соседей частицы
     for (int i=0; i<size(); i++){
         part = (*this)[i];
-        part->neighbours.clear();
         unsigned nNum=0;
         vector<Part*>::iterator iter = this->parts.begin();
         while(iter!=this->parts.end()){
             temp = *iter;
             if (isNeighbours(part,temp)){
-                part->neighbours.push_back(Part::neighbour{temp,nNum});
+                neighbours[part->Id()].push_front(neighbour{temp,nNum});
             }
             iter++; nNum++;
         }
@@ -324,8 +326,8 @@ void PartArray::insert(Part * part){
     while(iter!=this->parts.end()){
         temp = *iter;
         if (isNeighbours(part,temp)){
-            temp->neighbours.push_back(Part::neighbour{part,curNum});
-            part->neighbours.push_back(Part::neighbour{temp,nNum});
+            neighbours[temp->Id()].push_front(neighbour{part,curNum});
+            neighbours[part->Id()].push_front(neighbour{temp,nNum});
         }
         iter++; nNum++;
     }
@@ -418,15 +420,18 @@ void PartArray::calcH() {
 
 double PartArray::E(const StateMachineBase &s)
 {
-        if (this->eInit==0){
-            this->eInit = this->calcEnergy1FastIncrementalFirst();
-        }
-        if (s.size()==0){
-            if (this->eTemp==0){
-                return this->eTemp = this->calcEnergy1FastIncremental(this->eInit, this->state);
-            } else { return this->eTemp;}
-        } else
-            return this->calcEnergy1FastIncremental(this->eInit, s);
+    if (size()<2) //если 1 либо 0 частиц, ничего не возвращаем
+        return 0;
+
+    if (this->eInit==0){
+        this->eInit = this->calcEnergy1FastIncrementalFirst();
+    }
+    if (s.size()==0){
+        if (this->eTemp==0){
+            return this->eTemp = this->calcEnergy1FastIncremental(this->eInit, this->state);
+        } else { return this->eTemp;}
+    } else
+        return this->calcEnergy1FastIncremental(this->eInit, s);
 }
 
 
@@ -448,22 +453,19 @@ double PartArray::EComplete() const{
 }
 
 double PartArray::EComplete(Part* elem) const {
-    std::vector < Part::neighbour >::const_iterator iterator1;
     double r, r2, r5, E = 0;
     Vect rij;
-    iterator1 = elem->neighbours.begin();
-    while (iterator1 != elem->neighbours.end()) {
-        if ((*iterator1).item != elem) { //не считать взаимодействие частицы на себя
-            rij = (*iterator1).item->pos.radius(elem->pos);
+    for(const neighbour & neigh: neighbours.at(elem->Id())){
+        if (neigh.item != elem) { //не считать взаимодействие частицы на себя
+            rij = neigh.item->pos.radius(elem->pos);
             r = rij.length();
             r2 = r * r; //радиус в кубе
             r5 = r2 * r * r * r; //радиус в пятой
             E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                    (((*iterator1).item->m.scalar(elem->m) * r2)
+                    ((neigh.item->m.scalar(elem->m) * r2)
                      -
-                     (3 * elem->m.scalar(rij) * (*iterator1).item->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                     (3 * elem->m.scalar(rij) * neigh.item->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
         }
-        ++iterator1;
     }
     return E;
 }
@@ -527,46 +529,21 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     this->state.reset();//возращаем в начальное состояние
     double eIncrementalTemp = 0;
 
-    std::vector<Part::neighbour>::iterator iterator1;
     std::vector < Part* >::iterator iterator2;
-    double r, r2, r5, rijx, rijy, rijz, E;
-    Part *temp1, *temp2;
+    double E;
+    Part *temp2;
 
     iterator2 = this->parts.begin();
 
     while (iterator2 != this->parts.end()) {
         temp2 = *iterator2;
         temp2->eArray.clear();
-        iterator1 = temp2->neighbours.begin();
-        while (iterator1 != temp2->neighbours.end()) {
-            temp1 = (*iterator1).item;
-
-            rijx = temp2->pos.x - temp1->pos.x;
-            rijy = temp2->pos.y - temp1->pos.y;
-            rijz = temp2->pos.z - temp1->pos.z;
-            if (config::Instance()->dimensions()==2)
-                r2 = rijx*rijx+rijy*rijy;
-            else
-                r2 = rijx*rijx+rijy*rijy+rijz*rijz;
-            r = sqrt(r2); //трудное место, заменить бы
-            r5 = r2 * r2 * r; //радиус в пятой
-            if (config::Instance()->dimensions()==2)
-                E = //энергия считается векторным методом, так как она не нужна для каждой оси
-                        (( (temp1->m.x * temp2->m.x + temp1->m.y * temp2->m.y) * r2)
-                         -
-                         (3 * (temp2->m.x * rijx + temp2->m.y * rijy) * (temp1->m.x * rijx + temp1->m.y * rijy)  )) / r5;
-            else
-                E = //энергия считается векторным методом, так как она не нужна для каждой оси
-                        (( (temp1->m.x*temp2->m.x+temp1->m.y*temp2->m.y+temp1->m.z*temp2->m.z) * r2)
-                         -
-                         (3 * (temp2->m.x * rijx + temp2->m.y * rijy + temp2->m.z * rijz) * (temp1->m.x * rijx + temp1->m.y * rijy + temp1->m.z * rijz)  )) / r5;
+        for (const neighbour& neigh : neighbours.at(temp2->Id())){
+            E=_hamiltonian(neigh.item, temp2);
 
             temp2->eArray.push_back(E);
             eIncrementalTemp += E;
-
-            ++iterator1;
         }
-
         iterator2++;
     }
 
@@ -577,7 +554,6 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
 
 double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state)
 {
-    vector<Part::neighbour>::iterator iter; //итератор обхода состояния
     int j=0;
 
     //считаем число перевернутых спинов. Если перевернутых более половины, учитываем только неперевернутые.
@@ -592,13 +568,12 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachi
     double E=initEnergy;
     for (unsigned i=0; i<state.size(); i++){
         if ( state[i] == flag){
-            iter = (*this)[i]->neighbours.begin();
             j=0;
-            while (iter!=(*this)[i]->neighbours.end()){
-                if (state[(*iter).num] != flag){
+            for (const neighbour& neigh: neighbours.at(i)){
+                if (state[neigh.num] != flag){
                     E -=  2. * (*this)[i]->eArray[j];
                 }
-                iter++; j++;
+                j++;
             }
         }
     }
@@ -1456,6 +1431,39 @@ QString PartArray::type() const
 void PartArray::setType(QString type)
 {
     this->_type = type;
+}
+
+void PartArray::hamiltonianDipolar()
+{
+    this->_hamiltonian = [](Part* a, Part* b) -> double {
+        double rijx = b->pos.x - a->pos.x,
+            rijy = b->pos.y - a->pos.y,
+            rijz = b->pos.z - a->pos.z, r2, r, r5,E;
+        if (config::Instance()->dimensions()==2)
+            r2 = rijx*rijx+rijy*rijy;
+        else
+            r2 = rijx*rijx+rijy*rijy+rijz*rijz;
+        r = sqrt(r2); //трудное место, заменить бы
+        r5 = r2 * r2 * r; //радиус в пятой
+        if (config::Instance()->dimensions()==2)
+            E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                    (( (a->m.x * b->m.x + a->m.y * b->m.y) * r2)
+                     -
+                     (3 * (b->m.x * rijx + b->m.y * rijy) * (a->m.x * rijx + a->m.y * rijy)  )) / r5;
+        else
+            E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                    (( (a->m.x*b->m.x+a->m.y*b->m.y+a->m.z*b->m.z) * r2)
+                     -
+                     (3 * (b->m.x * rijx + b->m.y * rijy + b->m.z * rijz) * (a->m.x * rijx + a->m.y * rijy + a->m.z * rijz)  )) / r5;
+        return E;
+    };
+}
+
+void PartArray::hamiltonianIsing()
+{
+    this->_hamiltonian = [](Part* a, Part* b) -> double {
+        return -1. * a->m.scalar(b->m);
+    };
 }
 
 bool PartArray::_double_equals(double a, double b)
