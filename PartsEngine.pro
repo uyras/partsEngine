@@ -32,9 +32,10 @@ SOURCES += Vect.cpp \
     amorphousarray.cpp \
     loadhelper.cpp \
     savehelper.cpp \
-    dos.cpp \
     squareisinglattice.cpp \
-    clustermachine.cpp
+    clustermachine.cpp \
+    dos2.cpp \
+    dos3.cpp
 
 HEADERS += \
     Vect.h \
@@ -57,9 +58,10 @@ HEADERS += \
     amorphousarray.h \
     loadhelper.h \
     savehelper.h \
-    dos.h \
     squareisinglattice.h \
-    clustermachine.h
+    clustermachine.h \
+    dos2.h \
+    dos3.h
 
 
 TEMPLATE = lib

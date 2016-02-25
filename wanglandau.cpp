@@ -10,10 +10,9 @@ WangLandau::~WangLandau()
 
 }
 
-Dos WangLandau::dos(PartArray &sys,const int intervals,const int steps,const double accuracy)
+vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int steps,const double accuracy)
 {
     const StateMachineFree initState = sys.state;
-    ClusterMachine clusters(&sys, 0.8);
 
     unsigned long long int totalSteps=0;
 
@@ -23,7 +22,6 @@ Dos WangLandau::dos(PartArray &sys,const int intervals,const int steps,const dou
     const double eMin=sys.EMin();
     const double eMax = sys.EMax();
     const double dE = (eMax-eMin)/(intervals-1);
-    Dos d(eMin,eMax,intervals);
     sys.state.reset();
 
     qDebug()<<"eMin="<<eMin;
@@ -66,7 +64,6 @@ Dos WangLandau::dos(PartArray &sys,const int intervals,const int steps,const dou
             g[WangLandau::getIntervalNumber(eOld,eMin,dE)]+=log(f);
             h[WangLandau::getIntervalNumber(eOld,eMin,dE)]+=1;
 
-            d.add(eOld, clusters.averageSize(), log(f));
             totalSteps+=1;
         }
 
@@ -83,7 +80,7 @@ Dos WangLandau::dos(PartArray &sys,const int intervals,const int steps,const dou
 
 
     sys.state = initState;
-    return d;
+    return g;
 }
 
 vector<double> WangLandau::scale(PartArray &sys, const int intervals)

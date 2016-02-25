@@ -3,8 +3,7 @@
 
 #include "PartArray.h"
 #include "StateMachineFree.h"
-#include "dos.h"
-#include "clustermachine.h"
+#include "dos2.h"
 
 #include <QDebug>
 #include <cmath>
@@ -14,7 +13,7 @@ using namespace std;
 class WangLandau
 {
 public:
-    Dos dos(PartArray & sys, const int intervals=1000, const int steps=10000, const double accuracy=0.8);
+    vector<double> dos(PartArray & sys, const int intervals=1000, const int steps=10000, const double accuracy=0.8);
     static vector<double> scale(PartArray & sys, const int intervals=1000);
 
 
