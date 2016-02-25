@@ -74,8 +74,8 @@ private slots:
         Part p1, p2;
         p2.pos.x =1;
         p2.m = p1.m = Vect(0,1,0);
-        QVERIFY(p1.interact(&p2)==p2.interact(&p1));
-        QCOMPARE(p1.interact(&p2).length(),11.);
+        QVERIFY(p1.interact(p2.pos)==p2.interact(p1.pos));
+        QCOMPARE(p1.interact(p2.pos).length(),11.);
     }
 
     void rotate(){

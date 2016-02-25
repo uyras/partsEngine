@@ -202,6 +202,11 @@ bool StateMachineFree::fromString(const std::string &s)
     return true;
 }
 
+bool StateMachineFree::set(const unsigned long num, bool val)
+{
+    this->_state.at(num) = val;
+}
+
 StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
     this->_state.clear();
 
@@ -227,6 +232,28 @@ StateMachineFree &StateMachineFree::operator+=(int val)
         this->next();
     }
     return *this;
+}
+
+StateMachineFree StateMachineFree::operator &(StateMachineBase &one)
+{
+        if (one.size()!=this->size())
+            throw "operands must be the same size";
+        StateMachineFree ret = StateMachineFree(this->size());
+        for (int i=0;i<size();i++){
+            ret.set(i, one[i] & this->operator[](i));
+        }
+        return ret;
+}
+
+StateMachineFree StateMachineFree::operator ^(StateMachineBase &one)
+{
+    if (one.size()!=this->size())
+        throw "operands must be the same size";
+    StateMachineFree ret = StateMachineFree(this->size());
+    for (int i=0;i<size();i++){
+        ret.set(i, one[i] ^ this->operator[](i));
+    }
+    return ret;
 }
 
 void StateMachineFree::resize(const unsigned long size)

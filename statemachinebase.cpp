@@ -34,4 +34,16 @@ bool StateMachineBase::operator!=(const StateMachineBase &one) const
     return !((*this)==one);
 }
 
+unsigned long StateMachineBase::rotatedCount()
+{
+    unsigned long rot=0;
+    for (unsigned i=0; i<size(); i++){
+        if (operator [](i))
+            rot++;
+    }
+    if (rot>size()/2)
+        rot = size()-rot;
+    return rot;
+}
+
 

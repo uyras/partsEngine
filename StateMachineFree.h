@@ -42,12 +42,16 @@ public:
     virtual std::string toString() const;
     virtual bool fromString(const std::string&);
     inline virtual bool operator [](const unsigned long int num) const { return this->_state[num]; }
+    inline virtual bool set(const unsigned long int num, bool val);
     inline virtual unsigned long int size() const {return this->_state.size();}
 
     StateMachineFree & operator= (const StateMachineFree & one);
     StateMachineFree & operator= (const StateMachineBase & one);
 
     StateMachineFree &  operator+=(int val);
+
+    StateMachineFree operator & (StateMachineBase & one);
+    StateMachineFree operator ^ (StateMachineBase & one);
 
     void resize(const unsigned long int size);
 

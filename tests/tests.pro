@@ -35,7 +35,9 @@ SOURCES += main.cpp \
     ../distributionLaw.cpp \
     ../honeycombspinicearray.cpp \
     ../honeycombspinicecell.cpp \
-    ../loadhelper.cpp
+    ../loadhelper.cpp \
+    ../dos2.cpp \
+    ../dos3.cpp
 
 HEADERS += \
     VectTest2D.h \
@@ -65,7 +67,10 @@ HEADERS += \
     ../distributionLaw.h \
     ../honeycombspinicearray.h \
     ../honeycombspinicecell.h \
-    ../loadhelper.h
+    ../loadhelper.h \
+    dos2test.h \
+    ../dos2.h \
+    ../dos3.h
 
 INCLUDEPATH += ../
 

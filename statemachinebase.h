@@ -65,6 +65,12 @@ public:
 
     virtual bool operator==(const StateMachineBase &one) const;
     virtual bool operator!=(const StateMachineBase &one) const;
+
+    /*!
+     * \brief rotatedCount Число перевернутых спинов от 0 до N/2
+     * \return Число перевернутых спинов от 0 до N/2
+     */
+    unsigned long int rotatedCount();
 };
 
 #endif // STATEMACHINEBASE_H

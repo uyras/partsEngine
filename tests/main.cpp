@@ -7,6 +7,7 @@
 #include "squarespinicetest.h"
 #include "honeycombspinicetest.h"
 #include "randomtest.h"
+#include "dos2test.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
     num+=QTest::qExec(new StateMachineTest, argc, argv);
     num+=QTest::qExec(new StateMachineFreeTest, argc, argv);
     num+=QTest::qExec(new RandomTest, argc, argv);
+    num+=QTest::qExec(new Dos2Test, argc, argv);
 
     qWarning("Have %d errors!",num);
 
