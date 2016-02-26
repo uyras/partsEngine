@@ -1,14 +1,7 @@
 #include "dos2.h"
-
-Dos2::Dos2(double min, double max, unsigned intervals):
-    min(min),
-    max(max),
-    intervals(intervals)
-{
-    data.resize(intervals);
-}
-
-void Dos2::save(string file)
+/*
+template <typename T>
+void Dos2<T>::save(string file)
 {
     ofstream f(file);
     for (unsigned i=0; i<data.size()-1; i++){
@@ -25,7 +18,8 @@ void Dos2::save(string file)
     f.close();
 }
 
-void Dos2::load(string file)
+template <typename T>
+void Dos2<T>::load(string file)
 {
     ifstream f(file);
     data.clear();
@@ -41,7 +35,8 @@ void Dos2::load(string file)
     f.close();
 }
 
-string Dos2::toString()
+template <typename T>
+string Dos2<T>::toString()
 {
     stringstream f;
     for (unsigned i=0; i<data.size()-1; i++){
@@ -57,27 +52,8 @@ string Dos2::toString()
     return f.str();
 }
 
-void Dos2::reg(double a)
-{
-    data[num(a)]+=1;
-}
 
-void Dos2::set(double a, double b)
-{
-    data[num(a)]=b;
-}
-
-void Dos2::add(double a, double b)
-{
-    data[num(a)]+=b;
-}
-
-double& Dos2::at(unsigned i)
-{
-    return data[i];
-}
-
-double& Dos2::operator[](double a)
-{
-    return data[num(a)];
-}
+template class Dos2<int>;
+template class Dos2<double>;
+template class Dos2<unsigned>;
+template class Dos2< unordered_map<double,int> >;*/

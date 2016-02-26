@@ -1,43 +1,47 @@
-#ifndef DOS_H
-#define DOS_H
+#ifndef DOS2_H
+#define DOS2_H
 
 #include <string>
 #include <vector>
-#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <unordered_map>
 
 using namespace std;
 
+template <typename T>
 class Dos2
 {
 public:
-    Dos2(double min, double max, unsigned intervals);
+    Dos2(double min, double max, unsigned intervals):
+        min(min),
+        max(max),
+        intervals(intervals)
+    {
+        data.resize(intervals);
+    }
 
-    void save(string file);
-    void load(string file);
-    string toString();
-    void reg(double a);
-    void set(double a, double b);
+    //virtual void save(string file);
+    //virtual void load(string file);
+    //string toString();
 
-    //добавить значение к DOS
-    void add (double a, double b);
-
-    double& at(unsigned i);
+    inline T& at(unsigned i){return data[i];}
+    inline const T& at(unsigned i) const {return data[i];}
+    inline T& operator[](double a){return data[num(a)];}
+    inline const T& operator[](double a) const {return data[num(a)];}
 
     inline unsigned Intervals() const {return intervals;}
     inline double Min() const {return this->min;}
     inline double Max() const {return this->max;}
 
-    double& operator[](double a);
 
-    inline double val(unsigned i){ return min + (max-min)*((double)i/(double)(intervals)); }
+    inline double val(unsigned i) const{ return min + (max-min)*((double)i/(double)(intervals)); }
 
-    inline unsigned num(double a){
+    inline unsigned num(double a) const{
         if (a<min)
             return 0;
-        if(a>max)
+        if(a>=max)
             return intervals-1;
         unsigned r= (unsigned)floor((a-min)/(max-min)*double(intervals));
         if (r>intervals-1)
@@ -46,10 +50,10 @@ public:
             return r;
     }
 
-private:
+protected:
     double min, max, delta;
     unsigned intervals;
-    vector< double > data;
+    vector< T > data;
 };
 
-#endif // DOS_H
+#endif // DOS2_H
