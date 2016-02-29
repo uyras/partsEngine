@@ -12,71 +12,71 @@ class Dos2Test : public QObject
 
 private slots:
     void regTest(){
-        Dos2 dos(-4.,4.,4);
+        Dos2<double> dos(-4.,4.,4);
 
-        dos.reg(-5.);
+        dos[-5.]++;
         QCOMPARE(dos.at(0),1.);
 
-        dos.reg(-3.9999999999);
+        dos[-3.9999999999]++;
         QCOMPARE(dos.at(0),2.);
 
-        dos.reg(-2.9999999999);
+        dos[-2.9999999999]++;
         QCOMPARE(dos.at(0),3.);
         QCOMPARE(dos.at(1),0.);
 
-        dos.reg(-2.00000000001);
+        dos[-2.00000000001]++;
         QCOMPARE(dos.at(0),4.);
         QCOMPARE(dos.at(1),0.);
 
-        dos.reg(-2.0);
+        dos[-2.0]++;
         QCOMPARE(dos.at(0),4.);
         QCOMPARE(dos.at(1),1.);
 
-        dos.reg(-1.9999999999);
+        dos[-1.9999999999]++;
         QCOMPARE(dos.at(0),4.);
         QCOMPARE(dos.at(1),2.);
 
-        dos.reg(-0.9999999999);
+        dos[-0.9999999999]++;
         QCOMPARE(dos.at(0),4.);
         QCOMPARE(dos.at(1),3.);
 
-        dos.reg(-0.00000000001);
+        dos[-0.00000000001]++;
         QCOMPARE(dos.at(1),4.);
         QCOMPARE(dos.at(2),0.);
 
-        dos.reg(-0.0);
+        dos[-0.0]++;
         QCOMPARE(dos.at(1),4.);
         QCOMPARE(dos.at(2),1.);
 
-        dos.reg(0.0);
+        dos[0.0]++;
         QCOMPARE(dos.at(1),4.);
         QCOMPARE(dos.at(2),2.);
 
-        dos.reg(0.00000000001);
+        dos[0.00000000001]++;
         QCOMPARE(dos.at(1),4.);
         QCOMPARE(dos.at(2),3.);
 
-        dos.reg(1.00000000001);
+        dos[1.00000000001]++;
         QCOMPARE(dos.at(1),4.);
         QCOMPARE(dos.at(2),4.);
 
-        dos.reg(1.9999999999);
+        dos[1.9999999999]++;
         QCOMPARE(dos.at(2),5.);
         QCOMPARE(dos.at(3),0.);
 
-        dos.reg(2.0);
+        dos[2.0]++;
         QCOMPARE(dos.at(2),5.);
         QCOMPARE(dos.at(3),1.);
 
-        dos.reg(2.00000000001);
+        dos[2.00000000001]++;
         QCOMPARE(dos.at(2),5.);
         QCOMPARE(dos.at(3),2.);
 
-        dos.reg(3.00000000001);
+        dos[3.00000000001]++;
         QCOMPARE(dos.at(2),5.);
         QCOMPARE(dos.at(3),3.);
 
-        dos.reg(5.0);
+        dos[5.0]++;
         QCOMPARE(dos.at(2),5.);
         QCOMPARE(dos.at(3),4.);
 
@@ -87,30 +87,30 @@ private slots:
     }
 
     void valTest(){
-        Dos2 dos(-4.,4.,4);
+        Dos2<double> dos(-4.,4.,4);
 
-        dos.reg(-5.);
-        dos.reg(-4.5);
-        dos.reg(-4.4);
-        dos.reg(-4.3);
-        dos.reg(-3.9999999999);
-        dos.reg(-2.9999999999);
-        dos.reg(-2.00000000001);
-        dos.reg(-2.0);
-        dos.reg(-1.2);
-        dos.reg(-1.1);
-        dos.reg(-1.9999999999);
-        dos.reg(-0.9999999999);
-        dos.reg(-0.00000000001);
-        dos.reg(-0.0);
-        dos.reg(0.0);
-        dos.reg(0.00000000001);
-        dos.reg(1.00000000001);
-        dos.reg(1.9999999999);
-        dos.reg(2.0);
-        dos.reg(2.00000000001);
-        dos.reg(3.00000000001);
-        dos.reg(5.0);
+        dos[-5.]++;
+        dos[-4.5]++;
+        dos[-4.4]++;
+        dos[-4.3]++;
+        dos[-3.9999999999]++;
+        dos[-2.9999999999]++;
+        dos[-2.00000000001]++;
+        dos[-2.0]++;
+        dos[-1.2]++;
+        dos[-1.1]++;
+        dos[-1.9999999999]++;
+        dos[-0.9999999999]++;
+        dos[-0.00000000001]++;
+        dos[-0.0]++;
+        dos[0.0]++;
+        dos[0.00000000001]++;
+        dos[1.00000000001]++;
+        dos[1.9999999999]++;
+        dos[2.0]++;
+        dos[2.00000000001]++;
+        dos[3.00000000001]++;
+        dos[5.0]++;
 
         QCOMPARE(dos[-5.],7.);
         QCOMPARE(dos[-4.5],7.);

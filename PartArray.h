@@ -111,7 +111,9 @@ public:
      * @brief E Считает энергию системы. Метод подбирается автоматически исходя из конфигурации и свойств системы
      * @return
      */
-    virtual double E(const StateMachineBase &s = StateMachineFree());
+    virtual double E(const StateMachineBase &s);
+
+    virtual double E();
 
     /**
     * рассчитывает внутреннюю энергию во всей системе частиц (метод подсчета через магнитные моменты)
@@ -144,7 +146,7 @@ public:
     inline const StateMachine & State() const { return state; }
     inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }
 
-    inline void changeState(){this->eTemp=0;} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
+    inline void changeState(){} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
     void changeSystem(); //вызывается когда изменилась вся система целиком
 
     /**
@@ -278,11 +280,16 @@ public:
     void hamiltonianDipolar();
     void hamiltonianIsing();
 
+    inline unsigned neighbourSize(unsigned i){
+        return std::distance(neighbours[i].begin(), neighbours[i].end());
+    }
+
 protected:
     double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
 
-    double eMin,eMax,eInit,eTemp;
+    double eMin,eMax,eInit;
+    bool eInitCalculated;
     StateMachineFree minstate,maxstate;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);

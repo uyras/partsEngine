@@ -12,7 +12,7 @@ PartArray::PartArray():
     minstate(),
     maxstate()
 {
-    eMin = eMax = eInit = eTemp = 0;
+    this->changeSystem();
     this->_type="standart";
     lastId=0;
     _interactionRange = 0;
@@ -36,7 +36,7 @@ PartArray::PartArray(const PartArray &sys)
     this->eMin = sys.eMin;
     this->eMax = sys.eMax;
     this->eInit = sys.eInit;
-    this->eTemp = sys.eTemp;
+    this->eInitCalculated = sys.eInitCalculated;
     this->_type = sys._type;
     this->minstate = sys.minstate;
     this->maxstate = sys.maxstate;
@@ -62,7 +62,7 @@ PartArray& PartArray::operator= (const PartArray& sys){
     this->eMin = sys.eMin;
     this->eMax = sys.eMax;
     this->eInit = sys.eInit;
-    this->eTemp = sys.eTemp;
+    this->eInitCalculated = sys.eInitCalculated;
     this->minstate = sys.minstate;
     this->maxstate = sys.maxstate;
     this->_interactionRange = sys._interactionRange;
@@ -219,7 +219,8 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
 
 void PartArray::changeSystem()
 {
-    this->eMin = this->eMax = this->eInit = this->eTemp = 0;
+    this->eMin = this->eMax = this->eInit = 0;
+    this->eInitCalculated = false;
     this->minstate.clear();this->maxstate.clear();
 }
 
@@ -423,15 +424,23 @@ double PartArray::E(const StateMachineBase &s)
     if (size()<2) //если 1 либо 0 частиц, ничего не возвращаем
         return 0;
 
-    if (this->eInit==0){
+    if (!this->eInitCalculated){
         this->eInit = this->calcEnergy1FastIncrementalFirst();
+        this->eInitCalculated=true;
     }
-    if (s.size()==0){
-        if (this->eTemp==0){
-            return this->eTemp = this->calcEnergy1FastIncremental(this->eInit, this->state);
-        } else { return this->eTemp;}
-    } else
-        return this->calcEnergy1FastIncremental(this->eInit, s);
+    return this->calcEnergy1FastIncremental(this->eInit, s);
+}
+
+double PartArray::E()
+{
+    if (size()<2) //если 1 либо 0 частиц, ничего не возвращаем
+        return 0;
+
+    if (!this->eInitCalculated){
+        this->eInit = this->calcEnergy1FastIncrementalFirst();
+        this->eInitCalculated=true;
+    }
+    return this->calcEnergy1FastIncremental(this->eInit, this->state);
 }
 
 
