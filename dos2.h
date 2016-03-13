@@ -14,11 +14,17 @@ template <typename T>
 class Dos2
 {
 public:
-    Dos2(double min, double max, unsigned intervals):
-        min(min),
-        max(max),
-        intervals(intervals)
+    Dos2():min(0),max(0),intervals(0){}
+
+    Dos2(double min, double max, unsigned intervals)
     {
+        this->resize(min,max,intervals);
+    }
+
+    inline void resize(double min, double max, unsigned intervals){
+        this->min = min;
+        this->max= max;
+        this->intervals = intervals;
         data.resize(intervals);
     }
 
