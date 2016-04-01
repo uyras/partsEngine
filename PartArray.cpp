@@ -40,6 +40,8 @@ PartArray::PartArray(const PartArray &sys)
     this->_type = sys._type;
     this->minstate = sys.minstate;
     this->maxstate = sys.maxstate;
+
+    this->setNums();
 }
 
 PartArray::~PartArray(){
@@ -67,6 +69,8 @@ PartArray& PartArray::operator= (const PartArray& sys){
     this->maxstate = sys.maxstate;
     this->_interactionRange = sys._interactionRange;
     this->_type = sys._type;
+
+    this->setNums();
 
     return *this;
 }
@@ -217,6 +221,29 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
     }
 }
 
+void PartArray::reserveParts(unsigned count)
+{
+    parts.reserve(count);
+}
+
+unsigned PartArray::num(unsigned id)
+{
+    return this->nums[id];
+}
+
+unsigned PartArray::num(Part *part)
+{
+    return this->nums[part->Id()];
+}
+
+void PartArray::setNums()
+{
+    this->nums.clear();
+    for (unsigned i=0; i<count(); i++){
+        this->nums[i]=this->parts[i]->Id();
+    }
+}
+
 void PartArray::changeSystem()
 {
     this->eMin = this->eMax = this->eInit = 0;
@@ -273,14 +300,13 @@ void PartArray::setInteractionRange(const double range)
     //определяем соседей частицы
     for (int i=0; i<size(); i++){
         part = (*this)[i];
-        unsigned nNum=0;
         vector<Part*>::iterator iter = this->parts.begin();
         while(iter!=this->parts.end()){
             temp = *iter;
             if (isNeighbours(part,temp)){
-                neighbours[part->Id()].push_front(neighbour{temp,nNum});
+                neighbours[part->Id()].push_front(temp);
             }
-            iter++; nNum++;
+            iter++;
         }
     }
 
@@ -297,7 +323,7 @@ bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
 //перемешать магнитные моменты частиц M
 void PartArray::shuffleM(){
     bool rotate;
-    for (int i=0;i<this->count();i++){
+    for (unsigned i=0;i<this->count();i++){
         rotate = (double)config::Instance()->rand()/(double)config::Instance()->rand_max > 0.5;
         if (rotate)
             this->parts[i]->rotate();
@@ -320,17 +346,19 @@ void PartArray::insert(Part * part){
     if (part->id==-1) //если ИД частицы не задан, назначаем новый ИД
         part->id = lastId++;
 
+    //даем порядковый номер
+    this->nums[unsigned(this->count()-1)]=part->id;
+
     //определяем соседей частицы
-    unsigned curNum = count()-1, nNum=0;
     vector<Part*>::iterator iter = this->parts.begin();
     Part* temp;
     while(iter!=this->parts.end()){
         temp = *iter;
         if (isNeighbours(part,temp)){
-            neighbours[temp->Id()].push_front(neighbour{part,curNum});
-            neighbours[part->Id()].push_front(neighbour{temp,nNum});
+            neighbours[temp->Id()].push_front(part);
+            neighbours[part->Id()].push_front(temp);
         }
-        iter++; nNum++;
+        iter++;
     }
 }
 
@@ -464,16 +492,16 @@ double PartArray::EComplete() const{
 double PartArray::EComplete(Part* elem) const {
     double r, r2, r5, E = 0;
     Vect rij;
-    for(const neighbour & neigh: neighbours.at(elem->Id())){
-        if (neigh.item != elem) { //не считать взаимодействие частицы на себя
-            rij = neigh.item->pos.radius(elem->pos);
+    for(Part* neigh: neighbours.at(elem->Id())){
+        if (neigh != elem) { //не считать взаимодействие частицы на себя
+            rij = neigh->pos.radius(elem->pos);
             r = rij.length();
             r2 = r * r; //радиус в кубе
             r5 = r2 * r * r * r; //радиус в пятой
             E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                    ((neigh.item->m.scalar(elem->m) * r2)
+                    ((neigh->m.scalar(elem->m) * r2)
                      -
-                     (3 * elem->m.scalar(rij) * neigh.item->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                     (3 * elem->m.scalar(rij) * neigh->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
         }
     }
     return E;
@@ -547,8 +575,8 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     while (iterator2 != this->parts.end()) {
         temp2 = *iterator2;
         temp2->eArray.clear();
-        for (const neighbour& neigh : neighbours.at(temp2->Id())){
-            E=_hamiltonian(neigh.item, temp2);
+        for (Part* neigh : neighbours.at(temp2->Id())){
+            E=_hamiltonian(neigh, temp2);
 
             temp2->eArray.push_back(E);
             eIncrementalTemp += E;
@@ -566,7 +594,7 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachi
     int j=0;
 
     //считаем число перевернутых спинов. Если перевернутых более половины, учитываем только неперевернутые.
-    int rotated=0;
+    unsigned rotated=0;
     for (unsigned i=0; i<state.size(); i++){
         if (state[i])
             rotated++;
@@ -578,8 +606,8 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachi
     for (unsigned i=0; i<state.size(); i++){
         if ( state[i] == flag){
             j=0;
-            for (const neighbour& neigh: neighbours.at(i)){
-                if (state[neigh.num] != flag){
+            for (Part* neigh: neighbours.at(i)){
+                if (state[this->num(neigh)] != flag){
                     E -=  2. * (*this)[i]->eArray[j];
                 }
                 j++;
@@ -1312,6 +1340,7 @@ void PartArray::clear(){
     this->lastId = 0;
     this->parts.clear();
     this->changeSystem();
+    this->setNums();
     this->afterClear();
 }
 
@@ -1389,7 +1418,7 @@ void PartArray::saveEachMagnetization(string file) {
     f.close();
 }
 
-int PartArray::count() const{
+unsigned PartArray::count() const{
     return this->parts.size();
 }
 
@@ -1893,7 +1922,7 @@ void PartArray::turnToDirection(Vect *v){
 
 void PartArray::movePosRandomly(double d){
     Vect dir; //направление, в которое двигать частицу.
-    for(int i=0;i<this->count();i++){
+    for(unsigned i=0;i<this->count();i++){
         double longitude = ((double)config::Instance()->rand()/(double)config::Instance()->rand_max) * 2. * M_PI;
         double lattitude=0;
         switch (config::Instance()->dimensions()) {
@@ -1917,7 +1946,7 @@ void PartArray::moveMRandomly(double fi){
         double side = 1.;
         double oldFi;
 
-        for(int i=0;i<this->count();i++){
+        for(unsigned i=0;i<this->count();i++){
             double oldLen = this->parts[i]->m.length();
             if ((double)config::Instance()->rand()/(double)config::Instance()->rand_max>0.5)
                 side = -1.;
@@ -1930,7 +1959,7 @@ void PartArray::moveMRandomly(double fi){
             this->parts[i]->m.z = 0;
         }
     } else {
-        for(int i=0;i<this->count();i++){
+        for(unsigned i=0;i<this->count();i++){
             Part* temp = this->parts[i];
             Vect ox,oy,oz,newV;
             //1. нормализуем вектор частицы, считаем его длину

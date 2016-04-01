@@ -81,6 +81,11 @@ bool StateMachine::connected() const
     return !(this->_system==0);
 }
 
+bool &StateMachine::getById(unsigned id)
+{
+    return this->_system->getById(id)->state;
+}
+
 void StateMachine::reset(){
     std::vector<Part*>::iterator iter;
     iter = this->_system->parts.begin();

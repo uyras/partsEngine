@@ -271,7 +271,7 @@ private slots:
         sys.state.fromString("0000000011111111");
         QBENCHMARK{
             double E=0;
-            for (int i=0; i<sys.count(); i++)
+            for (unsigned i=0; i<sys.count(); i++)
                 E+=sys.ECompleteOld(sys[i]);
         }
     }

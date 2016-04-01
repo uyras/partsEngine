@@ -77,7 +77,7 @@ private slots:
         QCOMPARE(a.parts[3]->pos.x,3.);
         QCOMPARE(a.parts[3]->pos.y,1.5);
 
-        QCOMPARE(a.count(),12);
+        QCOMPARE(a.count(),(unsigned)12);
     }
 };
 

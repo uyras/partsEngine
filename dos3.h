@@ -20,8 +20,8 @@ public:
         { this->data.resize(interval);   }
 
     virtual void save(string file);
-    virtual void load(string file){};
-    string toString(){};
+    virtual void load(string file){(void)file;};
+    string toString(){return "";};
 
 };
 

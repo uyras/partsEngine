@@ -14,7 +14,7 @@ SquareSpinIceArray::SquareSpinIceArray(const SquareSpinIceArray &sys)
     while(iter!= sys.cells.end()){
         tempCell = new SquareSpinIceCell();
         oldCell = *iter;
-        for (int i=0;i<this->count();i++){
+        for (unsigned i=0;i<this->count();i++){
             if (*(oldCell->top)==*(this->parts[i]))
                 tempCell->top=this->parts[i];
 
@@ -53,7 +53,7 @@ SquareSpinIceArray &SquareSpinIceArray::operator =(const SquareSpinIceArray &sys
     while(iter!= sys.cells.end()){
         tempCell = new SquareSpinIceCell();
         oldCell = *iter;
-        for (int i=0;i<this->count();i++){
+        for (unsigned i=0;i<this->count();i++){
             if (*(oldCell->top)==*(this->parts[i]))
                 tempCell->top=this->parts[i];
 
@@ -83,6 +83,7 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
         qFatal("Square spin ice is possible only in 2 dimensionals model");
 
     this->clear();
+    this->reserveParts(unsigned(2*(hCells*vCells)+hCells+vCells));
 
     double l_2 = l/2.; //полурешетка
     Vect center(0,0,0);

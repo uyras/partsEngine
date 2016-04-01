@@ -11,6 +11,7 @@ SquareLattice::SquareLattice():
 void SquareLattice::dropSquareLattice(int m, int n, double l, double len, Part *example)
 {
     this->clear(); //очищаем систему
+    this->reserveParts(unsigned(m*n));
 
     //сохраняем параметры решетки
     this->m = m;

@@ -181,7 +181,7 @@ void LoadHelper::readHeader(PartArray *sys, bool readAnyWay)
         }
 
         //check the system size
-        if (sys->count()!=params["size"].toInt()){
+        if (sys->count()!=params["size"].toUInt()){
             qFatal("Something gonna worng while reading system: system size and size in the header are not the same");
         }
 }

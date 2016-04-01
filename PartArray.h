@@ -189,7 +189,7 @@ public:
     virtual void afterClear();
 
     //возвращает количество частиц на объекте
-    int count() const;
+    unsigned count() const;
     inline int size() const{return this->parts.size();}
 
     // возвращает вектор(массив) энергий каждой частицы
@@ -299,15 +299,27 @@ protected:
 
     QString _type;
 
-    struct neighbour{
-        Part* item;
-        unsigned num;
-    };
-    unordered_map<unsigned,forward_list<neighbour>> neighbours; //соседи, упорядоченные по id частицы
+    unordered_map<unsigned,forward_list<Part*>> neighbours; //соседи, упорядоченные по id частицы
+
+    /**
+     * @brief preInsert Разметить нужное число ячеек в памяти для размещения частиц (чтобы лишний раз не переразмечать память)
+     * @param count
+     */
+    void reserveParts(unsigned count);
 
 private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
     unsigned int lastId;
     double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы
+
+/* механизи определения порядкового номера частицы по ее ID */
+public:
+    unsigned num(unsigned id);
+    unsigned num(Part* part);
+
+private:
+    void setNums();
+    unordered_map <unsigned,unsigned> nums;
+
 };
 #endif // PARTARRAY_H

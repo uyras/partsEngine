@@ -15,7 +15,7 @@ PartArray(sys)
         tempCell = new HoneycombSpinIceCell();
         oldCell = *iter;
         for (int j=0;j<6;j++)
-            for (int i=0;i<this->count();i++){
+            for (unsigned i=0;i<this->count();i++){
                 if (*(oldCell->parts[j])==*(this->parts[i])){
                     tempCell->parts.push_back(this->parts[i]);
                     break;
@@ -46,7 +46,7 @@ HoneycombSpinIceArray &HoneycombSpinIceArray::operator =(const HoneycombSpinIceA
         tempCell = new HoneycombSpinIceCell();
         oldCell = *iter;
         for (int j=0;j<6;j++)
-            for (int i=0;i<this->count();i++){
+            for (unsigned i=0;i<this->count();i++){
                 if (oldCell->parts[j]==this->parts[i]){
                     tempCell->parts.push_back(this->parts[i]);
                     break;

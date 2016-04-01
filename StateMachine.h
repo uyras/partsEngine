@@ -42,6 +42,8 @@ public:
     void disconnect();
     bool connected() const;
 
+    bool &getById(unsigned id);
+
     /**
      * @brief hardReset Жестко обнуляет состояния частиц, не трогая их намагниченности.
      * Функция делает вид, что система только что сгенерировалась в таком состоянии.

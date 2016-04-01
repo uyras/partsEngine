@@ -23,11 +23,11 @@ private slots:
     void dropHoneyCombTest(){
         HoneycombSpinIceArray *sys1 = new HoneycombSpinIceArray();
         sys1->dropHoneyComb(2,2,1);
-        QCOMPARE(sys1->count(),19);
+        QCOMPARE(sys1->count(),(unsigned)19);
         QCOMPARE((int)sys1->cells.size(),4);
 
         sys1->dropHoneyComb(2,2,2);
-        QCOMPARE(sys1->count(),19);
+        QCOMPARE(sys1->count(),(unsigned)19);
         QCOMPARE((int)sys1->cells.size(),4);
     }
 
