@@ -281,7 +281,9 @@ public:
     void hamiltonianIsing();
 
     inline unsigned neighbourSize(unsigned i){
-        return std::distance(neighbours[i].begin(), neighbours[i].end());
+        if (this->_interactionRange!=0.)
+            return std::distance(neighbours[i].begin(), neighbours[i].end());
+        else return this->size()-1;
     }
 
 protected:

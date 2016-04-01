@@ -293,24 +293,28 @@ void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
 
 void PartArray::setInteractionRange(const double range)
 {
-    _interactionRange = range;
-    Part *part, *temp;
-    neighbours.clear();
+    if (_interactionRange!=range){
+        _interactionRange = range;
+        neighbours.clear();
 
-    //определяем соседей частицы
-    for (int i=0; i<size(); i++){
-        part = (*this)[i];
-        vector<Part*>::iterator iter = this->parts.begin();
-        while(iter!=this->parts.end()){
-            temp = *iter;
-            if (isNeighbours(part,temp)){
-                neighbours[part->Id()].push_front(temp);
+        //определяем соседей частицы
+        if (this->_interactionRange!=0.){ //только если не все со всеми
+            Part *part, *temp;
+            for (int i=0; i<size(); i++){
+                part = (*this)[i];
+                vector<Part*>::iterator iter = this->parts.begin();
+                while(iter!=this->parts.end()){
+                    temp = *iter;
+                    if (isNeighbours(part,temp)){
+                        neighbours[part->Id()].push_front(temp);
+                    }
+                    iter++;
+                }
             }
-            iter++;
         }
-    }
 
-    changeSystem();
+        changeSystem();
+    }
 }
 
 bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
@@ -350,15 +354,17 @@ void PartArray::insert(Part * part){
     this->nums[unsigned(this->count()-1)]=part->id;
 
     //определяем соседей частицы
-    vector<Part*>::iterator iter = this->parts.begin();
-    Part* temp;
-    while(iter!=this->parts.end()){
-        temp = *iter;
-        if (isNeighbours(part,temp)){
-            neighbours[temp->Id()].push_front(part);
-            neighbours[part->Id()].push_front(temp);
+    if (this->_interactionRange!=0.){ //только если не дальнодействие
+        vector<Part*>::iterator iter = this->parts.begin();
+        Part* temp;
+        while(iter!=this->parts.end()){
+            temp = *iter;
+            if (isNeighbours(part,temp)){
+                neighbours[temp->Id()].push_front(part);
+                neighbours[part->Id()].push_front(temp);
+            }
+            iter++;
         }
-        iter++;
     }
 }
 
@@ -492,16 +498,31 @@ double PartArray::EComplete() const{
 double PartArray::EComplete(Part* elem) const {
     double r, r2, r5, E = 0;
     Vect rij;
-    for(Part* neigh: neighbours.at(elem->Id())){
-        if (neigh != elem) { //не считать взаимодействие частицы на себя
-            rij = neigh->pos.radius(elem->pos);
-            r = rij.length();
-            r2 = r * r; //радиус в кубе
-            r5 = r2 * r * r * r; //радиус в пятой
-            E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                    ((neigh->m.scalar(elem->m) * r2)
-                     -
-                     (3 * elem->m.scalar(rij) * neigh->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+    if (_interactionRange!=0.){
+        for(Part* neigh: neighbours.at(elem->Id())){
+            if (neigh != elem) { //не считать взаимодействие частицы на себя
+                rij = neigh->pos.radius(elem->pos);
+                r = rij.length();
+                r2 = r * r; //радиус в кубе
+                r5 = r2 * r * r * r; //радиус в пятой
+                E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
+                        ((neigh->m.scalar(elem->m) * r2)
+                         -
+                         (3 * elem->m.scalar(rij) * neigh->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+            }
+        }
+    } else {
+        for(Part* neigh: this->parts){
+            if (neigh != elem) { //не считать взаимодействие частицы на себя
+                rij = neigh->pos.radius(elem->pos);
+                r = rij.length();
+                r2 = r * r; //радиус в кубе
+                r5 = r2 * r * r * r; //радиус в пятой
+                E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
+                        ((neigh->m.scalar(elem->m) * r2)
+                         -
+                         (3 * elem->m.scalar(rij) * neigh->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+            }
         }
     }
     return E;
@@ -575,11 +596,22 @@ double PartArray::calcEnergy1FastIncrementalFirst(){
     while (iterator2 != this->parts.end()) {
         temp2 = *iterator2;
         temp2->eArray.clear();
-        for (Part* neigh : neighbours.at(temp2->Id())){
-            E=_hamiltonian(neigh, temp2);
+        if (this->_interactionRange!=0.){ //для близкодействия проходим по соседям
+            for (Part* neigh : neighbours.at(temp2->Id())){
+                    E=_hamiltonian(neigh, temp2);
 
-            temp2->eArray.push_back(E);
-            eIncrementalTemp += E;
+                    temp2->eArray.push_back(E);
+                    eIncrementalTemp += E;
+            }
+        } else { //для дальнодействия проходим по всем
+            for (Part* neigh : this->parts){
+                if (temp2!=neigh){
+                    E=_hamiltonian(neigh, temp2);
+
+                    temp2->eArray.push_back(E);
+                    eIncrementalTemp += E;
+                }
+            }
         }
         iterator2++;
     }
@@ -606,11 +638,22 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachi
     for (unsigned i=0; i<state.size(); i++){
         if ( state[i] == flag){
             j=0;
-            for (Part* neigh: neighbours.at(i)){
-                if (state[this->num(neigh)] != flag){
-                    E -=  2. * (*this)[i]->eArray[j];
+            if (this->_interactionRange!=0.){
+                for (Part* neigh: neighbours.at(i)){
+                    if (state[this->num(neigh)] != flag){
+                        E -=  2. * (*this)[i]->eArray[j];
+                    }
+                    j++;
                 }
-                j++;
+            } else {
+                for (Part* neigh: this->parts){
+                    if (this->operator [](i) != neigh){
+                        if (state[this->num(neigh)] != flag){
+                            E -=  2. * (*this)[i]->eArray[j];
+                        }
+                        j++;
+                    }
+                }
             }
         }
     }
