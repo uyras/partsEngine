@@ -88,7 +88,8 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
     double l_2 = l/2.; //полурешетка
     Vect center(0,0,0);
 
-    Part *temp;
+    Part *temp,
+            *nextLeft; //следующая левая для новой ячейки будет предыдущей правой
     Vect partPos(0,0,0);
     center.y = l_2;
     for (int i=0;i<vCells;i++){
@@ -101,13 +102,10 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
             //добавляем верхнюю
             partPos.x = center.x;
             partPos.y = center.y+l_2;
-
-            if ((temp = this->findByPosition(partPos)) == 0){
-                temp = new Part();
-                temp->pos = partPos;
-                temp->m = Vect(config::Instance()->m,0,0);
-                this->insert(temp);
-            }
+            temp = new Part();
+            temp->pos = partPos;
+            temp->m = Vect(config::Instance()->m,0,0);
+            this->insert(temp);
             cell->top = temp;
 
             //добавляем нижнюю
@@ -126,24 +124,24 @@ void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
             partPos.x = center.x-l_2;
             partPos.y = center.y;
 
-            if ((temp = this->findByPosition(partPos)) == 0){
+            if (j == 0){
                 temp = new Part();
                 temp->pos = partPos;
                 temp->m = Vect(0,config::Instance()->m,0);
                 this->insert(temp);
-            }
+            } else temp=nextLeft;
             cell->left = temp;
 
             //добавляем правую
             partPos.x = center.x+l_2;
             partPos.y = center.y;
 
-            if ((temp = this->findByPosition(partPos)) == 0){
-                temp = new Part();
-                temp->pos = partPos;
-                temp->m = Vect(0,config::Instance()->m,0);
-                this->insert(temp);
-            }
+            temp = new Part();
+            temp->pos = partPos;
+            temp->m = Vect(0,config::Instance()->m,0);
+            this->insert(temp);
+            nextLeft=temp;
+
             cell->right = temp;
             cell->row = i;
             cell->column = j;

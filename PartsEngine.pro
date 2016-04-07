@@ -23,8 +23,6 @@ SOURCES += Vect.cpp \
     squarespinicearray.cpp \
     squarespinicecell.cpp \
     wanglandau.cpp \
-    wanglandauparallel.cpp \
-    wanglandauparallelwalker.cpp \
     random.cpp \
     honeycombspinicearray.cpp \
     honeycombspinicecell.cpp \
@@ -53,8 +51,6 @@ HEADERS += \
     squarelattice.h \
     distributionLaw.h \
     wanglandau.h \
-    wanglandauparallelwalker.h \
-    wanglandauparallel.h \
     amorphousarray.h \
     loadhelper.h \
     savehelper.h \

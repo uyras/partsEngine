@@ -25,8 +25,6 @@ SOURCES += main.cpp \
     ../StateMachineFree.cpp \
     ../Vect.cpp \
     ../wanglandau.cpp \
-    ../wanglandauparallel.cpp \
-    ../wanglandauparallelwalker.cpp \
     ../random.cpp \
     ../Part.cpp \
     ../PartArray.cpp \
@@ -57,8 +55,6 @@ HEADERS += \
     ../StateMachineFree.h \
     ../Vect.h \
     ../wanglandau.h \
-    ../wanglandauparallel.h \
-    ../wanglandauparallelwalker.h \
     ../random.h \
     ../Part.h \
     ../PartArray.h \

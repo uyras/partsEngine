@@ -1,30 +1,51 @@
 #ifndef WANGLANDAU_H
 #define WANGLANDAU_H
 
+#include <QDebug>
+#include <cmath>
+#include <iostream>
+#include <sstream>
+
 #include "PartArray.h"
 #include "StateMachineFree.h"
 #include "dos2.h"
-
-#include <QDebug>
-#include <cmath>
 
 using namespace std;
 
 class WangLandau
 {
 public:
-    vector<double> dos(PartArray & sys, const int intervals=1000, const int steps=10000, const double accuracy=0.8);
-    static vector<double> scale(PartArray & sys, const int intervals=1000);
+    WangLandau(PartArray *sys, unsigned intervals, double accuracy=0.8, double fmin=1.0001);
+    virtual ~WangLandau();
+
+    void run(unsigned steps=10000);
+    void runWithSave(unsigned steps=10000, unsigned saveEach=100);
+
+    /**
+     * @brief save сохранить гистограммы в файл
+     * @param filename Имя файла для сохранения. По умолчанию сохраняет в формате g_<number_of_parts>_<intervals>.dat.
+     */
+    void saveG(const std::string filename="") const;
+    void saveH(const std::string filename="") const;
+
+    Dos2<double> g;//g - логарифм плотности состояний (энтропия), h - вспомогательная гистограмма, которая должна быть плоской
+    Dos2<unsigned> h;
+
+private:
+    PartArray *sys;
+    unsigned int intervals; //число интервалов в плотности состояний
+    double accuracy; //величина погрешности для степени плоскости гистограммы
+    double fMin,f;
 
 
-    static unsigned int getIntervalNumber(double Energy, const double eMin, const double dE);
-    static void setValues(vector<double> & histogramm, double value);
-    static bool isFlat(vector<double> &histogramm, const double accuracy);
-    static void normalize(vector<double> &histogramm);
+    double average; //подсчитывает среднее число для h
+    unsigned hCount; //количество ненулевых элементов h, нужно для подсчета среднего
 
 
-    WangLandau();
-    ~WangLandau();
+    bool isFlat(); //критерий плоскости гистограммы
+    void updateGH(double E=0.0);
+    void resetH();
+    void normalizeG();
 };
 
 #endif // WANGLANDAU_H

@@ -1,8 +1,19 @@
 #include "wanglandau.h"
 
-WangLandau::WangLandau()
+WangLandau::WangLandau(PartArray *sys, unsigned intervals, double accuracy, double fmin):
+    sys(sys),
+    intervals(intervals),
+    accuracy(accuracy),
+    fMin(fmin)
 {
 
+    //считаем минимум и максимум системы
+    if (sys->Minstate().size()==0 || sys->Maxstate().size()==0)
+        qFatal("Min or max state is unknown. DOS calculation is impossible.");
+
+    //инициируем DOS
+    h.resize(sys->E(sys->Minstate()), sys->E(sys->Maxstate()), intervals);
+    g.resize(sys->E(sys->Minstate()), sys->E(sys->Maxstate()), intervals);
 }
 
 WangLandau::~WangLandau()
@@ -10,145 +21,166 @@ WangLandau::~WangLandau()
 
 }
 
-vector<double> WangLandau::dos(PartArray &sys,const int intervals,const int steps,const double accuracy)
+void WangLandau::run(unsigned steps)
 {
-    const StateMachineFree initState = sys.state;
+    const StateMachineFree initState = sys->state;
+    this->f = exp(1);
+    this->resetH();
 
-    unsigned long long int totalSteps=0;
+    sys->state = sys->Minstate();
 
-    if (sys.Minstate().size()==0 || sys.Maxstate().size()==0)
-        qFatal("Min or max state is unknown. DOS calculation is impossible.");
-
-    const double eMin=sys.EMin();
-    const double eMax = sys.EMax();
-    const double dE = (eMax-eMin)/(intervals-1);
-    sys.state.reset();
-
-    qDebug()<<"eMin="<<eMin;
-    qDebug()<<"eMax="<<eMax;
-    qDebug()<<"dE="<<dE;
     qDebug()<<"steps="<<steps;
 
-    //создать две гистограммы
-    vector<double> g,h; //g - логарифм плотности состояний (энтропия), h - вспомогательная гистограмма, которая должна быть плоской
-
-    for (int i=0;i<intervals;i++){
-        g.push_back(0);
-        h.push_back(0);
-    }
-
-    const double fMin=1.000001;
-    double f = exp(1);
-    double eOld = sys.E(),eNew=sys.E();
-    const int count = sys.count();
+    double eOld = sys->E(),eNew=sys->E();
 
     while (f>fMin){
-
         //повторяем алгоритм сколько-то шагов
-        for (int i=0;i<steps;i++){
-            double rand = (double)config::Instance()->rand()/(double)config::Instance()->rand_max;
-            int partNum = (int)floor(rand*(double)count);
-            sys.parts[partNum]->rotate();
-            eNew = sys.E();
+        for (unsigned i=0;i<steps;i++){
+            int partNum = sys->state.randomize();
 
-            if (
-                    (double)config::Instance()->rand()/(double)config::Instance()->rand_max <=
-                    exp(g[WangLandau::getIntervalNumber(eOld,eMin,dE)]-g[WangLandau::getIntervalNumber(eNew,eMin,dE)])
-                    ) {
+            eNew = sys->E();
+            if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
                 eOld = eNew;
-            }
-            else {
-                sys.parts[partNum]->rotate(); //откатываем состояние
+            } else {
+                sys->parts[partNum]->rotate(); //откатываем состояние
             }
 
-            g[WangLandau::getIntervalNumber(eOld,eMin,dE)]+=log(f);
-            h[WangLandau::getIntervalNumber(eOld,eMin,dE)]+=1;
-
-            totalSteps+=1;
+            updateGH(eOld);
         }
 
         //проверяем ровность диаграммы
-        if (WangLandau::isFlat(h,accuracy)){
-            WangLandau::normalize(g);
+        if (this->isFlat()){
+            this->normalizeG();
             f=sqrt(f);
-            WangLandau::setValues(h,0);
+            this->resetH();
             qDebug()<<"h is flat, new f is "<<f;
         }
     }
 
-    qDebug()<<"Total steps: "<<totalSteps;
 
-
-    sys.state = initState;
-    return g;
+    sys->state = initState;
+    return;
 }
 
-vector<double> WangLandau::scale(PartArray &sys, const int intervals)
+void WangLandau::runWithSave(unsigned steps, unsigned saveEach)
 {
-    const StateMachineFree initState = sys.State();
-    const double eMin=sys.EMin();
-    const double eMax = sys.EMax();
-    const double dE = (eMax-eMin)/(intervals-1);
-    vector<double> scale;
-    for (int i=0;i<intervals;i++){
-        scale.push_back(eMin+((double)i * dE));
+    const StateMachineFree initState = sys->state;
+    this->f = exp(1);
+    this->resetH();
+    unsigned long long totalSteps=0;
+    ostringstream fn;
+
+    sys->state = sys->Minstate();
+
+    qDebug()<<"steps="<<steps;
+
+    double eOld = sys->E(),eNew=sys->E();
+
+    while (f>fMin){
+        //повторяем алгоритм сколько-то шагов
+        for (unsigned i=0;i<steps;i++){
+            int partNum = sys->state.randomize();
+
+            eNew = sys->E();
+            if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
+                eOld = eNew;
+            } else {
+                sys->parts[partNum]->rotate(); //откатываем состояние
+            }
+
+            updateGH(eOld);
+            ++totalSteps;
+
+            if (totalSteps%saveEach==0){
+                fn.str("");
+                fn.clear();
+                fn<<"g_"<<totalSteps<<".dat";
+                saveG(fn.str());
+
+                fn.str("");
+                fn.clear();
+                fn<<"h_"<<totalSteps<<".dat";
+                saveH(fn.str());
+                qDebug()<<totalSteps;
+            }
+        }
+
+        //проверяем ровность диаграммы
+        if (this->isFlat()){
+            this->normalizeG();
+            f=sqrt(f);
+            this->resetH();
+            qDebug()<<"h is flat, new f is "<<f;
+        }
     }
-    sys.setState(initState);
-    return scale;
+
+
+    sys->state = initState;
+    return;
 }
 
-unsigned int WangLandau::getIntervalNumber(double Energy,const double eMin,const double dE)
+void WangLandau::saveH(const string filename) const
 {
-    return round((Energy-eMin)/dE);
-}
-
-void WangLandau::setValues(vector<double> &histogramm, double value)
-{
-    vector<double>::iterator iter = histogramm.begin();
-    while (iter!=histogramm.end()){
-        (*iter)=value;
-        iter++;
+    ofstream f(filename);
+    for (unsigned i=0;i<h.Intervals();i++){
+        f<<i<<"\t"<<h.val(i)<<"\t"<<h.at(i)<<endl;
     }
+
+    f.close();
+}
+
+void WangLandau::saveG(const string filename) const
+{
+    ofstream f(filename);
+    for (unsigned i=0;i<g.Intervals();i++){
+        f<<i<<"\t"<<g.val(i)<<"\t"<<g.at(i)<<endl;
+    }
+
+    f.close();
 }
 
 //критерий плоскости гистограммы
-bool WangLandau::isFlat(vector<double> &histogramm, const double accuracy)
+bool WangLandau::isFlat()
 {
-    vector<double>::iterator iter;
-
-    //считаем среднее значение
-    double average=0; int step=0;
-    iter = histogramm.begin();
-    while (iter!=histogramm.end()){
-        if (*iter != 0){
-            average = (average*step+(*iter))/(step+1);
-            step++;
-        }
-        iter++;
-    }
-
-    iter = histogramm.begin();
-    while (iter!=histogramm.end()){
-        if ((*iter)!=0 && fabs(*iter-average)/average > (1.0 - accuracy)) //критерий плоскости
+    for (unsigned i=0; i<=h.Intervals(); i++){//плоскость гистограммы только в своем интервале
+        if (h.at(i)!=0. && fabs(h.at(i)-average)/average > (1.0 - accuracy)) //критерий плоскости
             return false;
-        iter++;
     }
     return true;
 }
 
-//выровнять гистограмму, чтобы сумма значений была равна 1
-void WangLandau::normalize(vector<double> &histogramm)
+void WangLandau::updateGH(double E)
 {
-    double d = histogramm[0]-log(2);
+    if (E==0.){
+        E = this->sys->E();
+    }
 
-    vector<double>::iterator iter;
+    g[E]+=log(f);
 
-    //равняем на единицу
-    iter = histogramm.begin();
-    while (iter!=histogramm.end()){
-        if (*iter!=0)
-            (*iter)-=d;
-        iter++;
+    bool increased = (h[E]+=1) == 1;
+
+    if (increased){ //прибавляем h и одновременно считаем среднее значение
+        //случай если изменилось число ненулевых элементов
+        hCount++;
+        average = (average * (hCount-1) + 1) / hCount;
+    } else {
+        average += (1./(double)hCount);
     }
 }
 
+void WangLandau::resetH()
+{
+    for (unsigned i=0; i<h.Intervals(); i++){
+        h.at(i)=0;
+    }
+    average=0.0;
+    hCount=0;
+}
+
+void WangLandau::normalizeG()
+{
+    const double gFirst=g.at(0);
+    for (unsigned i=0; i<g.Intervals(); i++){
+        g.at(i)-=gFirst;
+    }
+}
