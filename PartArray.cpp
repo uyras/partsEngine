@@ -249,6 +249,7 @@ void PartArray::changeSystem()
     this->eMin = this->eMax = this->eInit = 0;
     this->eInitCalculated = false;
     this->minstate.clear();this->maxstate.clear();
+    this->stateChanged=true;
 }
 
 void PartArray::dropTetrahedron(int n, int m, int h, double R, Part *tmp)
@@ -458,11 +459,11 @@ double PartArray::E(const StateMachineBase &s)
     if (size()<2) //если 1 либо 0 частиц, ничего не возвращаем
         return 0;
 
-    if (!this->eInitCalculated){
-        this->eInit = this->calcEnergy1FastIncrementalFirst();
-        this->eInitCalculated=true;
+    if (!this->eInitCalculated){ //если начальная энергия не посчитана, считаем ее
+        this->EInit();
     }
-    return this->calcEnergy1FastIncremental(this->eInit, s);
+
+    return EUpdate(s);
 }
 
 double PartArray::E()
@@ -470,11 +471,99 @@ double PartArray::E()
     if (size()<2) //если 1 либо 0 частиц, ничего не возвращаем
         return 0;
 
-    if (!this->eInitCalculated){
-        this->eInit = this->calcEnergy1FastIncrementalFirst();
-        this->eInitCalculated=true;
+    if (!this->eInitCalculated){ //если начальная энергия не посчитана, считаем ее
+        this->EInit();
     }
-    return this->calcEnergy1FastIncremental(this->eInit, this->state);
+
+    if (this->stateChanged){
+        this->eInit = this->EUpdate(this->state);
+        this->eInitState = this->state;
+        this->stateChanged = false;
+    }
+
+    return this->eInit;
+}
+
+void PartArray::EInit(){
+    this->eInitState = this->state;
+    this->eInit = 0;
+
+    double eTemp;
+
+    for (Part* temp : this->parts) {
+        temp->eArray.clear();
+        if (this->_interactionRange!=0.){ //для близкодействия проходим по соседям
+            for (Part* neigh : neighbours.at(temp->Id())){
+                    eTemp=_hamiltonian(neigh, temp);
+                    temp->eArray.push_back(eTemp);
+                    this->eInit += eTemp;
+            }
+        } else { //для дальнодействия проходим по всем
+            for (Part* neigh : this->parts){
+                if (temp!=neigh){
+                    eTemp=_hamiltonian(neigh, temp);
+                    temp->eArray.push_back(eTemp);
+                    this->eInit += eTemp;
+                }
+            }
+        }
+    }
+
+    this->stateChanged=false;
+    this->eInit *= 0.5;
+}
+
+double PartArray::EUpdate(const StateMachineBase &s){
+    int j=0;
+
+    const StateMachineFree changedState = eInitState^s;
+
+    //считаем число перевернутых спинов. Если перевернутых более половины, учитываем только неперевернутые.
+    unsigned rotated=0;
+    for (unsigned i=0; i<changedState.size(); i++){
+        if (changedState[i])
+            rotated++;
+    }
+    const bool flag = (rotated < (count()/2));
+
+    //рассчитываем энергию
+    double E=this->eInit;
+    for (unsigned i=0; i<changedState.size(); i++){
+        if ( changedState[i] == flag){
+            j=0;
+            if (this->_interactionRange!=0.){
+                for (Part* neigh: neighbours.at(parts[i]->Id())){
+                    if (changedState[this->num(neigh)] != flag){
+                        E -=  2. * (*this)[i]->eArray[j];
+                    }
+                    j++;
+                }
+            } else {
+                for (Part* neigh: this->parts){
+                    if (this->operator [](i) != neigh){
+                        if (changedState[this->num(neigh)] != flag){
+                            E -=  2. * (*this)[i]->eArray[j];
+                        }
+                        j++;
+                    }
+                }
+            }
+        }
+    }
+
+    return E;
+}
+
+void PartArray::EFastUpdate(Part* p){
+    if (!this->eInitCalculated){ //если начальная энергия не посчитана, считаем ее
+        this->EInit();
+    } else {
+        for (unsigned j=0; j<p->eArray.size(); j++){
+            this->eInit -=  2. * p->eArray[j];
+        }
+        eInitState = state;
+        stateChanged=false;
+    }
 }
 
 
@@ -639,7 +728,7 @@ double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachi
         if ( state[i] == flag){
             j=0;
             if (this->_interactionRange!=0.){
-                for (Part* neigh: neighbours.at(i)){
+                for (Part* neigh: neighbours.at(parts[i]->Id())){
                     if (state[this->num(neigh)] != flag){
                         E -=  2. * (*this)[i]->eArray[j];
                     }

@@ -130,10 +130,12 @@ int StateMachine::randomize(int count){
         randnum = floor(double(randnum)/double(rm)*double(parts-1));
         temp = (this->_system->parts.at(randnum));
 
-        //if (!temp->state){
+        if (count==1)
+            temp->rotate(true);
+        else
             temp->rotate();
-            rotated++;
-        //}
+
+        rotated++;
     }
 
     if (count==1)

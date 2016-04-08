@@ -115,6 +115,8 @@ public:
 
     virtual double E();
 
+    void EFastUpdate(Part *p);
+
     /**
     * рассчитывает внутреннюю энергию во всей системе частиц (метод подсчета через магнитные моменты)
 	* Возвращает её и записывает в параметр E1 класса
@@ -146,7 +148,7 @@ public:
     inline const StateMachine & State() const { return state; }
     inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }
 
-    inline void changeState(){} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
+    inline void changeState(){this->stateChanged=true;} //вызывается когда конфигурация системы изменилась (но не поменялась геометрия)
     void changeSystem(); //вызывается когда изменилась вся система целиком
 
     /**
@@ -292,7 +294,7 @@ protected:
 
     double eMin,eMax,eInit;
     bool eInitCalculated;
-    StateMachineFree minstate,maxstate;
+    StateMachineFree minstate, maxstate, eInitState;
     bool _double_equals(double a, double b); //сравнение double
     virtual void subTetrahedron(Part * tmp, double x, double y, double z, double vect=1, double rot=0, double r=1);
 
@@ -309,10 +311,14 @@ protected:
      */
     void reserveParts(unsigned count);
 
+    void EInit();
+    double EUpdate(const StateMachineBase &s);
 private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
     unsigned int lastId;
     double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы
+
+    bool stateChanged;
 
 /* механизи определения порядкового номера частицы по ее ID */
 public:

@@ -234,7 +234,7 @@ StateMachineFree &StateMachineFree::operator+=(int val)
     return *this;
 }
 
-StateMachineFree StateMachineFree::operator &(StateMachineBase &one)
+StateMachineFree StateMachineFree::operator &(const StateMachineBase &one) const
 {
         if (one.size()!=this->size())
             throw "operands must be the same size";
@@ -245,7 +245,7 @@ StateMachineFree StateMachineFree::operator &(StateMachineBase &one)
         return ret;
 }
 
-StateMachineFree StateMachineFree::operator ^(StateMachineBase &one)
+StateMachineFree StateMachineFree::operator ^(const StateMachineBase &one) const
 {
     if (one.size()!=this->size())
         throw "operands must be the same size";

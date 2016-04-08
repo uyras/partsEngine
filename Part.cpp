@@ -88,11 +88,13 @@ Vect Part::interact(const Vect &p) const{
     return h;
 }
 
-void Part::rotate(float angle){
-    angle = angle;
+void Part::rotate(bool updateEnergy){
     this->m.rotate();
     this->state = !this->state;
-    parent->changeState();
+    if (updateEnergy)
+        parent->EFastUpdate(this);
+    else
+        parent->changeState();
 }
 
 double Part::volume()

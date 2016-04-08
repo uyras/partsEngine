@@ -50,8 +50,8 @@ public:
 
     StateMachineFree &  operator+=(int val);
 
-    StateMachineFree operator & (StateMachineBase & one);
-    StateMachineFree operator ^ (StateMachineBase & one);
+    StateMachineFree operator & (const StateMachineBase & one) const;
+    StateMachineFree operator ^ (const StateMachineBase & one) const;
 
     void resize(const unsigned long int size);
 
