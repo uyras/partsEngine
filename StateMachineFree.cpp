@@ -218,10 +218,12 @@ StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
 
 StateMachineFree &StateMachineFree::operator=(const StateMachineBase &one)
 {
-    this->_state.clear();
+    unsigned os;
+    if (this->_state.size()!=(os=one.size()))
+        this->_state.resize(os);
 
-    for (unsigned int i=0;i<one.size();i++)
-        this->_state.push_back(one[i]);
+    for (unsigned i=0;i<os;i++)
+        this->_state.at(i)=one[i];
 
     return *this;
 }

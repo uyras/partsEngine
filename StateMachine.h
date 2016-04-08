@@ -34,8 +34,8 @@ public:
     virtual bool operator--(int);
     virtual std::string toString() const;
     virtual bool fromString(const std::string&);
-    virtual bool operator[](const unsigned long int) const;
-    virtual bool& operator[](const unsigned long int);
+    virtual inline bool operator[](const unsigned long int) const;
+    virtual inline bool& operator[](const unsigned long int);
     virtual unsigned long int size() const;
 
     void connect(PartArray *system);

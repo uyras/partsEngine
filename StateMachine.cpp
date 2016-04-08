@@ -304,11 +304,11 @@ bool StateMachine::fromString(const std::string & s)
     return true;
 }
 
-bool StateMachine::operator[](const unsigned long int num) const{
+inline bool StateMachine::operator[](const unsigned long int num) const{
     return this->_system->parts[num]->state;
 }
 
-bool &StateMachine::operator[](const unsigned long num)
+inline bool &StateMachine::operator[](const unsigned long num)
 {
     return this->_system->parts[num]->state;
 }

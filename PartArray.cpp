@@ -510,6 +510,7 @@ void PartArray::EInit(){
     }
 
     this->stateChanged=false;
+    this->eInitCalculated=true;
     this->eInit *= 0.5;
 }
 
