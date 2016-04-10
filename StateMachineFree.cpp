@@ -202,11 +202,6 @@ bool StateMachineFree::fromString(const std::string &s)
     return true;
 }
 
-bool StateMachineFree::set(const unsigned long num, bool val)
-{
-    return this->_state.at(num) = val;
-}
-
 StateMachineFree & StateMachineFree::operator= (const StateMachineFree & one){
     this->_state.clear();
 

@@ -11,6 +11,7 @@ public:
     double scalar(Vect); //Скалярное произведение двух векторов
 
     double space(const Vect &b) const; //расстояние между векторами
+    double space_2(const Vect &b) const; //расстояние между векторами в квадрате
     Vect radius(const Vect &b) const; //возвращает радиус-вектор
     double length() const; //длина вектора
     void setXYZ(double x, double y, double z); //задать вектор

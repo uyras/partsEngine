@@ -313,6 +313,7 @@ protected:
 
     void EInit();
     double EUpdate(const StateMachineBase &s);
+    void EUpdate();
 private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
     double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы

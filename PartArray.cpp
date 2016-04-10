@@ -291,7 +291,7 @@ bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
 {
     if (_a==_b) return false;
     if (_interactionRange==0) return true;
-    else return _a->pos.space(_b->pos)<=_interactionRange;
+    else return _a->pos.space_2(_b->pos)<=(_interactionRange*_interactionRange);
 }
 
 //перемешать магнитные моменты частиц M
@@ -444,8 +444,7 @@ double PartArray::E()
     }
 
     if (this->stateChanged){
-        this->eInit = this->EUpdate(this->state);
-        this->eInitState = this->state;
+        this->EUpdate();
         this->stateChanged = false;
     }
 
@@ -488,6 +487,57 @@ void PartArray::EInit(){
     this->stateChanged=false;
     this->eInitCalculated=true;
     this->eInit *= 0.5;
+}
+
+void PartArray::EUpdate(){
+    int j=0;
+
+    unsigned ssize=this->size();
+    vector<char> changedBits(ssize); //чар потому что бул очень долго работает в векторе
+    bool tempState;
+    for (unsigned i=0;i<ssize;i++){
+        tempState=parts[i]->state;
+        changedBits[i]=tempState ^ eInitState[i];
+        eInitState.set(i,tempState);
+    }
+
+
+    //рассчитываем энергию
+    //обходим все спины
+    Part* temp;
+    for (unsigned i=0; i<ssize; i++){
+        //если состояние поменялось
+        if ( changedBits[i] == true){
+            tempState=parts[i]->state;
+            temp = (*this)[i];
+            j=0;
+            if (this->_interactionRange!=0.){
+                for (Part* neigh: neighbours.at(i)){
+                    unsigned nnum=neigh->Id();
+                    if (!changedBits[nnum]){
+                        if (tempState!=neigh->state)
+                            eInit -=  2. * this->eMatrix[i][j];
+                        else
+                            eInit +=  2. * this->eMatrix[i][j];
+                    }
+                    j++;
+                }
+            } else {
+                for (Part* neigh: this->parts){
+                    if (temp != neigh){
+                        unsigned nnum=neigh->Id();
+                        if (!changedBits[nnum]){
+                            if (tempState!=neigh->state)
+                                eInit -=  2. * this->eMatrix[i][j];
+                            else
+                                eInit +=  2. * this->eMatrix[i][j];
+                        }
+                        j++;
+                    }
+                }
+            }
+        }
+    }
 }
 
 double PartArray::EUpdate(const StateMachineBase &s){

@@ -62,7 +62,22 @@ double Vect::space(const Vect &b) const {
 					(this->x - b.x)*(this->x - b.x) +
 					(this->y - b.y)*(this->y - b.y) +
 					(this->z - b.z)*(this->z - b.z)
-					);
+                    );
+}
+
+double Vect::space_2(const Vect &b) const
+{
+    if (config::Instance()->dimensions()==2)
+        return
+                    (this->x - b.x)*(this->x - b.x) +
+                    (this->y - b.y)*(this->y - b.y)
+                    ;
+    else
+        return
+                    (this->x - b.x)*(this->x - b.x) +
+                    (this->y - b.y)*(this->y - b.y) +
+                    (this->z - b.z)*(this->z - b.z)
+                    ;
 }
 
 Vect Vect::radius(const Vect &b) const {
