@@ -52,12 +52,13 @@ public:
 
     StateMachineFree operator & (const StateMachineBase & one) const;
     StateMachineFree operator ^ (const StateMachineBase & one) const;
+    StateMachineFree & operator ^= (const StateMachineBase & one);
 
     void resize(const unsigned long int size);
 
 protected:
     virtual void _construct(const StateMachine *state);
-    std::vector<bool> _state;
+    std::vector<char> _state;
 };
 
 #endif // STATEMACHINEFREE_H

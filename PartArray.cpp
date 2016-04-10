@@ -493,25 +493,27 @@ void PartArray::EInit(){
 double PartArray::EUpdate(const StateMachineBase &s){
     int j=0;
 
-    const StateMachineFree changedState = eInitState^s;
+    unsigned ssize=s.size();
+    vector<char> changedBits(ssize); //чар потому что бул очень долго работает в векторе
+    for (unsigned i=0;i<ssize;i++)
+        changedBits[i]=s[i]^eInitState[i];
 
     //рассчитываем энергию
     double E=this->eInit;
-    unsigned ssize=s.size();
     Part* temp;
     bool thisState;
 
     //обходим все спины
     for (unsigned i=0; i<ssize; i++){
         //если состояние поменялось
-        if ( changedState[i] == true){
+        if ( changedBits[i] == true){
             thisState=s[i];
             temp = (*this)[i];
             j=0;
             if (this->_interactionRange!=0.){
                 for (Part* neigh: neighbours.at(i)){
                     unsigned nnum=neigh->Id();
-                    if (!changedState[nnum]){
+                    if (!changedBits[nnum]){
                         if (thisState!=s[nnum])
                             E -=  2. * this->eMatrix[i][j];
                         else
@@ -523,7 +525,7 @@ double PartArray::EUpdate(const StateMachineBase &s){
                 for (Part* neigh: this->parts){
                     if (temp != neigh){
                         unsigned nnum=neigh->Id();
-                        if (!changedState[nnum]){
+                        if (!changedBits[nnum]){
                             if (thisState!=s[nnum])
                                 E -=  2. * this->eMatrix[i][j];
                             else
@@ -544,28 +546,29 @@ void PartArray::EFastUpdate(Part* p){
         //this->EInit();
         return;
     } else {
+        unsigned pid=p->Id();
         unsigned j=0;
         if (this->_interactionRange!=0.){
-            for (Part* neigh : neighbours[p->Id()]){
+            for (Part* neigh : neighbours[pid]){
                 if (neigh->state!=p->state)
-                    this->eInit -=  2. * this->eMatrix[p->Id()][j];
+                    this->eInit -=  2. * this->eMatrix[pid][j];
                 else
-                    this->eInit += 2. * this->eMatrix[p->Id()][j];
+                    this->eInit += 2. * this->eMatrix[pid][j];
                 j++;
             }
         } else {
             for (Part* neigh : parts){
                 if (p!=neigh){
                     if (neigh->state!=p->state)
-                        this->eInit -=  2. * this->eMatrix[p->Id()][j];
+                        this->eInit -=  2. * this->eMatrix[pid][j];
                     else
-                        this->eInit += 2. * this->eMatrix[p->Id()][j];
+                        this->eInit += 2. * this->eMatrix[pid][j];
                     j++;
                 }
             }
         }
 
-        eInitState = state;
+        eInitState.set(pid, !(eInitState[pid])); //обновляем соответствующий спин состояния. Подразумевается, что в state изменился только этот спин.
         stateChanged=false;
     }
 }

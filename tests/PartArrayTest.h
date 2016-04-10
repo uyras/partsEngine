@@ -53,6 +53,36 @@ private slots:
         delete sys;
     }
 
+    void EStepByStep(){
+        //тест вычисления энергии после создания системы
+        PartArray *sys = new PartArray();
+        sys->setInteractionRange(0.);
+        for (int i=0;i<4;i++){
+            for (int j=0;j<4;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                try{
+                    sys->insert(temp);
+                } catch(const string c){
+                    cout<<c<<endl;
+                }
+            }
+        }
+
+        for (int i=0; i<100; i++){
+            sys->operator [](i%sys->count())->rotate(true);
+            QCOMPARE(sys->E(), sys->EComplete());
+        }
+
+        for (int i=0; i<100; i++){
+            sys->state.randomize();
+            qFuzzyCompare(sys->E(), sys->EComplete());
+        }
+
+        delete sys;
+    }
+
 
     void E(){
         int nums[100] = {
@@ -538,6 +568,26 @@ private slots:
         a.save("sys"); b.load("sys"); //проверяем после сохранения
         for (unsigned i=0; i<b.size(); i++){
             QCOMPARE((unsigned)b[i]->Id(),i);
+        }
+    }
+
+    void eFastTest(){
+        PartArray a,b;
+        for (int i=0;i<3;i++)
+            for (int j=0;j<3;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                a.insert(temp);
+            }
+        b=a;
+
+        a.state.next();
+
+        for (int i=0;i<100;i++){
+            a.state.randomize();
+            b.state=a.state;
+            QCOMPARE(a.E(),b.E());
         }
     }
 

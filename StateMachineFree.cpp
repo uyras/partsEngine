@@ -22,7 +22,7 @@ StateMachineFree::StateMachineFree(const StateMachine *state)
 }
 
 void StateMachineFree::reset(){
-    vector<bool>::iterator iter = this->_state.begin();
+    vector<char>::iterator iter = this->_state.begin();
     while(iter!=this->_state.end()){
         *iter = false;
         iter++;
@@ -35,7 +35,7 @@ void StateMachineFree::clear()
 }
 
 void StateMachineFree::setLast(){
-    vector<bool>::iterator iter = this->_state.begin();
+    vector<char>::iterator iter = this->_state.begin();
     while(iter!=this->_state.end()){
         *iter = true;
         iter++;
@@ -44,7 +44,7 @@ void StateMachineFree::setLast(){
 
 int StateMachineFree::randomize(int count){
     int randnum=0, parts = this->_state.size();
-    vector<bool>::iterator iter;
+    vector<char>::iterator iter;
     for (int i=0;i<count;i++){
         randnum = config::Instance()->rand()%parts;
         iter = this->_state.begin()+randnum;
@@ -57,7 +57,7 @@ int StateMachineFree::randomize(int count){
 }
 
 bool StateMachineFree::isFirst(){
-    vector<bool>::iterator iter = this->_state.begin();
+    vector<char>::iterator iter = this->_state.begin();
     while (iter!=this->_state.end()){
         if (*iter==true)
             return false;
@@ -67,7 +67,7 @@ bool StateMachineFree::isFirst(){
 }
 
 bool StateMachineFree::isLast(){
-    vector<bool>::iterator iter = this->_state.begin();
+    vector<char>::iterator iter = this->_state.begin();
     while (iter!=this->_state.end()){
         if (*iter==false)
             return false;
@@ -77,7 +77,7 @@ bool StateMachineFree::isLast(){
 }
 
 bool StateMachineFree::isHalfLast(){
-    vector<bool>::iterator iter = this->_state.begin();
+    vector<char>::iterator iter = this->_state.begin();
     while (iter!=this->_state.end()-1){
         if (*iter==false)
             return false;
@@ -87,7 +87,7 @@ bool StateMachineFree::isHalfLast(){
 }
 
 bool StateMachineFree::next(){
-    std::vector<bool>::iterator iter;
+    std::vector<char>::iterator iter;
     iter = this->_state.begin();
 
     while (iter != this->_state.end()){
@@ -105,7 +105,7 @@ bool StateMachineFree::next(){
 }
 
 bool StateMachineFree::halfNext(){
-    std::vector<bool>::iterator iter;
+    std::vector<char>::iterator iter;
     iter = this->_state.begin();
 
     while (iter != (this->_state.end()-1)){
@@ -123,7 +123,7 @@ bool StateMachineFree::halfNext(){
 }
 
 bool StateMachineFree::prev(){
-    std::vector<bool>::iterator iter;
+    std::vector<char>::iterator iter;
     iter = this->_state.begin();
 
     while (iter != this->_state.end()){
@@ -141,7 +141,7 @@ bool StateMachineFree::prev(){
 }
 
 bool StateMachineFree::halfPrev(){
-    std::vector<bool>::iterator iter;
+    std::vector<char>::iterator iter;
     iter = this->_state.begin();
 
     while (iter != (this->_state.end()-1)){
@@ -179,7 +179,7 @@ bool StateMachineFree::operator--(int)
 }
 
 std::string StateMachineFree::toString() const{
-    std::vector<bool>::const_iterator iter;
+    std::vector<char>::const_iterator iter;
     std::string s="";
     iter = this->_state.begin();
     while (iter!=this->_state.end()){
@@ -249,13 +249,25 @@ StateMachineFree StateMachineFree::operator &(const StateMachineBase &one) const
 
 StateMachineFree StateMachineFree::operator ^(const StateMachineBase &one) const
 {
-    if (one.size()!=this->size())
+    unsigned ts=size();
+    if (one.size()!=ts)
         throw "operands must be the same size";
-    StateMachineFree ret = StateMachineFree(this->size());
-    for (unsigned i=0;i<size();i++){
-        ret.set(i, one[i] ^ this->operator[](i));
+    StateMachineFree ret = StateMachineFree(ts);
+    for (unsigned i=0;i<ts;i++){
+        ret.set(i, one[i] ^ _state[i]);
     }
     return ret;
+}
+
+StateMachineFree & StateMachineFree::operator ^=(const StateMachineBase &one)
+{
+    unsigned ts=size();
+    if (one.size()!=ts)
+        throw "operands must be the same size";
+    for (unsigned i=0;i<ts;i++){
+        _state[i] = _state[i]^one[i];
+    }
+    return *this;
 }
 
 void StateMachineFree::resize(const unsigned long size)
@@ -265,9 +277,9 @@ void StateMachineFree::resize(const unsigned long size)
 
 void StateMachineFree::_construct(const StateMachine *state)
 {
-    this->_state.clear();
+    this->_state.resize(state->size());
     for (unsigned int i=0;i<state->size();i++){
-        this->_state.push_back(state->operator[](i));
+        this->_state[i]=state->operator[](i);
     }
 }
 
