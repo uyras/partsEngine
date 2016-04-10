@@ -15,6 +15,7 @@ public:
     virtual ~LoadHelper();
 
     bool validate();
+    void parseHeader(); //спарсить заголовок в свою внутреннюю структуру
     bool go(QString section); //переместить курсор к определенной секции
     bool go(unsigned int num); //переместить курсо к секции num
     void close();
@@ -24,16 +25,19 @@ public:
     bool end();
     LoadHelper & operator >>(double & num);
     LoadHelper & operator >>(int & num);
+    LoadHelper & operator >>(long & num);
     LoadHelper & operator >>(unsigned int & num);
     LoadHelper & operator >>(QString & num);
     LoadHelper & operator >>(bool & num);
 
-    void readHeader(PartArray* sys);
+    void applyHeader(PartArray* sys);
 
     static int version(QString file);
 
+    std::map<QString,QString> params;
+
 private:
-    void readHeader(PartArray *sys, bool readAnyWay);
+    void applyHeader(PartArray *sys, bool readAnyWay);
     QMap<QString,QString> dumpFileContent();
     QFile f;
     QTextStream s;

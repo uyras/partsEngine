@@ -79,6 +79,26 @@ private slots:
 
         QCOMPARE(a.count(),(unsigned)12);
     }
+
+    void chechIds(){
+        SquareSpinIceArray a,b;
+        a.dropSpinIce(10,10,1);
+
+        a.setInteractionRange(0.8); //проверяем для короткодействия
+        for (unsigned i=0; i<a.size(); i++){
+            QCOMPARE((unsigned)a[i]->Id(),i);
+        }
+
+        a.setInteractionRange(0); //проверяем для дальнодействия
+        for (unsigned i=0; i<a.size(); i++){
+            QCOMPARE((unsigned)a[i]->Id(),i);
+        }
+
+        a.save("sys"); b.load("sys"); //проверяем после сохранения
+        for (unsigned i=0; i<b.size(); i++){
+            QCOMPARE((unsigned)b[i]->Id(),i);
+        }
+    }
 };
 
 

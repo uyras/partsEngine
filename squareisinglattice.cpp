@@ -9,7 +9,7 @@ SquareIsingLattice::SquareIsingLattice():
 
 void SquareIsingLattice::dropSquareLattice(int m, int n)
 {
-    this->dropSquareLattice(m,n);
+    this->SquareLattice::dropSquareLattice(m,n);
 //замыкаем соседей
     Part* temp1, *temp2;
     for (int i=0; i<m; i++){

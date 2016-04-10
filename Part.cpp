@@ -32,7 +32,6 @@ Part::Part(const Part &obj):
     parent(0),
     id(-1)
 {
-    this->eArray=obj.eArray;
     this->_vol = obj._vol;
     this->sector = obj.sector;
     this->state = obj.state;
@@ -50,21 +49,7 @@ bool Part::operator==(const Part &one) const
     }
 }
 
-Part::Part(unsigned int id) :
-    state(false),
-    parent(0)
-{
-    this->id = id;
-    //по умолчанию на частицу ничего не действует
-    this->h.x = this->h.y = this->h.z = 0;
-    sector = 0; //по умолчанию, все частицы из сектора 0
-    this->r = config::Instance()->partR; //по умолчанию радиус задается в конфигах
-    this->e = 0;
-    this->w1 = this->h1 = 0;
-}
-
 Part::~Part(){
-    this->eArray.clear();
 }
 
 Vect Part::interact(const Vect &p) const{

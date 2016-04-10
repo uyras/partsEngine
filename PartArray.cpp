@@ -14,14 +14,12 @@ PartArray::PartArray():
 {
     this->changeSystem();
     this->_type="standart";
-    lastId=0;
     _interactionRange = 0;
     hamiltonianDipolar();
 }
 
 PartArray::PartArray(const PartArray &sys)
 {
-    this->lastId = 0;
     this->state.connect(this);
     this->_interactionRange = sys._interactionRange;
     this->_hamiltonian = sys._hamiltonian;
@@ -40,8 +38,6 @@ PartArray::PartArray(const PartArray &sys)
     this->_type = sys._type;
     this->minstate = sys.minstate;
     this->maxstate = sys.maxstate;
-
-    this->setNums();
 }
 
 PartArray::~PartArray(){
@@ -69,13 +65,10 @@ PartArray& PartArray::operator= (const PartArray& sys){
     this->maxstate = sys.maxstate;
     this->_interactionRange = sys._interactionRange;
     this->_type = sys._type;
-
-    this->setNums();
-
     return *this;
 }
 
-Part *PartArray::operator[](const int num)
+Part *PartArray::operator[](const unsigned num)
 {
     return parts[num];
 }
@@ -116,15 +109,9 @@ bool PartArray::operator==(const PartArray &sys) const
 
 Part *PartArray::getById(unsigned id)
 {
-    vector<Part*>::iterator iter = this->parts.begin();
-    Part* temp = 0;
-    while (iter!=this->parts.end()){
-        temp = *iter;
-        if ((unsigned)temp->id == id)
-            return temp;
-        iter++;
-    }
-    return temp;
+    if (id<this->size())
+        return this->parts[id];
+    else return 0;
 }
 
 
@@ -226,24 +213,6 @@ void PartArray::reserveParts(unsigned count)
     parts.reserve(count);
 }
 
-unsigned PartArray::num(unsigned id)
-{
-    return this->nums[id];
-}
-
-unsigned PartArray::num(Part *part)
-{
-    return this->nums[part->Id()];
-}
-
-void PartArray::setNums()
-{
-    this->nums.clear();
-    for (unsigned i=0; i<count(); i++){
-        this->nums[i]=this->parts[i]->Id();
-    }
-}
-
 void PartArray::changeSystem()
 {
     this->eMin = this->eMax = this->eInit = 0;
@@ -301,7 +270,7 @@ void PartArray::setInteractionRange(const double range)
         //определяем соседей частицы
         if (this->_interactionRange!=0.){ //только если не все со всеми
             Part *part, *temp;
-            for (int i=0; i<size(); i++){
+            for (unsigned i=0; i<size(); i++){
                 part = (*this)[i];
                 vector<Part*>::iterator iter = this->parts.begin();
                 while(iter!=this->parts.end()){
@@ -346,13 +315,12 @@ void PartArray::insert(Part * part){
     //прописываем родителя
     part->parent = this;
 
-    this->parts.push_back(part);
-
-    if (part->id==-1) //если ИД частицы не задан, назначаем новый ИД
-        part->id = lastId++;
-
-    //даем порядковый номер
-    this->nums[unsigned(this->count()-1)]=part->id;
+    if (part->id==-1) { //если ИД частицы не задан, назначаем новый ИД и вставляем в конец системы
+        part->id = this->count();
+        this->parts.push_back(part);
+    } else {
+        this->parts[part->id] = part;
+    }
 
     //определяем соседей частицы
     if (this->_interactionRange!=0.){ //только если не дальнодействие
@@ -490,20 +458,28 @@ void PartArray::EInit(){
 
     double eTemp;
 
+    this->eMatrix.clear();
+    this->eMatrix.resize(this->size());
+
     for (Part* temp : this->parts) {
-        temp->eArray.clear();
         if (this->_interactionRange!=0.){ //для близкодействия проходим по соседям
             for (Part* neigh : neighbours.at(temp->Id())){
                     eTemp=_hamiltonian(neigh, temp);
-                    temp->eArray.push_back(eTemp);
                     this->eInit += eTemp;
+                    //В матрицу надо помещать энергии только в неперевернутых состояниях
+                    if (neigh->state!=temp->state)
+                        eTemp*=-1.;
+                    this->eMatrix[temp->Id()].push_back(eTemp);
             }
         } else { //для дальнодействия проходим по всем
             for (Part* neigh : this->parts){
                 if (temp!=neigh){
                     eTemp=_hamiltonian(neigh, temp);
-                    temp->eArray.push_back(eTemp);
                     this->eInit += eTemp;
+                    //В матрицу надо помещать энергии только в неперевернутых состояниях
+                    if (neigh->state!=temp->state)
+                        eTemp*=-1.;
+                    this->eMatrix[temp->Id()].push_back(eTemp);
                 }
             }
         }
@@ -519,31 +495,39 @@ double PartArray::EUpdate(const StateMachineBase &s){
 
     const StateMachineFree changedState = eInitState^s;
 
-    //считаем число перевернутых спинов. Если перевернутых более половины, учитываем только неперевернутые.
-    unsigned rotated=0;
-    for (unsigned i=0; i<changedState.size(); i++){
-        if (changedState[i])
-            rotated++;
-    }
-    const bool flag = (rotated < (count()/2));
-
     //рассчитываем энергию
     double E=this->eInit;
-    for (unsigned i=0; i<changedState.size(); i++){
-        if ( changedState[i] == flag){
+    unsigned ssize=s.size();
+    Part* temp;
+    bool thisState;
+
+    //обходим все спины
+    for (unsigned i=0; i<ssize; i++){
+        //если состояние поменялось
+        if ( changedState[i] == true){
+            thisState=s[i];
+            temp = (*this)[i];
             j=0;
             if (this->_interactionRange!=0.){
-                for (Part* neigh: neighbours.at(parts[i]->Id())){
-                    if (changedState[this->num(neigh)] != flag){
-                        E -=  2. * (*this)[i]->eArray[j];
+                for (Part* neigh: neighbours.at(i)){
+                    unsigned nnum=neigh->Id();
+                    if (!changedState[nnum]){
+                        if (thisState!=s[nnum])
+                            E -=  2. * this->eMatrix[i][j];
+                        else
+                            E +=  2. * this->eMatrix[i][j];
                     }
                     j++;
                 }
             } else {
                 for (Part* neigh: this->parts){
-                    if (this->operator [](i) != neigh){
-                        if (changedState[this->num(neigh)] != flag){
-                            E -=  2. * (*this)[i]->eArray[j];
+                    if (temp != neigh){
+                        unsigned nnum=neigh->Id();
+                        if (!changedState[nnum]){
+                            if (thisState!=s[nnum])
+                                E -=  2. * this->eMatrix[i][j];
+                            else
+                                E +=  2. * this->eMatrix[i][j];
                         }
                         j++;
                     }
@@ -557,11 +541,30 @@ double PartArray::EUpdate(const StateMachineBase &s){
 
 void PartArray::EFastUpdate(Part* p){
     if (!this->eInitCalculated){ //если начальная энергия не посчитана, считаем ее
-        this->EInit();
+        //this->EInit();
+        return;
     } else {
-        for (unsigned j=0; j<p->eArray.size(); j++){
-            this->eInit -=  2. * p->eArray[j];
+        unsigned j=0;
+        if (this->_interactionRange!=0.){
+            for (Part* neigh : neighbours[p->Id()]){
+                if (neigh->state!=p->state)
+                    this->eInit -=  2. * this->eMatrix[p->Id()][j];
+                else
+                    this->eInit += 2. * this->eMatrix[p->Id()][j];
+                j++;
+            }
+        } else {
+            for (Part* neigh : parts){
+                if (p!=neigh){
+                    if (neigh->state!=p->state)
+                        this->eInit -=  2. * this->eMatrix[p->Id()][j];
+                    else
+                        this->eInit += 2. * this->eMatrix[p->Id()][j];
+                    j++;
+                }
+            }
         }
+
         eInitState = state;
         stateChanged=false;
     }
@@ -670,85 +673,6 @@ double PartArray::ECompleteFast(){
     }
 
     return E1 *= 0.5;
-}
-
-double PartArray::calcEnergy1FastIncrementalFirst(){
-    StateMachineFree tempstate = state;
-    this->state.reset();//возращаем в начальное состояние
-    double eIncrementalTemp = 0;
-
-    std::vector < Part* >::iterator iterator2;
-    double E;
-    Part *temp2;
-
-    iterator2 = this->parts.begin();
-
-    while (iterator2 != this->parts.end()) {
-        temp2 = *iterator2;
-        temp2->eArray.clear();
-        if (this->_interactionRange!=0.){ //для близкодействия проходим по соседям
-            for (Part* neigh : neighbours.at(temp2->Id())){
-                    E=_hamiltonian(neigh, temp2);
-
-                    temp2->eArray.push_back(E);
-                    eIncrementalTemp += E;
-            }
-        } else { //для дальнодействия проходим по всем
-            for (Part* neigh : this->parts){
-                if (temp2!=neigh){
-                    E=_hamiltonian(neigh, temp2);
-
-                    temp2->eArray.push_back(E);
-                    eIncrementalTemp += E;
-                }
-            }
-        }
-        iterator2++;
-    }
-
-    state = tempstate;
-
-    return eIncrementalTemp *= 0.5; //делим на два, так как в цикле считается и E12 и E21, хотя по факту они равны
-}
-
-double PartArray::calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state)
-{
-    int j=0;
-
-    //считаем число перевернутых спинов. Если перевернутых более половины, учитываем только неперевернутые.
-    unsigned rotated=0;
-    for (unsigned i=0; i<state.size(); i++){
-        if (state[i])
-            rotated++;
-    }
-    const bool flag = (rotated < (count()/2));
-
-    //рассчитываем энергию
-    double E=initEnergy;
-    for (unsigned i=0; i<state.size(); i++){
-        if ( state[i] == flag){
-            j=0;
-            if (this->_interactionRange!=0.){
-                for (Part* neigh: neighbours.at(parts[i]->Id())){
-                    if (state[this->num(neigh)] != flag){
-                        E -=  2. * (*this)[i]->eArray[j];
-                    }
-                    j++;
-                }
-            } else {
-                for (Part* neigh: this->parts){
-                    if (this->operator [](i) != neigh){
-                        if (state[this->num(neigh)] != flag){
-                            E -=  2. * (*this)[i]->eArray[j];
-                        }
-                        j++;
-                    }
-                }
-            }
-        }
-    }
-
-    return E;
 }
 
 void PartArray::cout() {
@@ -1390,11 +1314,8 @@ void PartArray::load_v2(QString file)
                )){ //read due to the next section or end of file
         params = s.split('\t');
         unsigned int id = params[0].toUInt();
-        temp = new Part(id);
-
-        if (this->lastId<id){
-            lastId = id;
-        }
+        temp = new Part();
+        temp->id = id;
 
         temp->pos = Vect(
                     params[1].toDouble(),
@@ -1424,15 +1345,13 @@ void PartArray::loadV2New(QString file)
     Part *temp;
     LoadHelper helper(file);
     if (helper.validate()){
+        helper.parseHeader();
+        this->parts.resize(helper.params["size"].toUInt());
         helper.go("parts");
         while (!helper.end()){
-            unsigned int id;
-            helper>>id;
-            temp = new Part(id);
+            temp = new Part();
+            helper>>temp->id;
 
-            if (this->lastId<id){
-                lastId = id;
-            }
             helper >> temp->pos.x;
             helper >> temp->pos.y;
             helper >> temp->pos.z;
@@ -1445,7 +1364,7 @@ void PartArray::loadV2New(QString file)
             helper.line();
         }
 
-        helper.readHeader(this, true);
+        helper.applyHeader(this, true);
 
         _unusedFileContent = helper.dumpFileContent();
     }
@@ -1470,18 +1389,15 @@ void PartArray::clear(){
         delete temp; //удаляем все что по есть по ссылкам на частицы
         iter++;
     }
-    this->lastId = 0;
     this->parts.clear();
+    this->eMatrix.clear();
     this->changeSystem();
-    this->setNums();
     this->afterClear();
 }
 
 void PartArray::beforeClear(){}
 
 void PartArray::afterClear(){}
-
-
 
 //временные функции, in process, deprecated and trash
 

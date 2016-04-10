@@ -20,6 +20,21 @@ bool LoadHelper::validate()
     return LoadHelper::version(f.fileName())>1;
 }
 
+void LoadHelper::parseHeader()
+{
+    QStringList tempList;
+    go("header");
+    QString str;
+    while(!(str = this->line()).isNull()){
+        tempList =str.split('=');
+        if (tempList.length()!=2)
+            qWarning()<<"Skip param"<<str<<"in file"<<f.fileName();
+        else {
+            params[tempList[0]]=tempList[1];
+        }
+    }
+}
+
 bool LoadHelper::go(QString section)
 {
     s.seek(0);
@@ -78,6 +93,12 @@ LoadHelper &LoadHelper::operator >>(int &num)
     return *this;
 }
 
+LoadHelper &LoadHelper::operator >>(long &num)
+{
+    s>>num;
+    return *this;
+}
+
 LoadHelper &LoadHelper::operator >>(unsigned int &num)
 {
     s>>num;
@@ -98,9 +119,9 @@ LoadHelper &LoadHelper::operator >>(bool &num)
     return *this;
 }
 
-void LoadHelper::readHeader(PartArray *sys)
+void LoadHelper::applyHeader(PartArray *sys)
 {
-    this->readHeader(sys,false);
+    this->applyHeader(sys,false);
 }
 
 int LoadHelper::version(QString file)
@@ -132,58 +153,46 @@ int LoadHelper::version(QString file)
     return 0;
 }
 
-void LoadHelper::readHeader(PartArray *sys, bool readAnyWay)
+void LoadHelper::applyHeader(PartArray *sys, bool readAnyWay)
 {
     //читаем параметры
-        map<QString,QString> params;
-        QStringList tempList;
+    if (params.size()==0)
+        this->parseHeader();
 
-        go("header");
+    if (readAnyWay)
+        sys->setType(params["type"]);
 
-        QString str;
-        while(!(str = this->line()).isNull()){
-            tempList =str.split('=');
-            if (tempList.length()!=2)
-                qWarning()<<"Skip param"<<str<<"in file"<<f.fileName();
-            else {
-                params[tempList[0]]=tempList[1];
-            }
-        }
+    if (sys->type()!=params["type"])
+        return;
 
-        if (readAnyWay)
-            sys->setType(params["type"]);
+    switch(params["dimensions"].toInt()){
+    case 2:
+        config::Instance()->set2D();
+        break;
+    case 3:
+        config::Instance()->set3D();
+        break;
+    default:
+        qFatal("Dimensions in file %s are setted as %s, which is wrong!",qUtf8Printable(f.fileName()),qUtf8Printable(params["dimensions"]));
+    }
 
-        if (sys->type()!=params["type"])
-            return;
+    if (params.find("interactionrange") != params.end())
+        sys->setInteractionRange(params["interactionrange"].toDouble());
 
-        switch(params["dimensions"].toInt()){
-        case 2:
-            config::Instance()->set2D();
-            break;
-        case 3:
-            config::Instance()->set3D();
-            break;
-        default:
-            qFatal("Dimensions in file %s are setted as %s, which is wrong!",qUtf8Printable(f.fileName()),qUtf8Printable(params["dimensions"]));
-        }
+    sys->eMin = params["emin"].toDouble();
+    sys->eMax = params["emax"].toDouble();
+    sys->minstate.fromString(qUtf8Printable(params["minstate"]));
+    sys->maxstate.fromString(qUtf8Printable(params["maxstate"]));
 
-        if (params.find("interactionrange") != params.end())
-            sys->setInteractionRange(params["interactionrange"].toDouble());
+    //check the state of the system
+    if (QString::fromStdString(sys->state.toString()) != params["state"]){
+        qFatal("Something gonna worng while reading system: system state and state in the header are not the same");
+    }
 
-        sys->eMin = params["emin"].toDouble();
-        sys->eMax = params["emax"].toDouble();
-        sys->minstate.fromString(qUtf8Printable(params["minstate"]));
-        sys->maxstate.fromString(qUtf8Printable(params["maxstate"]));
-
-        //check the state of the system
-        if (QString::fromStdString(sys->state.toString()) != params["state"]){
-            qFatal("Something gonna worng while reading system: system state and state in the header are not the same");
-        }
-
-        //check the system size
-        if (sys->count()!=params["size"].toUInt()){
-            qFatal("Something gonna worng while reading system: system size and size in the header are not the same");
-        }
+    //check the system size
+    if (sys->count()!=params["size"].toUInt()){
+        qFatal("Something gonna worng while reading system: system size and size in the header are not the same");
+    }
 }
 
 QMap<QString, QString> LoadHelper::dumpFileContent()

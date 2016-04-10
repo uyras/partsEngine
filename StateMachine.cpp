@@ -81,11 +81,6 @@ bool StateMachine::connected() const
     return !(this->_system==0);
 }
 
-bool &StateMachine::getById(unsigned id)
-{
-    return this->_system->getById(id)->state;
-}
-
 void StateMachine::reset(){
     std::vector<Part*>::iterator iter;
     iter = this->_system->parts.begin();
@@ -304,11 +299,11 @@ bool StateMachine::fromString(const std::string & s)
     return true;
 }
 
-inline bool StateMachine::operator[](const unsigned long int num) const{
+bool StateMachine::operator[](const unsigned long int num) const{
     return this->_system->parts[num]->state;
 }
 
-inline bool &StateMachine::operator[](const unsigned long num)
+bool &StateMachine::operator[](const unsigned long num)
 {
     return this->_system->parts[num]->state;
 }

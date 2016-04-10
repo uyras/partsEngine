@@ -34,15 +34,13 @@ public:
     virtual bool operator--(int);
     virtual std::string toString() const;
     virtual bool fromString(const std::string&);
-    virtual inline bool operator[](const unsigned long int) const;
-    virtual inline bool& operator[](const unsigned long int);
+    virtual bool operator[](const unsigned long int) const;
+    virtual bool& operator[](const unsigned long int);
     virtual unsigned long int size() const;
 
     void connect(PartArray *system);
     void disconnect();
     bool connected() const;
-
-    bool &getById(unsigned id);
 
     /**
      * @brief hardReset Жестко обнуляет состояния частиц, не трогая их намагниченности.

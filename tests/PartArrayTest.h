@@ -223,6 +223,22 @@ private slots:
         }
     }
 
+    void EFastUpdate(){
+        PartArray sys;
+        for (int i=0;i<3;i++)
+            for (int j=0; j<3; j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+
+        for (int i=0;i<10;i++){
+            sys.state.randomize();
+            QCOMPARE(sys.E(), sys.EComplete());
+        }
+    }
+
     void eEmptySystem(){
         PartArray sys;
         qFuzzyIsNull(sys.E());
@@ -496,6 +512,33 @@ private slots:
         QVERIFY(sys1.Minstate()==sys2.Minstate());
         QVERIFY(sys1.Maxstate()==sys2.Maxstate());
         QVERIFY(sys1.State()==sys2.State());
+    }
+
+    void chechIds(){
+        PartArray a,b;
+        for (int i=0;i<3;i++)
+            for (int j=0;j<3;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                a.insert(temp);
+            }
+
+        a.setInteractionRange(1.1);
+        for (unsigned i=0; i<a.size(); i++){
+            QCOMPARE((unsigned)a[i]->Id(),i);
+        }
+
+
+        a.setInteractionRange(0);
+        for (unsigned i=0; i<a.size(); i++){
+            QCOMPARE((unsigned)a[i]->Id(),i);
+        }
+
+        a.save("sys"); b.load("sys"); //проверяем после сохранения
+        for (unsigned i=0; i<b.size(); i++){
+            QCOMPARE((unsigned)b[i]->Id(),i);
+        }
     }
 
 };

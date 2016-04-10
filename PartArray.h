@@ -36,7 +36,7 @@ class SysLoader;
 class PartArray {
     friend class SysLoader;
     friend class StateMachine;
-    friend void LoadHelper::readHeader(PartArray *, bool);
+    friend void LoadHelper::applyHeader(PartArray *, bool);
     friend void SaveHelper::writeHeader(PartArray *);
 public:
 
@@ -45,7 +45,7 @@ public:
     virtual ~PartArray();
 
     PartArray& operator= (const PartArray& sys);
-    Part* operator[](const int num);
+    Part* operator[](const unsigned num);
     virtual bool operator==(const PartArray& sys) const;
     inline bool operator!=(const PartArray& sys) const{return !this->operator ==(sys);}
 
@@ -192,7 +192,7 @@ public:
 
     //возвращает количество частиц на объекте
     unsigned count() const;
-    inline int size() const{return this->parts.size();}
+    inline unsigned size() const{return this->parts.size();}
 
     // возвращает вектор(массив) энергий каждой частицы
     std::vector<double> getEVector();
@@ -315,19 +315,10 @@ protected:
     double EUpdate(const StateMachineBase &s);
 private:
     QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
-    unsigned int lastId;
     double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы
 
+    vector< vector <double> > eMatrix;
+
     bool stateChanged;
-
-/* механизи определения порядкового номера частицы по ее ID */
-public:
-    unsigned num(unsigned id);
-    unsigned num(Part* part);
-
-private:
-    void setNums();
-    unordered_map <unsigned,unsigned> nums;
-
 };
 #endif // PARTARRAY_H

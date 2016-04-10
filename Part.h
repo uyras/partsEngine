@@ -35,15 +35,13 @@ public:
     void rotate(bool updateEnergy=false); //вращаем магнитный момент частицы и меняем ее состояние
     double volume(); //Возвращает объем частицы в относительных единицах
 
-    inline long int Id() const{
+    inline long Id() const{
         return this->id;
     }
 
 protected:
     PartArray *parent;
-    std::vector<double> eArray;
-    long int id;
-    Part(unsigned int id); //конструктор с установленным ИДом разрешен только для дружественных классов
+    long id; //ИД задается только дружественным классом. Равен порядковому номеру спина в магнитной системе
 };
 
 #endif // PART_H

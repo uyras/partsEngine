@@ -28,7 +28,7 @@ public:
 private:
     PartArray *sys;
     double interactionRange;
-    int lastSize;
+    unsigned lastSize;
     void initNeightbours();
     bool isConnected(const Part* p1, const Part* p2) const;
     bool isNeightbours(const Part* a, const Part* b) const;
