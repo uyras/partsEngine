@@ -303,7 +303,7 @@ protected:
 
     QString _type;
 
-    unordered_map<unsigned,forward_list<Part*>> neighbours; //соседи, упорядоченные по id частицы
+    vector< forward_list<Part*> > neighbours; //соседи, упорядоченные по id частицы
 
     /**
      * @brief preInsert Разметить нужное число ячеек в памяти для размещения частиц (чтобы лишний раз не переразмечать память)

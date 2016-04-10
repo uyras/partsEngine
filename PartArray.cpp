@@ -211,6 +211,8 @@ void PartArray::subTetrahedron(Part *tmp, double x, double y, double z, double v
 void PartArray::reserveParts(unsigned count)
 {
     parts.reserve(count);
+    if (this->_interactionRange!=0.)
+        neighbours.reserve(count);
 }
 
 void PartArray::changeSystem()
@@ -269,14 +271,16 @@ void PartArray::setInteractionRange(const double range)
 
         //определяем соседей частицы
         if (this->_interactionRange!=0.){ //только если не все со всеми
+            neighbours.resize(size());
             Part *part, *temp;
             for (unsigned i=0; i<size(); i++){
+                neighbours[i].clear();
                 part = (*this)[i];
                 vector<Part*>::iterator iter = this->parts.begin();
                 while(iter!=this->parts.end()){
                     temp = *iter;
                     if (isNeighbours(part,temp)){
-                        neighbours[part->Id()].push_front(temp);
+                        neighbours[i].push_front(temp);
                     }
                     iter++;
                 }
@@ -324,6 +328,7 @@ void PartArray::insert(Part * part){
 
     //определяем соседей частицы
     if (this->_interactionRange!=0.){ //только если не дальнодействие
+        neighbours.push_back(forward_list<Part*>());//добавляем соседа, если его еще нет
         vector<Part*>::iterator iter = this->parts.begin();
         Part* temp;
         while(iter!=this->parts.end()){
