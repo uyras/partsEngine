@@ -11,14 +11,9 @@ StateMachineFree::StateMachineFree(const unsigned long size)
     this->_state.resize(size,false);
 }
 
-StateMachineFree::StateMachineFree(const StateMachine &state)
+StateMachineFree::StateMachineFree(const StateMachineBase &state)
 {
     this->_construct(&state);
-}
-
-StateMachineFree::StateMachineFree(const StateMachine *state)
-{
-    this->_construct(state);
 }
 
 void StateMachineFree::reset(){
@@ -270,7 +265,7 @@ void StateMachineFree::resize(const unsigned long size)
     this->_state.resize(size);
 }
 
-void StateMachineFree::_construct(const StateMachine *state)
+void StateMachineFree::_construct(const StateMachineBase *state)
 {
     this->_state.resize(state->size());
     for (unsigned int i=0;i<state->size();i++){

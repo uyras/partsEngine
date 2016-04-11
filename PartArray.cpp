@@ -18,9 +18,12 @@ PartArray::PartArray():
     hamiltonianDipolar();
 }
 
-PartArray::PartArray(const PartArray &sys)
+PartArray::PartArray(const PartArray &sys):
+    state(this),
+    eInit(0.),
+    eInitCalculated(false),
+    stateChanged(true)
 {
-    this->state.connect(this);
     this->_interactionRange = sys._interactionRange;
     this->_hamiltonian = sys._hamiltonian;
 
@@ -33,11 +36,10 @@ PartArray::PartArray(const PartArray &sys)
 
     this->eMin = sys.eMin;
     this->eMax = sys.eMax;
-    this->eInit = sys.eInit;
-    this->eInitCalculated = sys.eInitCalculated;
     this->_type = sys._type;
-    this->minstate = sys.minstate;
-    this->maxstate = sys.maxstate;
+
+    minstate = sys.minstate;
+    maxstate = sys.maxstate;
 }
 
 PartArray::~PartArray(){
@@ -59,8 +61,9 @@ PartArray& PartArray::operator= (const PartArray& sys){
     this->state = sys.state;
     this->eMin = sys.eMin;
     this->eMax = sys.eMax;
-    this->eInit = sys.eInit;
-    this->eInitCalculated = sys.eInitCalculated;
+    this->eInit = 0;
+    this->eInitCalculated = false;
+    this->stateChanged =true;
     this->minstate = sys.minstate;
     this->maxstate = sys.maxstate;
     this->_interactionRange = sys._interactionRange;

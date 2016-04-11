@@ -42,12 +42,6 @@ private slots:
 
         QCOMPARE(s2[0],false);
         QCOMPARE(s2[3],true);
-
-        StateMachineFree s3(&sys.state);
-
-        QVERIFY(s3.size()==5);
-        QCOMPARE(s3[0],false);
-        QCOMPARE(s3[3],true);
     }
 
     void reset(){

@@ -20,8 +20,7 @@ public:
 
     StateMachineFree(const unsigned long int size);
 
-    StateMachineFree(const StateMachine &state);
-    StateMachineFree(const StateMachine *state);
+    StateMachineFree(const StateMachineBase &state);
 
 
     virtual void reset();
@@ -59,7 +58,7 @@ public:
     void resize(const unsigned long int size);
 
 protected:
-    virtual void _construct(const StateMachine *state);
+    virtual void _construct(const StateMachineBase *state);
     std::vector<char> _state;
 };
 

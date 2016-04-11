@@ -591,6 +591,51 @@ private slots:
         }
     }
 
+    void energyAfterCopy(){
+        PartArray a;
+        for (int i=0;i<3;i++)
+            for (int j=0;j<3;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                a.insert(temp);
+            }
+        double e1=a.E();
+        PartArray b(a);
+        QCOMPARE(e1,b.E());
+
+        PartArray c;
+        c = a;
+        QCOMPARE(e1,c.E());
+    }
+
+    void stateAfterCopy(){
+        PartArray a;
+        for (int i=0;i<3;i++)
+            for (int j=0;j<3;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                a.insert(temp);
+            }
+        a.state+=95;
+        a.setMinstate(a.state);
+        a.state+=95;
+        a.setMaxstate(a.state);
+        a.state+=95;
+
+        PartArray b(a);
+        QCOMPARE(a.Minstate(),b.Minstate());
+        QCOMPARE(a.Maxstate(),b.Maxstate());
+        QCOMPARE(a.State(),b.State());
+
+        PartArray c;
+        c = a;
+        QCOMPARE(a.Minstate(),c.Minstate());
+        QCOMPARE(a.Maxstate(),c.Maxstate());
+        QCOMPARE(a.State(),c.State());
+    }
+
 };
 
 #endif // PARTARRAYTEST_H
