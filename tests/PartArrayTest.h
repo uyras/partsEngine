@@ -636,6 +636,26 @@ private slots:
         QCOMPARE(a.State(),c.State());
     }
 
+    void energyAfterRandomize(){
+        PartArray sys;
+        for (int i=0;i<5;i++)
+            for (int j=0;j<5;j++){
+                Part temp;
+                temp.pos.setXYZ(i,j,0);
+                temp.m.setXYZ(0,1,0);
+                sys.insert(temp);
+            }
+
+        QCOMPARE(sys.E(),sys.EComplete());
+
+        sys.state.fromString("0100110010");
+        int rotated = sys.state.randomize();
+        QCOMPARE(sys.E(),sys.EComplete());
+
+        sys.parts[rotated]->rotate();
+        QCOMPARE(sys.E(),sys.EComplete());
+    }
+
 };
 
 #endif // PARTARRAYTEST_H

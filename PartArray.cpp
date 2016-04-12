@@ -600,7 +600,10 @@ double PartArray::EUpdate(const StateMachineBase &s){
 }
 
 void PartArray::EFastUpdate(Part* p){
-    if (!this->eInitCalculated){ //если начальная энергия не посчитана, считаем ее
+    if (!this->eInitCalculated || stateChanged){
+        //если начальная энергия не посчитана,
+        //либо текущее состояние не пересчитано,
+        //пропускаем обновление энергии
         //this->EInit();
         return;
     } else {
@@ -627,7 +630,6 @@ void PartArray::EFastUpdate(Part* p){
         }
 
         eInitState.set(pid, !(eInitState[pid])); //обновляем соответствующий спин состояния. Подразумевается, что в state изменился только этот спин.
-        stateChanged=false;
     }
 }
 
