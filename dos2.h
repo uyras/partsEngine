@@ -42,8 +42,17 @@ public:
     inline double Max() const {return this->max;}
 
 
+    /**
+     * @brief val Возращает значение, с которого начинается i интервал
+     * @param i Интервал, для которого надо получить соответствующее double значение
+     * @return
+     */
     inline double val(unsigned i) const{ return min + (max-min)*((double)i/(double)(intervals)); }
 
+    /**
+     * @brief num Возращает номер интервала для соответствующего значения
+     * @param a
+     */
     inline unsigned num(double a) const{
         if (a<min)
             return 0;
