@@ -9,7 +9,11 @@ public:
     SquareIsingLattice();
     void dropSquareLattice(int m, int n);
 
+    StateMachineFree groundState();
+    StateMachineFree maximalState();
+
 private:
+    //прячем наследованные функции от изменения
     void hamiltonianDipolar();
     void setInteractionRange(const double range);
 };

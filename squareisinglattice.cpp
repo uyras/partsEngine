@@ -25,3 +25,45 @@ void SquareIsingLattice::dropSquareLattice(int m, int n)
         neighbours[temp2->Id()].push_front(temp1);
     }
 }
+
+StateMachineFree SquareIsingLattice::groundState()
+{
+    StateMachineFree newState(this->size()); //сохраняем текущее состояние
+
+    Part* temp; //временная частица
+
+    vector<Part*>::iterator iter = parts.begin();
+    while (iter != parts.end()){ //обходим все частицы
+        temp = *iter;
+        if (temp->m.scalar(Vect(0,1,0))<0) //все верх
+            newState.set(temp->Id(), !temp->state);
+        else
+            newState.set(temp->Id(), temp->state);
+        iter++;
+    }
+
+    return newState;
+}
+
+StateMachineFree SquareIsingLattice::maximalState()
+{
+    StateMachineFree newState(this->size());
+    Part* temp; //временная частица
+
+    vector<Part*>::iterator iter = parts.begin();
+    int i=0, j=0;
+    while (iter != parts.end()){
+        temp = *iter;
+        if ((temp->m.scalar(Vect(0,1,0))>0) ^ ((j+i)%2==1))
+            newState.set(temp->Id(), !temp->state);
+        else
+            newState.set(temp->Id(), temp->state);
+
+        if ((++j) == n){
+            j=0; i++;
+        }
+        iter++;
+    }
+
+    return newState;
+}
