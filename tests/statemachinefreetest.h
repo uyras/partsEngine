@@ -67,7 +67,7 @@ private slots:
 
         s1.reset();
 
-        QCOMPARE(s1.randomize(2),2);
+        QCOMPARE(s1.randomize(2),(unsigned)2);
         QVERIFY(!s1.isFirst());
     }
 
@@ -259,6 +259,25 @@ private slots:
         StateMachineFree s3(6);
         s3+=10;
         QVERIFY(!(s1==s3));
+    }
+
+    void randomTest(){
+        StateMachineFree s(16);
+
+        unsigned c[16];
+        for (unsigned i=0;i<16;i++){
+            c[i]=0;
+        }
+
+        unsigned tempNum;
+        for (unsigned i=0;i<10000000;i++){
+            tempNum=s.randomize();
+            c[tempNum]++;
+        }
+
+        for (unsigned i=0;i<16;i++){
+            QVERIFY(c[i]>0);
+        }
     }
 };
 

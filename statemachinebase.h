@@ -23,7 +23,7 @@ public:
      * @param count Количество переворотов которые нужно совершить
      * @return если перевернуть одну частицу, возвращает ее номер, иначе count. При ошибке возвращает -1.
      */
-    virtual int randomize(int count=1)=0;
+    virtual unsigned randomize(unsigned count=1)=0;
 
     /**
      * @brief isFirst Проверяет, находится ли система в начальном состоянии

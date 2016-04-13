@@ -26,7 +26,7 @@ public:
     virtual void reset();
     virtual void clear();
     virtual void setLast();
-    virtual int randomize(int count=1);
+    virtual unsigned randomize(unsigned count=1);
     virtual bool isFirst();
     virtual bool isLast();
     virtual bool isHalfLast();

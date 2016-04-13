@@ -20,7 +20,7 @@ public:
 
     virtual void reset();
     virtual void setLast();
-    virtual int randomize(int count=1);
+    virtual unsigned randomize(unsigned count=1);
     virtual bool isFirst();
     virtual bool isLast();
     virtual bool isHalfLast();
@@ -53,6 +53,8 @@ public:
     StateMachine& operator=(const StateMachineFree &state);
     StateMachine& operator=(const StateMachine & state);
     StateMachine& operator=(const StateMachineBase& state);
+
+    inline const PartArray *system() const{return _system;}
 
 private:
     PartArray* _system;

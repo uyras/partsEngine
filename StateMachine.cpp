@@ -113,17 +113,15 @@ void StateMachine::setLast(){
     }
 }
 
-int StateMachine::randomize(int count){
-    int randnum=0,
-            rm = Random::Instance()->max(),
-            parts = this->_system->parts.size(),
+unsigned StateMachine::randomize(unsigned count){
+    unsigned parts = this->size(),
             rotated = 0;
+    int rnum=0;
 
     Part* temp;
     while (rotated<count){
-        randnum = config::Instance()->rand();
-        randnum = floor(double(randnum)/double(rm)*double(parts-1));
-        temp = (this->_system->parts.at(randnum));
+        rnum=Random::Instance()->next(parts);
+        temp = (this->_system->parts.at(rnum));
 
         if (count==1)
             temp->rotate(true);
@@ -134,7 +132,7 @@ int StateMachine::randomize(int count){
     }
 
     if (count==1)
-        return randnum;
+        return temp->Id();
     else
         return count;
 }

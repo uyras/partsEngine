@@ -37,8 +37,7 @@ private slots:
         QCOMPARE((int)s1.size(),10);
         QCOMPARE(s1[5], false);
 
-        QEXPECT_FAIL("", "Will fix in the next release", Continue);
-        QCOMPARE(&s1,&sys1.state);
+        QCOMPARE(s1.system(),&sys1);
     }
 
     void constructor3(){
@@ -53,8 +52,7 @@ private slots:
         QCOMPARE((int)s1->size(),10);
         QCOMPARE((*s1)[5],false);
 
-        QEXPECT_FAIL("", "Will fix in the next release", Continue);
-        QCOMPARE(s1,&sys1.state);
+        QCOMPARE(s1->system(),&sys1);
         delete s1;
     }
 
@@ -108,7 +106,7 @@ private slots:
 
         sys1.state.reset();
 
-        QCOMPARE(sys1.state.randomize(2),2);
+        QCOMPARE(sys1.state.randomize(2),(unsigned)2);
         QVERIFY(!sys1.state.isFirst());
     }
 
@@ -465,11 +463,9 @@ private slots:
         for (int i=0; i<10; i++)
             a->insert(Part());
 
-        QVERIFY(a->state.randomize()>=0);
+        QCOMPARE(a->state.randomize(11),(unsigned)11);
         a->state.reset();
-        QCOMPARE(a->state.randomize(11),11);
-        a->state.reset();
-        QCOMPARE(a->state.randomize(2),2);
+        QCOMPARE(a->state.randomize(2),(unsigned)2);
         a->state.reset();
         int reallyTurned = a->state.randomize(1);
 
@@ -482,6 +478,27 @@ private slots:
         }
         QCOMPARE(num,1);
         QCOMPARE(reallyTurned,turned);
+    }
+
+    void randomTest(){
+        PartArray sys;
+        for (unsigned i=0; i<16; i++)
+            sys.insert(new Part());
+
+        unsigned c[16];
+        for (unsigned i=0;i<16;i++){
+            c[i]=0;
+        }
+
+        unsigned tempNum;
+        for (unsigned i=0;i<10000000;i++){
+            tempNum=sys.state.randomize();
+            c[tempNum]++;
+        }
+
+        for (unsigned i=0;i<16;i++){
+            QVERIFY(c[i]>0);
+        }
     }
 };
 
