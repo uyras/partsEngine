@@ -4,7 +4,8 @@ WangLandau::WangLandau(PartArray *sys, unsigned intervals, double accuracy, doub
     sys(sys),
     intervals(intervals),
     accuracy(accuracy),
-    fMin(fmin)
+    fMin(fmin),
+    f(0)
 {
 
     //считаем минимум и максимум системы
@@ -26,6 +27,7 @@ void WangLandau::run(unsigned steps)
     const StateMachineFree initState = sys->state;
     this->f = exp(1);
     this->resetH();
+    updateGH(sys->E());
 
     sys->state = sys->Minstate();
 
@@ -42,7 +44,7 @@ void WangLandau::run(unsigned steps)
             if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
                 eOld = eNew;
             } else {
-                sys->parts[partNum]->rotate(); //откатываем состояние
+                sys->parts[partNum]->rotate(true); //откатываем состояние
             }
 
             updateGH(eOld);
@@ -85,7 +87,7 @@ void WangLandau::runWithSave(unsigned steps, unsigned saveEach)
             if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
                 eOld = eNew;
             } else {
-                sys->parts[partNum]->rotate(); //откатываем состояние
+                sys->parts[partNum]->rotate(true); //откатываем состояние
             }
 
             updateGH(eOld);
@@ -142,7 +144,7 @@ void WangLandau::saveG(const string filename) const
 //критерий плоскости гистограммы
 bool WangLandau::isFlat()
 {
-    for (unsigned i=0; i<=h.Intervals(); i++){//плоскость гистограммы только в своем интервале
+    for (unsigned i=0; i<h.Intervals(); i++){//плоскость гистограммы только в своем интервале
         if (h.at(i)!=0. && fabs(h.at(i)-average)/average > (1.0 - accuracy)) //критерий плоскости
             return false;
     }
