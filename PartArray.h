@@ -33,6 +33,10 @@ using namespace std;
 class Part;
 class SysLoader;
 
+/**
+ * @brief The PartArray class
+ */
+
 class PartArray {
     friend class SysLoader;
     friend class StateMachine;
@@ -41,6 +45,16 @@ class PartArray {
 public:
 
     PartArray();
+    /**
+     * @brief PartArray Конструктор копирования класса
+     * @param sys Копируемый класс
+     *
+     * Копирует список частиц минимальное, максимальное и текущее состояние, их энергии, строку типа системы,
+     * радиус взаимодействия и гамильтониан.
+     * Таблица энергий, история изменения состояний не копируется.
+     * Список соседей создается заново в процессе копирования
+     * В результате операции новая система будет идентична старой.
+     */
     PartArray(const PartArray &sys);
     virtual ~PartArray();
 
