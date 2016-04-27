@@ -56,7 +56,6 @@ void WangLandau::run(unsigned steps)
 
         //проверяем ровность диаграммы
         if (this->isFlat()){
-            this->normalizeG();
             f=sqrt(f);
             this->resetH();
             msg("accepted ",(int)accepted);
@@ -133,7 +132,8 @@ void WangLandau::saveH(const string filename) const
 {
     ofstream f(filename);
     for (unsigned i=0;i<h.Intervals();i++){
-        f<<i<<"\t"<<h.val(i)<<"\t"<<h.at(i)<<endl;
+        if (h.val(i)!=0.)
+            f<<i<<"\t"<<h.val(i)<<"\t"<<h.at(i)<<"\t"<<h.at(i+1)<<endl;
     }
 
     f.close();
@@ -143,7 +143,8 @@ void WangLandau::saveG(const string filename) const
 {
     ofstream f(filename);
     for (unsigned i=0;i<g.Intervals();i++){
-        f<<i<<"\t"<<g.val(i)<<"\t"<<g.at(i)<<endl;
+        if (g.val(i)!=0.)
+            f<<i<<"\t"<<g.val(i)<<"\t"<<g.at(i)<<"\t"<<g.at(i+1)<<endl;
     }
 
     f.close();
