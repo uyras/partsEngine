@@ -31,6 +31,8 @@ public:
     Dos2<double> g;//g - логарифм плотности состояний (энтропия), h - вспомогательная гистограмма, которая должна быть плоской
     Dos2<unsigned> h;
 
+    bool showMessages;
+
 private:
     PartArray *sys;
     unsigned int intervals; //число интервалов в плотности состояний
@@ -46,6 +48,9 @@ private:
     void updateGH(double E=0.0);
     void resetH();
     void normalizeG();
+    inline void msg(std::string str){if (showMessages) cout<<str<<endl;}
+    inline void msg(std::string str,double val){if (showMessages) cout<<str<<val<<endl;}
+    inline void msg(std::string str,int val){if (showMessages) cout<<str<<val<<endl;}
 };
 
 #endif // WANGLANDAU_H

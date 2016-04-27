@@ -1,6 +1,7 @@
 #include "wanglandau.h"
 
 WangLandau::WangLandau(PartArray *sys, unsigned intervals, double accuracy, double fmin):
+    showMessages(false),
     sys(sys),
     intervals(intervals),
     accuracy(accuracy),
@@ -26,6 +27,7 @@ void WangLandau::run(unsigned steps)
 {
     const StateMachineFree initState = sys->state;
     this->f = exp(1);
+    long unsigned accepted=0, rejected=0;
     this->resetH();
     updateGH(sys->E());
 
@@ -43,8 +45,10 @@ void WangLandau::run(unsigned steps)
             eNew = sys->E();
             if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
                 eOld = eNew;
+                accepted++;
             } else {
                 sys->parts[partNum]->rotate(true); //откатываем состояние
+                rejected++;
             }
 
             updateGH(eOld);
@@ -55,7 +59,11 @@ void WangLandau::run(unsigned steps)
             this->normalizeG();
             f=sqrt(f);
             this->resetH();
-            qDebug()<<"h is flat, new f is "<<f;
+            msg("accepted ",(int)accepted);
+            msg("rejected ",(int)rejected);
+            msg("h is flat, new f is ",f);
+            accepted=0; rejected=0;
+
         }
     }
 
