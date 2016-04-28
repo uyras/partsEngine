@@ -132,8 +132,8 @@ void WangLandau::saveH(const string filename) const
 {
     ofstream f(filename);
     for (unsigned i=0;i<h.Intervals();i++){
-        if (h.val(i)!=0.)
-            f<<i<<"\t"<<h.val(i)<<"\t"<<h.at(i)<<"\t"<<h.at(i+1)<<endl;
+        if (h.at(i)!=0.)
+            f<<i<<"\t"<<h.at(i)<<"\t"<<h.val(i)<<"\t"<<h.val(i+1)<<endl;
     }
 
     f.close();
@@ -143,8 +143,8 @@ void WangLandau::saveG(const string filename) const
 {
     ofstream f(filename);
     for (unsigned i=0;i<g.Intervals();i++){
-        if (g.val(i)!=0.)
-            f<<i<<"\t"<<g.val(i)<<"\t"<<g.at(i)<<"\t"<<g.at(i+1)<<endl;
+        if (g.at(i)!=0.)
+            f<<i<<"\t"<<g.at(i)<<"\t"<<g.val(i)<<"\t"<<g.val(i+1)<<endl;
     }
 
     f.close();
