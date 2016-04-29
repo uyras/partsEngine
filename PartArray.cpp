@@ -117,6 +117,20 @@ Part *PartArray::getById(unsigned id)
     else return 0;
 }
 
+Part *PartArray::findByPosition(const Vect &pos, double epsilon)
+{
+    vector<Part*>::reverse_iterator iter = this->parts.rbegin();
+    Part* temp;
+    while (iter!=this->parts.rend()){
+        temp = *iter;
+        if (fabs(temp->pos.x-pos.x)<epsilon && fabs(temp->pos.y-pos.y)<epsilon){
+            return temp;
+        }
+        iter++;
+    }
+    return 0;
+}
+
 
 //Вспомогательная функция генерирующая спины
 //Генерируется 4 спина (1 пирамида)

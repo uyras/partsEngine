@@ -22,14 +22,6 @@ public:
 
     void dropSpinIce(int hCells, int vCells, double l=1);
 
-    /**
-     * @brief findByPosition Найти частицу по ее позиции
-     * @param pos Позиция частицы, которую надо найти
-     * @param epsilon Точность поиска
-     * @return
-     */
-    Part* findByPosition(const Vect& pos, double epsilon=1e-15);
-
     StateMachineFree groundState();
     StateMachineFree maximalState();
 

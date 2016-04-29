@@ -63,8 +63,16 @@ public:
     virtual bool operator==(const PartArray& sys) const;
     inline bool operator!=(const PartArray& sys) const{return !this->operator ==(sys);}
 
-    //получить частицу по уникальному идентификатору
+    ///получить частицу по уникальному идентификатору
     Part* getById(unsigned id);
+
+    /**
+     * @brief findByPosition Найти частицу по ее позиции
+     * @param pos Позиция частицы, которую надо найти
+     * @param epsilon Точность поиска
+     * @return 0 если не найдена, ссылку на найденную частицу в случае нахождения
+     */
+    Part *findByPosition(const Vect& pos, double epsilon=1e-15);
 
     void insert(Part* part); //Добавляет частицу на образец
     void insert(const Part &part); //Добавляет копию частицы в образец
