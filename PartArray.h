@@ -157,15 +157,17 @@ public:
 
     inline double EMin() const {return this->eMin;}
     inline double EMax() const {return this->eMax;}
+    inline void setEMin(const double val) {this->eMin = val;}
+    inline void setEMax(const double val) {this->eMax = val;}
 
     virtual StateMachineFree maximalState(); //находит состояние максимума энергии системы
     virtual StateMachineFree groundState(); //находит состояние минимума энергии
 
     inline const StateMachineFree & Minstate() const { return minstate; }
-    inline void setMinstate(const StateMachineBase &s) { minstate = s; eMin = E(minstate); }
+    inline void setMinstate(const StateMachineBase &s) { minstate = s; setEMin(E(minstate)); }
 
     inline const StateMachineFree & Maxstate() const { return maxstate; }
-    inline void setMaxstate(const StateMachineBase &s) { maxstate = s; eMax = E(maxstate); }
+    inline void setMaxstate(const StateMachineBase &s) { maxstate = s; setEMax(E(maxstate)); }
 
     inline const StateMachine & State() const { return state; }
     inline void setState(const StateMachineBase &s) { this->state = s; changeState(); }

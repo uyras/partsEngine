@@ -57,7 +57,10 @@ HEADERS += \
     squareisinglattice.h \
     clustermachine.h \
     dos2.h \
-    dos3.h
+    dos3.h \
+    utils.h \
+    brickworka.h \
+    brickworkc.h
 
 
 TEMPLATE = lib

@@ -2,6 +2,7 @@
 
 WangLandau::WangLandau(PartArray *sys, unsigned intervals, double accuracy, double fmin):
     showMessages(false),
+    saveEach(0),
     sys(sys),
     intervals(intervals),
     accuracy(accuracy),
@@ -10,12 +11,12 @@ WangLandau::WangLandau(PartArray *sys, unsigned intervals, double accuracy, doub
 {
 
     //считаем минимум и максимум системы
-    if (sys->Minstate().size()==0 || sys->Maxstate().size()==0)
+    if (sys->EMin()==0 || sys->EMax()==0)
         qFatal("Min or max state is unknown. DOS calculation is impossible.");
 
     //инициируем DOS
-    h.resize(sys->E(sys->Minstate()), sys->E(sys->Maxstate()), intervals);
-    g.resize(sys->E(sys->Minstate()), sys->E(sys->Maxstate()), intervals);
+    h.resize(sys->EMin(), sys->EMax(), intervals);
+    g.resize(sys->EMin(), sys->EMax(), intervals);
 }
 
 WangLandau::~WangLandau()
@@ -27,11 +28,9 @@ void WangLandau::run(unsigned steps)
 {
     const StateMachineFree initState = sys->state;
     this->f = exp(1);
-    long unsigned accepted=0, rejected=0;
+    long unsigned accepted=0, rejected=0, totalSteps=0;
     this->resetH();
     updateGH(sys->E());
-
-    sys->state = sys->Minstate();
 
     qDebug()<<"steps="<<steps;
 
@@ -45,13 +44,25 @@ void WangLandau::run(unsigned steps)
             eNew = sys->E();
             if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
                 eOld = eNew;
-                accepted++;
+                ++accepted;
             } else {
                 sys->parts[partNum]->rotate(true); //откатываем состояние
-                rejected++;
+                ++rejected;
             }
 
             updateGH(eOld);
+            ++totalSteps;
+
+            if (saveEach && totalSteps%saveEach==0){
+                ostringstream fn;
+                fn<<"g_"<<totalSteps<<".dat";
+                saveG(fn.str());
+
+                fn.str("");
+                fn.clear();
+                fn<<"h_"<<totalSteps<<".dat";
+                saveH(fn.str());
+            }
         }
 
         //проверяем ровность диаграммы
@@ -63,63 +74,6 @@ void WangLandau::run(unsigned steps)
             msg("h is flat, new f is ",f);
             accepted=0; rejected=0;
 
-        }
-    }
-
-
-    sys->state = initState;
-    return;
-}
-
-void WangLandau::runWithSave(unsigned steps, unsigned saveEach)
-{
-    const StateMachineFree initState = sys->state;
-    this->f = exp(1);
-    this->resetH();
-    unsigned long long totalSteps=0;
-    ostringstream fn;
-
-    sys->state = sys->Minstate();
-
-    qDebug()<<"steps="<<steps;
-
-    double eOld = sys->E(),eNew=sys->E();
-
-    while (f>fMin){
-        //повторяем алгоритм сколько-то шагов
-        for (unsigned i=0;i<steps;i++){
-            int partNum = sys->state.randomize();
-
-            eNew = sys->E();
-            if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
-                eOld = eNew;
-            } else {
-                sys->parts[partNum]->rotate(true); //откатываем состояние
-            }
-
-            updateGH(eOld);
-            ++totalSteps;
-
-            if (totalSteps%saveEach==0){
-                fn.str("");
-                fn.clear();
-                fn<<"g_"<<totalSteps<<".dat";
-                saveG(fn.str());
-
-                fn.str("");
-                fn.clear();
-                fn<<"h_"<<totalSteps<<".dat";
-                saveH(fn.str());
-                qDebug()<<totalSteps;
-            }
-        }
-
-        //проверяем ровность диаграммы
-        if (this->isFlat()){
-            this->normalizeG();
-            f=sqrt(f);
-            this->resetH();
-            qDebug()<<"h is flat, new f is "<<f;
         }
     }
 

@@ -19,7 +19,6 @@ public:
     virtual ~WangLandau();
 
     void run(unsigned steps=10000);
-    void runWithSave(unsigned steps=10000, unsigned saveEach=100);
 
     /**
      * @brief save сохранить гистограммы в файл
@@ -28,10 +27,12 @@ public:
     void saveG(const std::string filename="") const;
     void saveH(const std::string filename="") const;
 
-    Dos2<double> g;//g - логарифм плотности состояний (энтропия), h - вспомогательная гистограмма, которая должна быть плоской
+    Dos2<double> g; ///g - логарифм плотности состояний (энтропия), h - вспомогательная гистограмма, которая должна быть плоской
     Dos2<unsigned> h;
 
     bool showMessages;
+    unsigned saveEach; ///каждые сколько шагов сохранять данные в файл. если 0 то не сохранять.
+
 
 private:
     PartArray *sys;
