@@ -40,7 +40,7 @@ public:
     virtual bool operator--(int);
     virtual std::string toString() const;
     virtual bool fromString(const std::string&);
-    inline virtual bool operator [](const unsigned long int num) const { return this->_state[num]; }
+    inline virtual bool operator [](const unsigned long int num) const { return (bool)this->_state[num]; }
     inline virtual bool set(const unsigned long int num, bool val){
         return (this->_state[num] = val);
     }

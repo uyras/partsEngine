@@ -76,3 +76,5 @@ CONFIG += c++11
 CONFIG(release,debug|release){
     DEFINES += QT_NO_DEBUG_OUTPUT
 }
+
+DEFINES += _USE_MATH_DEFINES

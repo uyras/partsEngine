@@ -529,7 +529,7 @@ void PartArray::EUpdate(){
     Part* temp;
     for (unsigned i=0; i<ssize; i++){
         //если состояние поменялось
-        if ( changedBits[i] == true){
+        if ( changedBits[i] == (char)true){
             tempState=parts[i]->state;
             temp = (*this)[i];
             j=0;
@@ -578,7 +578,7 @@ double PartArray::EUpdate(const StateMachineBase &s){
     //обходим все спины
     for (unsigned i=0; i<ssize; i++){
         //если состояние поменялось
-        if ( changedBits[i] == true){
+        if ( changedBits[i] == (char)true){
             thisState=s[i];
             temp = (*this)[i];
             j=0;

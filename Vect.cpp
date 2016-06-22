@@ -8,9 +8,7 @@
 #include "config.h"
 #include "Vect.h"
 #include "Part.h"
-#include <cmath>
 #include <locale.h>
-#include <iostream>
 
 using namespace std;
 
