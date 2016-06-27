@@ -15,7 +15,7 @@ PartArray::PartArray():
     this->changeSystem();
     this->_type="standart";
     _interactionRange = 0;
-    hamiltonianDipolar();
+    setHamiltonian(hamiltonianDipolar);
 }
 
 PartArray::PartArray(const PartArray &sys):
@@ -1597,39 +1597,6 @@ void PartArray::setType(QString type)
     this->_type = type;
 }
 
-void PartArray::hamiltonianDipolar()
-{
-    this->_hamiltonian = [](Part* a, Part* b) -> double {
-        double rijx = b->pos.x - a->pos.x,
-            rijy = b->pos.y - a->pos.y,
-            rijz = b->pos.z - a->pos.z, r2, r, r5,E;
-        if (config::Instance()->dimensions()==2)
-            r2 = rijx*rijx+rijy*rijy;
-        else
-            r2 = rijx*rijx+rijy*rijy+rijz*rijz;
-        r = sqrt(r2); //трудное место, заменить бы
-        r5 = r2 * r2 * r; //радиус в пятой
-        if (config::Instance()->dimensions()==2)
-            E = //энергия считается векторным методом, так как она не нужна для каждой оси
-                    (( (a->m.x * b->m.x + a->m.y * b->m.y) * r2)
-                     -
-                     (3 * (b->m.x * rijx + b->m.y * rijy) * (a->m.x * rijx + a->m.y * rijy)  )) / r5;
-        else
-            E = //энергия считается векторным методом, так как она не нужна для каждой оси
-                    (( (a->m.x*b->m.x+a->m.y*b->m.y+a->m.z*b->m.z) * r2)
-                     -
-                     (3 * (b->m.x * rijx + b->m.y * rijy + b->m.z * rijz) * (a->m.x * rijx + a->m.y * rijy + a->m.z * rijz)  )) / r5;
-        return E;
-    };
-}
-
-void PartArray::hamiltonianIsing()
-{
-    this->_hamiltonian = [](Part* a, Part* b) -> double {
-        return -1. * a->m.scalar(b->m);
-    };
-}
-
 bool PartArray::_double_equals(double a, double b)
 {
     return fabs(a - b) < 1e-12;
@@ -2110,4 +2077,33 @@ void PartArray::moveMRandomly(double fi){
         }
     }
     this->changeSystem();
+}
+
+double hamiltonianDipolar(Part *a, Part *b)
+{
+    double rijx = b->pos.x - a->pos.x,
+        rijy = b->pos.y - a->pos.y,
+        rijz = b->pos.z - a->pos.z, r2, r, r5,E;
+    if (config::Instance()->dimensions()==2)
+        r2 = rijx*rijx+rijy*rijy;
+    else
+        r2 = rijx*rijx+rijy*rijy+rijz*rijz;
+    r = sqrt(r2); //трудное место, заменить бы
+    r5 = r2 * r2 * r; //радиус в пятой
+    if (config::Instance()->dimensions()==2)
+        E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                (( (a->m.x * b->m.x + a->m.y * b->m.y) * r2)
+                 -
+                 (3 * (b->m.x * rijx + b->m.y * rijy) * (a->m.x * rijx + a->m.y * rijy)  )) / r5;
+    else
+        E = //энергия считается векторным методом, так как она не нужна для каждой оси
+                (( (a->m.x*b->m.x+a->m.y*b->m.y+a->m.z*b->m.z) * r2)
+                 -
+                 (3 * (b->m.x * rijx + b->m.y * rijy + b->m.z * rijz) * (a->m.x * rijx + a->m.y * rijy + a->m.z * rijz)  )) / r5;
+    return E;
+}
+
+double hamiltonianIsing(Part *a, Part *b)
+{
+    return -1. * a->m.scalar(b->m);
 }

@@ -236,3 +236,12 @@ double Vect::angle(){
 double Vect::grade(){
     return this->angle()*180/M_PI;
 }
+
+ostream& operator<<(ostream & os, const Vect& p){
+    os<<"("<<p.x<<";"<<p.y;
+    if (config::Instance()->dimensions()==3){
+        os<<";"<<p.z;
+    }
+    os<<")";
+    return os;
+}

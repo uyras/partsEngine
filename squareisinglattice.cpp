@@ -4,7 +4,7 @@ SquareIsingLattice::SquareIsingLattice():
     SquareLattice()
 {
     this->SquareLattice::setInteractionRange(1.1);
-    this->SquareLattice::hamiltonianIsing();
+    this->setHamiltonian(hamiltonianIsing);
 }
 
 void SquareIsingLattice::dropSquareLattice(int m, int n)

@@ -11,6 +11,15 @@ class SaveHelper
 {
     friend class PartArray;
 public:
+
+    /**
+     * @brief SaveHelper Конструктор сохранения. Открывает файл для записи
+     * @param file Путь до сохраняемого файла
+     * @param overwritePreviousData Перезаписать предыдущий файл.
+     * Если true, удаляет все данные,
+     * если false дописывает в существующий файл.
+     * Однако функция go(QString) перезаписывает секцию в любом случае
+     */
     SaveHelper(QString file, bool overwritePreviousData = false);
     virtual ~SaveHelper();
 

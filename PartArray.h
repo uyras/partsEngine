@@ -30,6 +30,10 @@ using namespace std;
 class Part;
 class SysLoader;
 
+double hamiltonianDipolar(Part* a, Part* b);
+
+double hamiltonianIsing(Part* a, Part* b);
+
 /**
  * @brief The PartArray class
  */
@@ -299,15 +303,15 @@ public:
     virtual QString type() const;
     void setType(QString type);
 
-    //Гамильтонианы
-    void hamiltonianDipolar();
-    void hamiltonianIsing();
+    void setHamiltonian(double (*ham)(Part*,Part*)){this->_hamiltonian=ham; this->changeSystem();}
 
     inline unsigned neighbourSize(unsigned i){
         if (this->_interactionRange!=0.)
             return std::distance(neighbours[i].begin(), neighbours[i].end());
         else return this->size()-1;
     }
+
+    double eAt(unsigned id1, unsigned id2){ return this->eMatrix[id1][id2]; }
 
 protected:
     double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы

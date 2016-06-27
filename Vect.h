@@ -1,6 +1,10 @@
 #ifndef VECT_H
 #define VECT_H
 
+#include <iostream>
+
+using namespace std;
+
 class Vect {
 public:
     double x, y, z; //основные параметры векторов
@@ -40,6 +44,8 @@ public:
     inline bool operator!=(const Vect& a) const {return !this->operator ==(a);}
     static Vect crossProduct(const Vect& vect1, const Vect& vect2);  //векторное произведение двух векторов
     static Vect normal(const Vect& vect1, const Vect& vect2); //нормаль к плоскости векторов
+
+    friend ostream &operator<<(ostream & os, const Vect& p);
 };
 
 #endif // VECT_H
