@@ -29,7 +29,7 @@ public:
 
     virtual ~Part();
     Vect interact(const Vect &p) const; //считает поле взаимодействия текущей частицы в точке p и возвращает вектор H
-    void rotate(bool updateEnergy=false); //вращаем магнитный момент частицы и меняем ее состояние
+    virtual void rotate(bool updateEnergy=false); //вращаем магнитный момент частицы и меняем ее состояние
     double volume(); //Возвращает объем частицы в относительных единицах
 
     inline long Id() const{
