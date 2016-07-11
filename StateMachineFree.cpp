@@ -41,7 +41,7 @@ unsigned StateMachineFree::randomize(unsigned count){
     int randnum=0, parts = this->size();
     vector<char>::iterator iter;
     for (unsigned i=0;i<count;i++){
-        randnum = Random::Instance()->next(parts);
+        randnum = rnd::next(parts);
         iter = this->_state.begin()+randnum;
         *iter = !*iter;
     }

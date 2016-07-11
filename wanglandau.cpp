@@ -42,7 +42,7 @@ void WangLandau::run(unsigned steps)
             int partNum = sys->state.randomize();
 
             eNew = sys->E();
-            if (Random::Instance()->nextDouble() <= exp(g[eOld]-g[eNew])) {
+            if (rnd::nextDouble() <= exp(g[eOld]-g[eNew])) {
                 eOld = eNew;
                 ++accepted;
             } else {

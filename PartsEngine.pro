@@ -23,7 +23,6 @@ SOURCES += Vect.cpp \
     squarespinicearray.cpp \
     squarespinicecell.cpp \
     wanglandau.cpp \
-    random.cpp \
     honeycombspinicearray.cpp \
     honeycombspinicecell.cpp \
     squarelattice.cpp \
@@ -33,7 +32,8 @@ SOURCES += Vect.cpp \
     squareisinglattice.cpp \
     clustermachine.cpp \
     dos2.cpp \
-    dos3.cpp
+    dos3.cpp \
+    random.cpp
 
 HEADERS += \
     Vect.h \

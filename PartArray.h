@@ -77,6 +77,7 @@ public:
 
     void insert(Part* part); //Добавляет частицу на образец
     void insert(const Part &part); //Добавляет копию частицы в образец
+    void add(Part* part);
 
     virtual void dropTetrahedron(int x, int y, int z, double R = 1, Part * tmp = 0);
 
@@ -87,7 +88,9 @@ public:
      */
     void setInteractionRange(const double range);
     inline double interactionRange() const { return _interactionRange; }
-    bool isNeighbours(const Part* _a, const Part* _b) const;
+    virtual bool isNeighbours(const Part* _a, const Part* _b) const;
+
+    void setNeighbours(Part *_a, Part *_b);
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
 

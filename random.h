@@ -7,50 +7,33 @@
 #include <iostream>
 
 using namespace std;
+namespace rnd {
 
-class Random
-{
-public:
+extern int (*_rand)(); //функция - рэндом
+extern void (*_srand)(unsigned int); //функция - cид
+extern unsigned long long randmax;
 
-    //паттерн синглтон
-    static Random *Instance(int srand=0);
+/**
+ * @brief next Cлучайное число в интервале от minValue (включительно) до maxValue (исключительно)
+ * @param minValue Минимальное значение случайного числа.
+ * @param maxValue Максимальное значение случайного числа.
+ * @return озвращает случайное число. Например, если minValue=1, maxValue=4, то вернет одно из чисел 1,2,3
+ */
+int next(const int minValue,const int maxValue);
 
-    //установка режимов random
-    void standart();
+/**
+ * @brief next Cлучайное число в интервале от 0 (включительно) до maxValue (исключительно)
+ * @param maxValue Максимальное значение случайного числа.
+ * @return Возвращает случайное число. Например, если maxValue=3, то вернет одно из чисел 0,1,2
+ */
+int next(const int maxValue);
 
-    /**
-     * @brief next Cлучайное число в интервале от 0 (включительно) до maxValue (исключительно)
-     * @param maxValue Максимальное значение случайного числа.
-     * @return Возвращает случайное число. Например, если maxValue=3, то вернет одно из чисел 0,1,2
-     */
-    int next(const int maxValue);
+int next();
+unsigned long int max();
+void srand(unsigned int seed);
 
-    /**
-     * @brief next Cлучайное число в интервале от minValue (включительно) до maxValue (исключительно)
-     * @param minValue Минимальное значение случайного числа.
-     * @param maxValue Максимальное значение случайного числа.
-     * @return озвращает случайное число. Например, если minValue=1, maxValue=4, то вернет одно из чисел 1,2,3
-     */
-    int next(const int minValue,const int maxValue);
+double nextDouble();
 
-
-    int next();
-    double nextDouble();
-
-    unsigned long int max();
-    void srand(int value);
-
-private:
-    static Random* _self;
-    Random(int srand);
-    virtual ~Random();
-
-    /*режим рэндома
-    0 - стандартный
-    1 - нативный
-    */
-    int _randmode;
-    unsigned long int randmax;
-};
+}
 
 #endif // RANDOM_H

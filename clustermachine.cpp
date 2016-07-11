@@ -133,12 +133,14 @@ void ClusterMachine::findClusters()
 
 void ClusterMachine::walkNeighbours(Part *part, ClusterMachine::cluster &currentCluster, unordered_set<unsigned> &unWalked)
 {
-    for(Part* temp: neighbours.at(part->Id())){
-        bool walked = (unWalked.find(temp->Id())==unWalked.end());
-        if (!walked && isConnected(part,temp)){
-            unWalked.erase(temp->Id());
-            currentCluster.push_back(temp);
-            this->walkNeighbours(temp,currentCluster, unWalked);
+    try{
+        for(Part* temp: neighbours.at(part->Id())){
+            bool walked = (unWalked.find(temp->Id())==unWalked.end());
+            if (!walked && isConnected(part,temp)){
+                unWalked.erase(temp->Id());
+                currentCluster.push_back(temp);
+                this->walkNeighbours(temp,currentCluster, unWalked);
+            }
         }
-    }
+    } catch (std::out_of_range& oor){(void)oor;};
 }

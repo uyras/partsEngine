@@ -120,7 +120,7 @@ unsigned StateMachine::randomize(unsigned count){
 
     Part* temp;
     while (rotated<count){
-        rnum=Random::Instance()->next(parts);
+        rnum=rnd::next(parts);
         temp = (this->_system->parts.at(rnum));
 
         if (count==1)
@@ -135,6 +135,13 @@ unsigned StateMachine::randomize(unsigned count){
         return temp->Id();
     else
         return count;
+}
+
+unsigned StateMachine::randomize()
+{
+    int rnum=rnd::next(this->size());
+    this->system()->parts.at(rnum)->rotate(true);
+    return rnum;
 }
 
 bool StateMachine::isFirst(){

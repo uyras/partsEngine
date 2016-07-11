@@ -1,64 +1,17 @@
 #include "random.h"
-Random*  Random::_self=0;
 
-Random *Random::Instance(int srand)
-{
-    if(Random::_self==0)
-    {
-        Random::_self = new Random(srand);
-    }
-    return Random::_self;
-}
+int (*rnd::_rand)() = std::rand; //функция - рэндом
+void (*rnd::_srand)(unsigned int) = std::srand; //функция - cид
+unsigned long long rnd::randmax = RAND_MAX;
 
-void Random::standart()
-{
-    this->randmax = RAND_MAX;
-    this->_randmode = 0;
-}
+int rnd::next(const int minValue, const int maxValue){return rnd::_rand()%(maxValue-minValue)+minValue;}
 
-int Random::next(const int maxValue)
-{
-    return this->next(0,maxValue);
-}
+int rnd::next(const int maxValue){ return next(0,maxValue); }
 
-int Random::next(const int minValue, const int maxValue)
-{
-    return rand()%(maxValue-minValue)+minValue;
-}
+int rnd::next() {return rnd::_rand();}
 
-int Random::next()
-{
-    return rand();
-}
+unsigned long rnd::max() {return rnd::randmax; }
 
-double Random::nextDouble()
-{
-    return (double)(rand())
-            /
-            (double)(randmax);
-}
+void rnd::srand(unsigned int seed) { rnd::_srand(seed); }
 
-unsigned long Random::max()
-{
-    return randmax;
-}
-
-void Random::srand(int value)
-{
-    if (value==0)
-        std::srand(time(NULL));
-    else
-        std::srand(value);
-}
-
-Random::Random(int srand)
-{
-    this->standart();
-    this->srand(srand);
-}
-
-Random::~Random()
-{
-    delete Random::_self;
-}
-
+double rnd::nextDouble(){return (double)(rnd::_rand()) / (double)(rnd::randmax);}

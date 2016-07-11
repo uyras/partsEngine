@@ -315,6 +315,12 @@ bool PartArray::isNeighbours(const Part *_a, const Part *_b) const
     else return _a->pos.space_2(_b->pos)<=(_interactionRange*_interactionRange);
 }
 
+void PartArray::setNeighbours(Part *_a, Part *_b)
+{
+    neighbours[_a->Id()].push_front(_b);
+    neighbours[_b->Id()].push_front(_a);
+}
+
 //перемешать магнитные моменты частиц M
 void PartArray::shuffleM(){
     bool rotate;
@@ -326,22 +332,8 @@ void PartArray::shuffleM(){
 }
 
 void PartArray::insert(Part * part){
-    this->changeSystem();
-    if (part->parent!=0){
-        std::ostringstream s;
-        s<<"part is already attached to system "<<part->parent<<". Declined to attach it to "<<this;
-        throw s.str();
-    }
 
-    //прописываем родителя
-    part->parent = this;
-
-    if (part->id==-1) { //если ИД частицы не задан, назначаем новый ИД и вставляем в конец системы
-        part->id = this->count();
-        this->parts.push_back(part);
-    } else {
-        this->parts[part->id] = part;
-    }
+    this->add(part);
 
     //определяем соседей частицы
     if (this->_interactionRange!=0.){ //только если не дальнодействие
@@ -362,6 +354,26 @@ void PartArray::insert(Part * part){
 void PartArray::insert(const Part &part)
 {
     insert(new Part(part));
+}
+
+void PartArray::add(Part *part)
+{
+    this->changeSystem();
+    if (part->parent!=0){
+        std::ostringstream s;
+        s<<"part is already attached to system "<<part->parent<<". Declined to attach it to "<<this;
+        throw s.str();
+    }
+
+    //прописываем родителя
+    part->parent = this;
+
+    if (part->id==-1) { //если ИД частицы не задан, назначаем новый ИД и вставляем в конец системы
+        part->id = this->count();
+        this->parts.push_back(part);
+    } else {
+        this->parts[part->id] = part;
+    }
 }
 
 

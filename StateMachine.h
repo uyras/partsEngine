@@ -20,7 +20,8 @@ public:
 
     virtual void reset();
     virtual void setLast();
-    virtual unsigned randomize(unsigned count=1);
+    virtual unsigned randomize(unsigned count);
+    virtual unsigned randomize();
     virtual bool isFirst();
     virtual bool isLast();
     virtual bool isHalfLast();
