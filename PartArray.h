@@ -315,6 +315,8 @@ public:
     }
 
     double eAt(unsigned id1, unsigned id2){ return this->eMatrix[id1][id2]; }
+    
+    vector< forward_list<Part*> > neighbours; //соседи, упорядоченные по id частицы
 
 protected:
     double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы
@@ -330,8 +332,6 @@ protected:
     bool _closeEdges; //замыкание краев
 
     QString _type;
-
-    vector< forward_list<Part*> > neighbours; //соседи, упорядоченные по id частицы
 
     /**
      * @brief preInsert Разметить нужное число ячеек в памяти для размещения частиц (чтобы лишний раз не переразмечать память)
