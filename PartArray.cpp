@@ -1469,6 +1469,43 @@ void PartArray::load(QString file)
     }
 }
 
+void PartArray::csv(string filename, double (*hamiltonian)(Part *, Part *))
+{
+    if (hamiltonian==NULL){
+        hamiltonian= _hamiltonian;
+    }
+    ofstream f(filename.c_str());
+    if (_interactionRange==0.){ //true - для неограниченного радиуса взаимодействия
+        for (Part* p1 : this->parts){
+            unsigned i=0;
+            for (Part* p2: this->parts){
+                if (p2->Id()!=p1->Id()){
+                    f<<hamiltonian(p1,p2);
+                }
+                if (i != this->size()-1)
+                    f<<";";
+                ++i;
+            }
+            f<<endl;
+        }
+    } else {
+        for (Part* p1 : this->parts){
+            for (unsigned i=0; i< this->size(); ++i){
+                for (Part* p2: this->neighbours[p1->Id()]){
+                    if (p2->Id()==i){
+                        f<<hamiltonian(p1,p2);
+                        break;
+                    }
+                }
+                if (i!=this->size()-1)
+                    f<<";";
+            }
+            f<<endl;
+        }
+    }
+    f.close();
+}
+
 void PartArray::clear(){
     this->beforeClear();
     vector<Part*>::iterator iter = this->parts.begin();
