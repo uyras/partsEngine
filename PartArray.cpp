@@ -690,9 +690,6 @@ double PartArray::Check_dT(Part* p){
 }
 
 
-
-
-
 double PartArray::EComplete(Vect& H) const {
     std::vector < Part* >::const_iterator iterator2;
     double E1=0;

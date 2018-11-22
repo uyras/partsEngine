@@ -70,6 +70,7 @@ void SaveHelper::close()
 SaveHelper &SaveHelper::operator <<(const double num)
 {
     write(QString::number(num));
+    //write(QString::number(num,'e',10));
     return *this;
 }
 

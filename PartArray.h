@@ -91,6 +91,7 @@ public:
     virtual bool isNeighbours(const Part* _a, const Part* _b) const;
     //virtual bool isNeighbours(double x, double y, const Part* _b) const;
 
+
     void setNeighbours(Part *_a, Part *_b);
 
     void shuffleM(); //хаотично развернуть магнитные моменты случайных частиц
@@ -215,16 +216,15 @@ public:
     void loadV2New(QString file);
     virtual void load(QString file);
 
-   /**
-        * @brief csv Генерирует csv-файл энергий парных взаимодействий.
-        * Если частицы не взаимодействуют - то соответствующее поле
-        * csv-файла остается пустым
-        * @param filename Имя создавамого файла
-        * @param hamiltonian Ссылка на функцию - гамильтониан парного взаимодействия.
-        * Если значение не задано, то используется гамильтониан, определенный системой.
-        */
-       void csv(string filename, double (*hamiltonian)(Part*,Part*) = NULL);
-
+    /**
+     * @brief csv Генерирует csv-файл энергий парных взаимодействий.
+     * Если частицы не взаимодействуют - то соответствующее поле
+     * csv-файла остается пустым
+     * @param filename Имя создавамого файла
+     * @param hamiltonian Ссылка на функцию - гамильтониан парного взаимодействия.
+     * Если значение не задано, то используется гамильтониан, определенный системой.
+     */
+    void csv(string filename, double (*hamiltonian)(Part*,Part*) = NULL);
 
     //чистим массив частиц
     virtual void clear();
@@ -330,6 +330,7 @@ public:
 
     double eAt(unsigned id1, unsigned id2){ return this->eMatrix[id1][id2]; }
     vector< forward_list<Part*> > neighbours; //соседи, упорядоченные по id частицы
+
 protected:
     double calcEnergy1FastIncremental(double initEnergy, const StateMachineBase &state); //state - новое состояние системы
     double calcEnergy1FastIncrementalFirst(); //считает начальную энергию системы и попутно записывает части энергий в параметры частиц
@@ -344,8 +345,6 @@ protected:
     bool _closeEdges; //замыкание краев
 
     QString _type;
-
-
 
     /**
      * @brief preInsert Разметить нужное число ячеек в памяти для размещения частиц (чтобы лишний раз не переразмечать память)
