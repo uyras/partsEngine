@@ -659,6 +659,36 @@ void PartArray::EFastUpdate(Part* p){
     }
 }
 
+// вычисление разницы энергий от гипотетического переворота частицы p
+double PartArray::Check_dT(Part* p){
+    double dt1=0;
+    unsigned pid=p->Id();
+    unsigned j=0;
+
+    if (this->_interactionRange!=0.){
+        for (Part* neigh : neighbours[pid]){
+            if (neigh->state!=p->state)
+                dt1 -=  2. * this->eMatrix[pid][j];
+            else
+                dt1 += 2. * this->eMatrix[pid][j];
+            j++;
+        }
+    }
+    else{
+        for (Part* neigh : parts){
+            if (p!=neigh){
+                if (neigh->state!=p->state)
+                    dt1 -=  2. * this->eMatrix[pid][j];
+                else
+                    dt1 += 2. * this->eMatrix[pid][j];
+                j++;
+            }
+        }
+
+    }
+        return -dt1;
+}
+
 
 double PartArray::EComplete(Vect& H) const {
     std::vector < Part* >::const_iterator iterator2;
@@ -1505,6 +1535,7 @@ void PartArray::csv(string filename, double (*hamiltonian)(Part *, Part *))
     }
     f.close();
 }
+
 
 void PartArray::clear(){
     this->beforeClear();

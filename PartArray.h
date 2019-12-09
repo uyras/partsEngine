@@ -89,6 +89,8 @@ public:
     void setInteractionRange(const double range);
     inline double interactionRange() const { return _interactionRange; }
     virtual bool isNeighbours(const Part* _a, const Part* _b) const;
+    //virtual bool isNeighbours(double x, double y, const Part* _b) const;
+
 
     void setNeighbours(Part *_a, Part *_b);
 
@@ -142,6 +144,8 @@ public:
     virtual double E();
 
     void EFastUpdate(Part *p);
+
+    double Check_dT(Part* p); // выдает dt энергии без переворота спина
 
     /**
     * рассчитывает внутреннюю энергию во всей системе частиц (метод подсчета через магнитные моменты)
@@ -325,7 +329,6 @@ public:
     }
 
     double eAt(unsigned id1, unsigned id2){ return this->eMatrix[id1][id2]; }
-    
     vector< forward_list<Part*> > neighbours; //соседи, упорядоченные по id частицы
 
 protected:
