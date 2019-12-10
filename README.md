@@ -10,7 +10,9 @@ In addition it supports saving|loading of the system to file. Saved files may be
 This library is not updated for a long time.
 But, if you have interest to it, don't heistate to contact me!
 
-Also, chackout [wiki](https://github.com/uyras/partsEngine/wiki). There are some examples.
+Also, checkout [wiki](https://github.com/uyras/partsEngine/wiki). There are some examples.
+
+And, read the [documentation](http://uyras.github.io/partsEngine/). I hope, in some future the code will be fully documented.
 
 For another examples you can checkout `tests` folder. There is something.
 
