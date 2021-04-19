@@ -713,27 +713,13 @@ double PartArray::EComplete(Part* elem) const {
     if (_interactionRange!=0.){
         for(Part* neigh: neighbours.at(elem->Id())){
             if (neigh != elem) { //не считать взаимодействие частицы на себя
-                rij = neigh->pos.radius(elem->pos);
-                r = rij.length();
-                r2 = r * r; //радиус в кубе
-                r5 = r2 * r * r * r; //радиус в пятой
-                E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                        ((neigh->m.scalar(elem->m) * r2)
-                         -
-                         (3 * elem->m.scalar(rij) * neigh->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                E += _hamiltonian(neigh, elem);
             }
         }
     } else {
         for(Part* neigh: this->parts){
             if (neigh != elem) { //не считать взаимодействие частицы на себя
-                rij = neigh->pos.radius(elem->pos);
-                r = rij.length();
-                r2 = r * r; //радиус в кубе
-                r5 = r2 * r * r * r; //радиус в пятой
-                E += //энергии отличаются от формулы потому что дроби внесены под общий знаменатель
-                        ((neigh->m.scalar(elem->m) * r2)
-                         -
-                         (3 * elem->m.scalar(rij) * neigh->m.scalar(rij))) / r5; //энергия считается векторным методом, так как она не нужна для каждой оси
+                E += _hamiltonian(neigh, elem);
             }
         }
     }

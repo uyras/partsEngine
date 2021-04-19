@@ -1,6 +1,6 @@
 #include "squarelattice.h"
 
-SquareLattice::SquareLattice():
+SquareLattice::SquareLattice(): PartArray(),
     m(0),
     n(0),
     l(1)

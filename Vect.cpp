@@ -38,6 +38,12 @@ Vect Vect::normalize()
     return Vect(this->x / length, this->y / length, this->z / length);
 }
 
+void Vect::normalizeItself()
+{
+    double length = this->length();
+    this->x /= length; this->y /= length; this->z /= length;
+}
+
 
 double Vect::scalar(Vect b) {
 	return (this->x * b.x) + (this->y * b.y) + (this->z * b.z);

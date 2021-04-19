@@ -5,7 +5,14 @@
 #
 #-------------------------------------------------
 
-TARGET = PartsEngine
+CONFIG(release,debug|release){
+    TARGET = PartsEngine
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+CONFIG(debug,debug|release){
+    TARGET = dPartsEngine
+}
+
 QT       += core
 
 SUBDIRS += tests
@@ -72,9 +79,5 @@ OTHER_FILES += \
     .gitignore
 
 CONFIG += c++11
-
-CONFIG(release,debug|release){
-    DEFINES += QT_NO_DEBUG_OUTPUT
-}
 
 DEFINES += _USE_MATH_DEFINES

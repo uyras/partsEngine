@@ -10,6 +10,7 @@
 
 using namespace std;
 
+
 template <typename T>
 class Dos2
 {
@@ -63,6 +64,15 @@ public:
             return unsigned(intervals-1);
         else
             return r;
+    }
+
+    /**
+     * @brief clear Reset all values of DOS to 0
+     */
+    inline void clear(){
+        for (auto i: data){
+            i=0.;
+        }
     }
 
 protected:
