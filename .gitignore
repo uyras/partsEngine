@@ -26,6 +26,7 @@ Makefile*
 *-build-*
 build-*
 *build-*
+build
 
 # QtCreator
 
