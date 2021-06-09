@@ -16,7 +16,6 @@ class PartArrayTest : public QObject
 private slots:
     void initTestCase(){
         config::Instance()->set2D();
-        Random::Instance();
     }
 
     void EVsEComplete(){
@@ -536,7 +535,6 @@ private slots:
         sys1.state.next();
         sys1.state.next();
         sys1.save("saveload.dat");
-
         sys2.load("saveload.dat");
         QVERIFY(sys1==sys2);
         QVERIFY(sys1.Minstate()==sys2.Minstate());

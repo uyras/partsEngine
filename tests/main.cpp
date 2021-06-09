@@ -6,12 +6,13 @@
 #include "statemachinefreetest.h"
 #include "squarespinicetest.h"
 #include "honeycombspinicetest.h"
-#include "randomtest.h"
+//#include "randomtest.h"
 #include "dos2test.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    setlocale(LC_ALL, "C");
     int num=0;
     num+=QTest::qExec(new VectTest2D, argc, argv);
     num+=QTest::qExec(new PartArrayTest, argc, argv);
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
     num+=QTest::qExec(new HoneycombSpinIceTest, argc, argv);
     num+=QTest::qExec(new StateMachineTest, argc, argv);
     num+=QTest::qExec(new StateMachineFreeTest, argc, argv);
-    num+=QTest::qExec(new RandomTest, argc, argv);
+    //num+=QTest::qExec(new RandomTest, argc, argv);
     num+=QTest::qExec(new Dos2Test, argc, argv);
 
     qWarning("Have %d errors!",num);
