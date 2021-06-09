@@ -167,7 +167,7 @@ void HoneycombSpinIceArray::clear()
     PartArray::clear();
 }
 
-void HoneycombSpinIceArray::load(QString file)
+void HoneycombSpinIceArray::load(std::string file)
 {
     this->clear();
     //load base part of file
@@ -201,7 +201,7 @@ void HoneycombSpinIceArray::load(QString file)
     n = this->cells.size()/m;
 }
 
-void HoneycombSpinIceArray::save(QString file)
+void HoneycombSpinIceArray::save(std::string file)
 {
     //save base part of file
     PartArray::save(file);

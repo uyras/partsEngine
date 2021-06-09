@@ -15,11 +15,7 @@
 #include <forward_list>
 #include <string>
 #include <sstream>
-#include <QString>
-#include <QFile>
-#include <QTextStream>
 #include <map>
-#include <QtDebug>
 #include "Part.h"
 #include "StateMachine.h"
 #include "StateMachineFree.h"
@@ -189,9 +185,8 @@ public:
     void cout();
 
     void save_v1(string file, bool showNotifications = false);
-    void save_v2(QString file);
-    void saveV2New(QString file);
-    virtual void save(QString file);
+    void save_v2(std::string file);
+    virtual void save(std::string file);
 
     /**
      * @brief savePVPython Сохраняет систему в скрипте ParaView
@@ -212,9 +207,8 @@ public:
     void savePVPythonAnimation(PartArray *secondSystem, string file, int thteta=8, int phi=8, int frames=100);
 
     void load_v1(string file, bool showNotifications = false);
-    void load_v2(QString file);
-    void loadV2New(QString file);
-    virtual void load(QString file);
+    void load_v2(string file);
+    virtual void load(string file);
 
     /**
      * @brief csv Генерирует csv-файл энергий парных взаимодействий.
@@ -317,8 +311,8 @@ public:
     std::vector < Part* > parts;
     StateMachine state;
 
-    virtual QString type() const;
-    void setType(QString type);
+    virtual std::string type() const;
+    void setType(std::string type);
 
     void setHamiltonian(double (*ham)(Part*,Part*)){this->_hamiltonian=ham; this->changeSystem();}
 
@@ -344,7 +338,7 @@ protected:
     double _interactionRange; //длина взаимодействия
     bool _closeEdges; //замыкание краев
 
-    QString _type;
+    std::string _type;
 
     /**
      * @brief preInsert Разметить нужное число ячеек в памяти для размещения частиц (чтобы лишний раз не переразмечать память)
@@ -356,7 +350,7 @@ protected:
     double EUpdate(const StateMachineBase &s);
     void EUpdate();
 private:
-    QMap<QString,QString> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
+    std::map<std::string, std::string> _unusedFileContent; //при загрузке файла производного формата необходимо оставлять содержимое этого файла на случай дальнейшего сохранения
     double (*_hamiltonian)(Part*,Part*); //функция - гамильтониан системы
 
     vector< vector <double> > eMatrix;

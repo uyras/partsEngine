@@ -1144,48 +1144,7 @@ void PartArray::save_v1(string file, bool showNotifications) {
 
 }
 
-void PartArray::save_v2(QString file)
-{
-    //open file
-    QFile outfile(file);
-    outfile.open(QFile::WriteOnly | QFile::Truncate);
-    QTextStream f(&outfile);
-
-    //write header
-    f<<"[header]"<<endl;
-    f<<"version=2"<<endl;
-    f<<"dimensions="<<config::Instance()->dimensions()<<endl;
-    f<<"type="<<this->type()<<endl;
-    f<<"size="<<this->count()<<endl;
-    f<<"emin="<<this->eMin<<endl;
-    f<<"emax="<<this->eMax<<endl;
-    f<<"state="<<QString::fromStdString(this->state.toString())<<endl;
-    f<<"minstate="<<QString::fromStdString(this->minstate.toString())<<endl;
-    f<<"maxstate="<<QString::fromStdString(this->maxstate.toString())<<endl;
-    f<<"sizescale=1"<<endl;
-    f<<"magnetizationscale=1"<<endl;
-
-    //write particles
-    f<<"[parts]"<<endl;
-    vector<Part*>::iterator iter = this->parts.begin();
-    while (iter != this->parts.end()) {
-        f << (*iter)->id << "\t";// << endl;
-        f << (*iter)->pos.x << "\t";// << endl;
-        f << (*iter)->pos.y << "\t";// << endl;
-        f << (*iter)->pos.z << "\t";// << endl;
-        f << (*iter)->m.x << "\t";// << endl;
-        f << (*iter)->m.y << "\t";// << endl;
-        f << (*iter)->m.z << "\t";// << endl;
-        f << int((*iter)->state) << "\t";// << endl;
-        f << endl;
-        iter++;
-    }
-
-    //close file
-    outfile.close();
-}
-
-void PartArray::saveV2New(QString file)
+void PartArray::save_v2(std::string file)
 {
     SaveHelper helper(file,true);
     helper.writeDumped(this->_unusedFileContent);
@@ -1209,9 +1168,9 @@ void PartArray::saveV2New(QString file)
     helper.close();
 }
 
-void PartArray::save(QString file)
+void PartArray::save(std::string file)
 {
-    this->saveV2New(file);
+    this->save_v2(file);
 }
 
 void PartArray::savePVPython(string file, int thteta, int phi)
@@ -1393,65 +1352,14 @@ void PartArray::load_v1(string file,bool showNotifications) {
 
 }
 
-void PartArray::load_v2(QString file)
-{
-    this->clear();
-
-    //open file
-    QFile infile(file);
-    infile.open(QFile::ReadOnly);
-    QTextStream f(&infile);
-
-    //skip to parts section
-    QString s;
-    while (s!="[parts]"){
-        s = f.readLine();
-    }
-    s="";
-
-    //read particles data
-    QStringList params;
-    Part* temp;
-    s=f.readLine();
-    while (! (
-               (s[0]=='[' && s[s.length()-1]==']') ||
-               (s.isEmpty())
-               )){ //read due to the next section or end of file
-        params = s.split('\t');
-        unsigned int id = params[0].toUInt();
-        temp = new Part();
-        temp->id = id;
-
-        temp->pos = Vect(
-                    params[1].toDouble(),
-                    params[2].toDouble(),
-                    params[3].toDouble()
-                    );
-
-        temp->m = Vect(
-                    params[4].toDouble(),
-                    params[5].toDouble(),
-                    params[6].toDouble()
-                    );
-        temp->state = params[7].toInt();
-
-        this->insert(temp);
-
-        s=f.readLine();
-    }
-
-    //close file
-    infile.close();
-}
-
-void PartArray::loadV2New(QString file)
+void PartArray::load_v2(string file)
 {
     this->clear();
     Part *temp;
     LoadHelper helper(file);
     if (helper.validate()){
         helper.parseHeader();
-        this->parts.resize(helper.params["size"].toUInt());
+        this->parts.resize(std::stoi(helper.params["size"]));
         helper.go("parts");
         while (!helper.end()){
             temp = new Part();
@@ -1477,11 +1385,11 @@ void PartArray::loadV2New(QString file)
     helper.close();
 }
 
-void PartArray::load(QString file)
+void PartArray::load(string file)
 {
     switch(LoadHelper::version(file)){
-        case 1: this->load_v1(qUtf8Printable(file)); break;
-        case 2: this->loadV2New(file); break;
+        case 1: this->load_v1(file); break;
+        case 2: this->load_v2(file); break;
     }
 }
 
@@ -1653,12 +1561,12 @@ void PartArray::setMBruteLines(double segmentSize){
     }
 }
 
-QString PartArray::type() const
+std::string PartArray::type() const
 {
     return this->_type;
 }
 
-void PartArray::setType(QString type)
+void PartArray::setType(std::string type)
 {
     this->_type = type;
 }

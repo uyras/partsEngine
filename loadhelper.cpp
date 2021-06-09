@@ -1,12 +1,12 @@
 #include "loadhelper.h"
 #include "PartArray.h"
 
-LoadHelper::LoadHelper(QString file):
-    f(file)
+LoadHelper::LoadHelper(std::string file):
+    filename(file)
 {
-    if (!f.open(QFile::ReadOnly))
-        qFatal("file %s not found", qUtf8Printable(file));
-    s.setDevice(&f);
+    this->f.open(file);
+    if (!f.good())
+        cerr<<"file "<<file<<" not found"<<endl;
 }
 
 LoadHelper::~LoadHelper()
@@ -17,65 +17,79 @@ LoadHelper::~LoadHelper()
 bool LoadHelper::validate()
 {
     //@todo дописать validate
-    return LoadHelper::version(f.fileName())>1;
+    return LoadHelper::version(this->filename)>1;
 }
 
 void LoadHelper::parseHeader()
 {
-    QStringList tempList;
     go("header");
-    QString str;
-    while(!(str = this->line()).isNull()){
-        tempList =str.split('=');
-        if (tempList.length()!=2)
-            qWarning()<<"Skip param"<<str<<"in file"<<f.fileName();
+    std::string str;
+    std::string::size_type strpos;
+    while(!(str = this->line()).empty()){
+        strpos = str.find('=');
+        if (strpos == std::string::npos)
+            cerr<<"Skip param "<<str<<" in file "<<this->filename<<endl;
         else {
-            params[tempList[0]]=tempList[1];
+            this->params[str.substr(0,strpos)]=str.substr(strpos+1);
         }
     }
 }
 
-bool LoadHelper::go(QString section)
+bool LoadHelper::go(std::string section)
 {
-    s.seek(0);
-    QString str;
-    section.push_front('[');
-    section.push_back(']');
-    while (!s.atEnd() && str != section){
-        str = s.readLine();
+    std::streampos p = f.tellg();
+    f.seekg(0);
+    section = '['+section+']';
+    std::string str;
+    while (!f.eof() && str != section){
+        std::getline(f,str);
+        if (str.empty())
+            
+        f.clear(f.rdstate() & ~ios::failbit);
     }
-    return str==section;
+    if (str==section)
+        return true;
+    else {
+        f.seekg(p);
+        return false;
+    }
 }
 
 bool LoadHelper::go(unsigned int num)
 {
-    s.seek(0);
+    f.seekg(0);
     for (int i=0;i<(int)num;i++)
-        while(!line().isNull()){}
-    return s.atEnd();
+        while(!line().empty()){}
+    return f.eof();
 }
 
 void LoadHelper::close()
 {
-    if (f.isOpen())
+    if (f.is_open())
         f.close();
 }
 
-QString LoadHelper::line()
+std::string LoadHelper::line()
 {
-    if (end())
-        return QString();
-    else
-        return s.readLine();
+    std::string str;
+    if (!f.eof()){
+        std::getline(f,str);
+        f.clear(f.rdstate() & ~ios::failbit);
+    }
+    return str;
 }
 
 bool LoadHelper::end()
 {
-    qint64 p = s.pos();
-    QString str = s.readLine();
-    s.seek(p);
-    if (str.isNull())
+    
+    std::streampos p = f.tellg();
+    std::string str;
+    std::getline(f,str);
+    f.seekg(p);
+    if (str.empty()){
         return true;
+        f.clear(f.rdstate() & ~ios::failbit);
+    }
     if (str[0]=='[' && str[str.length()-1]==']')
         return true;
     return false;
@@ -83,38 +97,38 @@ bool LoadHelper::end()
 
 LoadHelper &LoadHelper::operator >>(double &num)
 {
-    s>>num;
+    f>>num;
     return *this;
 }
 
 LoadHelper &LoadHelper::operator >>(int &num)
 {
-    s>>num;
+    f>>num;
     return *this;
 }
 
 LoadHelper &LoadHelper::operator >>(long &num)
 {
-    s>>num;
+    f>>num;
     return *this;
 }
 
 LoadHelper &LoadHelper::operator >>(unsigned int &num)
 {
-    s>>num;
+    f>>num;
     return *this;
 }
 
-LoadHelper &LoadHelper::operator >>(QString &num)
+LoadHelper &LoadHelper::operator >>(std::string &num)
 {
-    s>>num;
+    f>>num;
     return *this;
 }
 
 LoadHelper &LoadHelper::operator >>(bool &num)
 {
     int n;
-    s>>n;
+    f>>n;
     num = (bool)n;
     return *this;
 }
@@ -124,20 +138,20 @@ void LoadHelper::applyHeader(PartArray *sys)
     this->applyHeader(sys,false);
 }
 
-int LoadHelper::version(QString file)
+int LoadHelper::version(std::string file)
 {
-    QFile f(file);
+    std::ifstream f(file);
 
-    if (f.open(QFile::ReadOnly)) {
-        QTextStream infile(&f);
-        QString s = infile.readLine();
+    if (f.good()) {
+        std::string s;
+        std::getline(f,s);
         if (s=="[header]"){
             f.close();
             return 2;
         } else {
-            s = infile.readLine(); //read 2 line
-            s = infile.readLine(); //read 3 line
-            s = infile.readLine(); //read 4 line
+            std::getline(f,s); //read 2 line
+            std::getline(f,s); //read 3 line
+            std::getline(f,s); //read 4 line
             if (s=="x\ty\tz\tMx\tMy\tMz\tr"){
                 f.close();
                 return 1;
@@ -148,14 +162,14 @@ int LoadHelper::version(QString file)
         }
         f.close();
     } else {
-        qFatal("file %s not found", qUtf8Printable(file));
+        cerr<<"file "<<file<<" not found";
     }
     return 0;
 }
 
 void LoadHelper::applyHeader(PartArray *sys, bool readAnyWay)
 {
-    //читаем параметры
+    //read all parameters
     if (params.size()==0)
         this->parseHeader();
 
@@ -165,7 +179,7 @@ void LoadHelper::applyHeader(PartArray *sys, bool readAnyWay)
     if (sys->type()!=params["type"])
         return;
 
-    switch(params["dimensions"].toInt()){
+    switch(std::stoi(params["dimensions"])){
     case 2:
         config::Instance()->set2D();
         break;
@@ -173,42 +187,42 @@ void LoadHelper::applyHeader(PartArray *sys, bool readAnyWay)
         config::Instance()->set3D();
         break;
     default:
-        qFatal("Dimensions in file %s are setted as %s, which is wrong!",qUtf8Printable(f.fileName()),qUtf8Printable(params["dimensions"]));
+        fprintf(stderr,"Dimensions in file %s are setted as %s, which is wrong!",this->filename,params["dimensions"]);
     }
 
     if (params.find("interactionrange") != params.end())
-        sys->setInteractionRange(params["interactionrange"].toDouble());
+        sys->setInteractionRange(std::stod(params["interactionrange"]));
 
-    sys->eMin = params["emin"].toDouble();
-    sys->eMax = params["emax"].toDouble();
-    sys->minstate.fromString(qUtf8Printable(params["minstate"]));
-    sys->maxstate.fromString(qUtf8Printable(params["maxstate"]));
+    sys->eMin = std::stod(params["emin"]);
+    sys->eMax = std::stod(params["emax"]);
+    sys->minstate.fromString(params["minstate"]);
+    sys->maxstate.fromString(params["maxstate"]);
 
     //check the state of the system
-    if (QString::fromStdString(sys->state.toString()) != params["state"]){
-        qFatal("Something gonna worng while reading system: system state and state in the header are not the same");
+    if (sys->state.toString() != params["state"]){
+        fprintf(stderr,"Something gonna worng while reading system: system state and state in the header are not the same");
     }
 
     //check the system size
-    if (sys->count()!=params["size"].toUInt()){
-        qFatal("Something gonna worng while reading system: system size and size in the header are not the same");
+    if (sys->count() != stoi(params["size"])){
+        fprintf(stderr,"Something gonna worng while reading system: system size and size in the header are not the same");
     }
 }
 
-QMap<QString, QString> LoadHelper::dumpFileContent()
+std::map<std::string,std::string> LoadHelper::dumpFileContent()
 {
-    QMap<QString,QString> strList;
-    s.seek(0);
-    QString temp, section;
-    while (!s.atEnd()) {
-        temp = s.readLine();
+    std::map< std::string, std::string > strList;
+    f.seekg(0);
+    std::string temp, section;
+    while (!f.fail()) {
+        std::getline(f,temp);
         if (temp[0]=='[' && temp[temp.length()-1]==']'){
-            temp.chop(1);temp.remove(0,1);
+            temp.erase(temp.begin()); temp.erase(temp.end()-1);
             section = temp;
             strList[section].clear();
         } else{
-            if (!strList[section].isEmpty())
-                strList[section].append('\n');
+            if (!strList[section].empty())
+                strList[section].append("\n");
             strList[section].append(temp);
         }
     }

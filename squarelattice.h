@@ -1,6 +1,7 @@
 #ifndef SQUARELATTICE_H
 #define SQUARELATTICE_H
 
+#include <string>
 #include "PartArray.h"
 #include "Part.h"
 #include "savehelper.h"
@@ -25,8 +26,8 @@ public:
     StateMachineFree groundState();
     StateMachineFree maximalState();
 
-    virtual void load(QString file);
-    virtual void save(QString file);
+    virtual void load(std::string file);
+    virtual void save(std::string file);
 
     Part* at(int i, int j);
 

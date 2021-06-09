@@ -82,7 +82,7 @@ StateMachineFree SquareLattice::maximalState()
     return newState;
 }
 
-void SquareLattice::load(QString file)
+void SquareLattice::load(std::string file)
 {
     //грузим основной набор частиц
     PartArray::load(file);
@@ -101,7 +101,7 @@ void SquareLattice::load(QString file)
     helper.close();
 }
 
-void SquareLattice::save(QString file)
+void SquareLattice::save(std::string file)
 {
     //Сохраняем основную часть файла
     PartArray::save(file);

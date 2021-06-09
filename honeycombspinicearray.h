@@ -1,6 +1,7 @@
 #ifndef HONEYCOMBSPINICEARRAY_H
 #define HONEYCOMBSPINICEARRAY_H
 
+#include <string>
 #include "PartArray.h"
 #include "honeycombspinicecell.h"
 #include "savehelper.h"
@@ -29,8 +30,8 @@ public:
 
     virtual void clear();
 
-    virtual void load(QString file);
-    virtual void save(QString file);
+    virtual void load(std::string file);
+    virtual void save(std::string file);
 
     vector<HoneycombSpinIceCell*> cells;
 

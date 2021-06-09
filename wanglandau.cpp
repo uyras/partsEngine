@@ -12,7 +12,7 @@ WangLandau::WangLandau(PartArray *sys, unsigned intervals, double accuracy, doub
 
     //считаем минимум и максимум системы
     if (sys->EMin()==0 || sys->EMax()==0)
-        qFatal("Min or max state is unknown. DOS calculation is impossible.");
+        fprintf(stderr,"Min or max state is unknown. DOS calculation is impossible.");
 
     //инициируем DOS
     h.resize(sys->EMin(), sys->EMax(), intervals);
@@ -32,7 +32,7 @@ void WangLandau::run(unsigned steps)
     this->resetH();
     updateGH(sys->E());
 
-    qDebug()<<"steps="<<steps;
+    fprintf(stderr,"steps=%u",steps);
 
     double eOld = sys->E(),eNew=sys->E();
 

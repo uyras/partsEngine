@@ -80,7 +80,7 @@ SquareSpinIceArray &SquareSpinIceArray::operator =(const SquareSpinIceArray &sys
 void SquareSpinIceArray::dropSpinIce(int hCells, int vCells, double l)
 {
     if (config::Instance()->dimensions()!=2)
-        qFatal("Square spin ice is possible only in 2 dimensionals model");
+        fprintf(stderr,"Square spin ice is possible only in 2 dimensionals model");
 
     this->clear();
     this->reserveParts(unsigned(2*(hCells*vCells)+hCells+vCells));
@@ -205,17 +205,12 @@ void SquareSpinIceArray::clear()
     PartArray::clear();
 }
 
-void SquareSpinIceArray::load(QString file)
+void SquareSpinIceArray::load(std::string file)
 {
     this->clear();
     //load base part of file
     PartArray::load(file);
     LoadHelper helper(file);
-
-    //open file
-    QFile infile(file);
-    infile.open(QFile::ReadOnly);
-    QTextStream f(&infile);
 
     //skip to cells section
     helper.go("cells");
@@ -251,7 +246,7 @@ void SquareSpinIceArray::load(QString file)
     helper.close();
 }
 
-void SquareSpinIceArray::save(QString file)
+void SquareSpinIceArray::save(std::string file)
 {
     //save base part of file
     PartArray::save(file);

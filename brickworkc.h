@@ -1,7 +1,6 @@
 #ifndef BRICKWORKB_H
 #define BRICKWORKB_H
 
-#include <QtDebug>
 #include "PartArray.h"
 #include "squarespinicecell.h"
 

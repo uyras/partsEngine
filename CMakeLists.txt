@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.9)
 
 project(partsEngine VERSION 0.0.1 DESCRIPTION "Library for creating and manipulating system of magnetic particles")
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
+set (CMAKE_CXX_STANDARD 11)
 
 
 set(SOURCES 
@@ -60,9 +60,9 @@ set(OTHER_FILES
     README.md 
     .gitignore)
 
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++0x")
-
 option(BUILD_STATIC_LIB "Build static library" ON)
+option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_DEBUG "Build Debug file" OFF)
 
 if(BUILD_STATIC_LIB)
     add_library(${PROJECT_NAME} STATIC ${SOURCES})
@@ -70,4 +70,12 @@ else()
     add_library(${PROJECT_NAME} SHARED ${SOURCES})
 endif()
 
-target_link_libraries(${PROJECT_NAME} Qt5::Core)
+target_link_libraries(${PROJECT_NAME})
+
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
+
+if(BUILD_DEBUG)
+    add_subdirectory(dbg)
+endif()

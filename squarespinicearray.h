@@ -1,12 +1,12 @@
 #ifndef SQUARESPINICEARRAY_H
 #define SQUARESPINICEARRAY_H
 
+#include <string>
 #include "PartArray.h"
 #include "squarespinicecell.h"
 #include "Vect.h"
 #include "savehelper.h"
 #include "loadhelper.h"
-#include <QtDebug>
 
 using namespace std;
 
@@ -29,8 +29,8 @@ public:
 
     virtual void clear();
 
-    virtual void load(QString file);
-    virtual void save(QString file);
+    virtual void load(std::string file);
+    virtual void save(std::string file);
 
 private:
     void clearCells(); //чистим информацию о ячейках

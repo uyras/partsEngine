@@ -1,7 +1,6 @@
 #ifndef WANGLANDAU_H
 #define WANGLANDAU_H
 
-#include <QDebug>
 #include <cmath>
 #include <iostream>
 #include <sstream>
