@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include "stringfunctions.h"
 
 class PartArray;
 class LoadHelper
@@ -52,6 +53,17 @@ public:
     //функции чтения
     std::string line();
     bool end();
+
+    /**
+     * @brief Get the one line in the current section.
+     * If the section is finished or started next section, 
+     * this function returns false and leave string unchanged.
+     * 
+     * @param s string where to write the line
+     * @return true if the line recieved successfully
+     * @return false if there is no more lines in the current section
+     */
+    bool getSectionLine(std::string & s);
     LoadHelper & operator >>(double & num);
     LoadHelper & operator >>(int & num);
     LoadHelper & operator >>(long & num);

@@ -25,7 +25,7 @@ void LoadHelper::parseHeader()
     go("header");
     std::string str;
     std::string::size_type strpos;
-    while(!(str = this->line()).empty()){
+    while(this->getSectionLine(str)){
         strpos = str.find('=');
         if (strpos == std::string::npos)
             cerr<<"Skip param "<<str<<" in file "<<this->filename<<endl;
@@ -43,9 +43,7 @@ bool LoadHelper::go(std::string section)
     std::string str;
     while (!f.eof() && str != section){
         std::getline(f,str);
-        if (str.empty())
-            
-        f.clear(f.rdstate() & ~ios::failbit);
+        rtrim(str);
     }
     if (str==section)
         return true;
@@ -74,9 +72,26 @@ std::string LoadHelper::line()
     std::string str;
     if (!f.eof()){
         std::getline(f,str);
-        f.clear(f.rdstate() & ~ios::failbit);
+        rtrim(str);
     }
     return str;
+}
+
+bool LoadHelper::getSectionLine(std:: string & s)
+{
+    std::streampos p = f.tellg();
+    std::string str;
+    std::getline(f,str);
+    rtrim(str);
+    if (str.empty()){
+        return false;
+    } else if (str[0]=='[' && str[str.length()-1]==']'){
+        f.seekg(p);
+        return false;
+    } else {
+        s = str;
+        return true;
+    }
 }
 
 bool LoadHelper::end()
@@ -84,15 +99,9 @@ bool LoadHelper::end()
     
     std::streampos p = f.tellg();
     std::string str;
-    std::getline(f,str);
+    bool res = getSectionLine(str);
     f.seekg(p);
-    if (str.empty()){
-        return true;
-        f.clear(f.rdstate() & ~ios::failbit);
-    }
-    if (str[0]=='[' && str[str.length()-1]==']')
-        return true;
-    return false;
+    return !res;
 }
 
 LoadHelper &LoadHelper::operator >>(double &num)
@@ -145,6 +154,7 @@ int LoadHelper::version(std::string file)
     if (f.good()) {
         std::string s;
         std::getline(f,s);
+        rtrim(s);
         if (s=="[header]"){
             f.close();
             return 2;
@@ -193,10 +203,17 @@ void LoadHelper::applyHeader(PartArray *sys, bool readAnyWay)
     if (params.find("interactionrange") != params.end())
         sys->setInteractionRange(std::stod(params["interactionrange"]));
 
-    sys->eMin = std::stod(params["emin"]);
-    sys->eMax = std::stod(params["emax"]);
-    sys->minstate.fromString(params["minstate"]);
-    sys->maxstate.fromString(params["maxstate"]);
+    if (params.find("emin") != params.end())
+        sys->eMin = std::stod(params["emin"]);
+
+    if (params.find("emax") != params.end())    
+        sys->eMax = std::stod(params["emax"]);
+    
+    if (params.find("minstate") != params.end())
+        sys->minstate.fromString(params["minstate"]);
+
+    if (params.find("maxstate") != params.end())
+        sys->maxstate.fromString(params["maxstate"]);
 
     //check the state of the system
     if (sys->state.toString() != params["state"]){
@@ -216,6 +233,7 @@ std::map<std::string,std::string> LoadHelper::dumpFileContent()
     std::string temp, section;
     while (!f.fail()) {
         std::getline(f,temp);
+        rtrim(temp);
         if (temp[0]=='[' && temp[temp.length()-1]==']'){
             temp.erase(temp.begin()); temp.erase(temp.end()-1);
             section = temp;
