@@ -322,7 +322,7 @@ public:
         else return this->size()-1;
     }
 
-    double eAt(unsigned id1, unsigned id2){ return this->eMatrix[id1][id2]; }
+    double eAt(unsigned id1, unsigned id2) const { return this->eMatrix[id1][id2]; }
     vector< forward_list<Part*> > neighbours; //соседи, упорядоченные по id частицы
 
 protected:
