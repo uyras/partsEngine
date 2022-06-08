@@ -1,5 +1,5 @@
 #include "dos2.h"
-/*
+
 template <typename T>
 void Dos2<T>::save(string file)
 {
@@ -56,4 +56,3 @@ string Dos2<T>::toString()
 template class Dos2<int>;
 template class Dos2<double>;
 template class Dos2<unsigned>;
-template class Dos2< unordered_map<double,int> >;*/

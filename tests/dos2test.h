@@ -136,6 +136,54 @@ private slots:
         QCOMPARE(dos[5.0],4.);
     }
 
+    void compareTest(){
+        Dos2<double> dos1(-4.,4.,4), dos2(-4.,4.,4);
+
+        QCOMPARE(dos1,dos2);
+
+        dos2.resize(-3.,4,4); QVERIFY(dos1 != dos2);
+        dos2.resize(-4.,3,4); QVERIFY(dos1 != dos2);
+        dos2.resize(-4.,4,5); QVERIFY(dos1 != dos2);
+        dos2.resize(-4.,4,4); QCOMPARE(dos1,dos2);
+
+        dos1[-2.0]++;
+        QVERIFY(dos1 != dos2);
+        dos2[-2.0]++;
+        QCOMPARE(dos1,dos2);
+    }
+
+    void saveLoadTest(){
+        Dos2<double> dos1(-4.,4.,4), dos2(-4.,4.,4);
+        dos1[-5.]++;
+        dos1[-4.5]++;
+        dos1[-4.4]++;
+        dos1[-4.3]++;
+        dos1[-3.9999999999]++;
+        dos1[-2.9999999999]++;
+        dos1[-2.00000000001]++;
+        dos1[-2.0]++;
+        dos1[-1.2]++;
+        dos1[-1.1]++;
+        dos1[-1.9999999999]++;
+        dos1[-0.9999999999]++;
+        dos1[-0.00000000001]++;
+        dos1[-0.0]++;
+        dos1[0.0]++;
+        dos1[0.00000000001]++;
+        dos1[1.00000000001]++;
+        dos1[1.9999999999]++;
+        dos1[2.0]++;
+        dos1[2.00000000001]++;
+        dos1[3.00000000001]++;
+        dos1[5.0]++;
+
+        dos1.save("tmp.dat");
+        dos2.load("tmp.dat");
+
+        QCOMPARE(dos1,dos2);
+
+    }
+
 };
 
 #endif // DOS2TEST_H
