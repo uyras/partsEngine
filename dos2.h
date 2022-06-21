@@ -69,7 +69,7 @@ public:
             return 0;
         if(a>=max)
             return intervals-1;
-        unsigned r= (unsigned)floor((a-min)/(max-min)*double(intervals));
+        unsigned r= (unsigned)floor(double(a-min)/(max-min)*(intervals));
         if (r>intervals-1)
             return unsigned(intervals-1);
         else
