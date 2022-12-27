@@ -38,7 +38,23 @@ For another examples you can checkout `tests` folder. There is something.
 * Transfer to cmake and make the lib independent from QT
 * Provide different names for debug and release builds
 
-## Compillation
+## Compillation with CMake
+
+Copy the repository:
+```
+git clone https://github.com/uyras/partsEngine.git
+```
+Go to the build folder:
+```
+mkdir partsEngine/build
+cd partsEngine/build
+```
+Compile library:
+```
+cmake --build ..
+```
+
+## Compillation with QMake (Deprecated variant)
 Copy the repository:
 ```
 git clone https://github.com/uyras/partsEngine.git
@@ -57,11 +73,53 @@ make release
 ```
 You will see the `libPartsEngine.a` which is ready to add to your project
 
+# How to use the library
+
+Example Hello World (main.cpp file):
+```
+#include "PartArray.h"
+
+int main(){
+
+    PartArray sys;
+    return 0;
+}
+
+```
+
+## How to connect the library to the new project (using CMake)
+
+Add this lines to `CMakeLists.txt` before `add_executable`:
+```
+include_directories("../partsEngine")
+link_directories("../partsEngine/build")
+```
+Paths `../partsEngine` and `../partsEngine/build` should point to folder with headers and binary library file, respectively.
+
+Add this line to `CMakeLists.txt` after `add_executable`:
+```
+target_link_libraries(yourExecutableName partsEngine)
+```
+where `yourExecutableName` is the name of resulting binary file.
+
+Full contents of `CMakeLists.txt`, for example:
+```
+cmake_minimum_required(VERSION 3.0)
+
+project(HelloWorldProject)
+
+include_directories("../partsEngine")
+link_directories("../partsEngine/build")
+
+add_executable(helloWorld main.cpp)
+target_link_libraries(helloWorld partsEngine)
+```
+
 ## How to connect the library to the new project (using Qt Creator)
 
 Create new empty repository via GitHub, check potions that you need .gitignore for qt and readme.md.
 
-Go to the folder which containts PartsEngine folder. Do not open it. 
+Go to the folder which contains PartsEngine folder. Do not open it. 
 
 Open bash and write:
 ```
@@ -84,27 +142,4 @@ INCLUDEPATH += ../PartsEngine/
 OTHER_FILES += \
     README.md \
     .gitignore
-```
-Create main.cpp with text (just some example):
-```
-#include <iostream>
-#include <fstream>
-#include <ctime>
-#include <cmath>
-#include <cstdlib>
-#include "config.h"
-#include "PartArray.h"
-#include <ctime>
-
-using namespace std;
-
-int main(){
-    config::Instance()->srand(time(NULL));
-
-    //write your code here
-
-    cout<<"finish";
-        return 0;
-}
-
 ```
