@@ -51,7 +51,8 @@ cd partsEngine/build
 ```
 Compile library:
 ```
-cmake --build ..
+cmake ..
+make
 ```
 
 ## Compillation with QMake (Deprecated variant)

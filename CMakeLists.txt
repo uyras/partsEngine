@@ -62,7 +62,7 @@ set(OTHER_FILES
 
 option(BUILD_STATIC_LIB "Build static library" ON)
 option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_DEBUG "Build Debug file" OFF)
+option(BUILD_EXECUTABLE "Build executable file for Debug purposes" OFF)
 
 if(BUILD_STATIC_LIB)
     add_library(${PROJECT_NAME} STATIC ${SOURCES})
